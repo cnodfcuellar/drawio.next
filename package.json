@@ -1,0 +1,31 @@
+{
+  "name": "drawio-next",
+  "version": "1.0.0",
+  "description": "Next-generation diagramming platform based on draw.io (diagrams.net)",
+  "main": "src/main/webapp/index.html",
+  "scripts": {
+    "start": "npx serve src/main/webapp -p 8080",
+    "dev": "npx serve src/main/webapp -p 8080",
+    "install:deps": "cd etc/dependencies && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnodfcuellar/drawio.next.git"
+  },
+  "keywords": [
+    "diagrams",
+    "drawio",
+    "flowchart",
+    "architecture",
+    "graph"
+  ],
+  "author": "cnodfcuellar",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/cnodfcuellar/drawio.next/issues"
+  },
+  "homepage": "https://github.com/cnodfcuellar/drawio.next#readme",
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
