@@ -1,0 +1,298 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 1150" width="100%" height="100%" style="background:#0b1120; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y profundidad -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="nodeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Gradientes de Cabecera y Pasos -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- Gradientes para cada Fase -->
+    <linearGradient id="phase1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="phase2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <linearGradient id="phase3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="phase4Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="phase5Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Fondos de Tarjetas -->
+    <linearGradient id="stepBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Marcadores de Flechas -->
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 7 4 L 0 7 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 7 4 L 0 7 Z" fill="#34d399"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 7 4 L 0 7 Z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+
+  <!-- ================= ENCABEZADO PRINCIPAL ================= -->
+  <g transform="translate(60, 45)">
+    <text x="0" y="0" font-size="28" font-weight="800" fill="url(#titleGrad)" letter-spacing="0.5">
+      PUNTO 2: FLUJO DE INICIALIZACIÓN Y ARRANQUE (BOOTSTRAPPING)
+    </text>
+    <text x="0" y="24" font-size="14" fill="#94a3b8">
+      Traza exacta de ejecución desde el parsing HTML inicial en el navegador hasta el renderizado SVG del grafo interactivo.
+    </text>
+  </g>
+
+  <!-- ================= TIMELINE VERTICAL CENTRAL / GUÍA ================= -->
+  <line x1="120" y1="120" x2="120" y2="1080" stroke="#334155" stroke-width="4" stroke-dasharray="6 6"/>
+
+  <!-- ================= FASE 1: CARGA DEL DOCUMENTO & PARSING ================= -->
+  <g transform="translate(90, 110)">
+    <!-- Nodo Circular de Timeline -->
+    <circle cx="30" cy="40" r="24" fill="url(#phase1Grad)" stroke="#38bdf8" stroke-width="2" filter="url(#nodeGlow)"/>
+    <text x="30" y="46" font-size="15" font-weight="800" fill="#ffffff" text-anchor="middle">1</text>
+
+    <!-- Tarjeta Fase 1 -->
+    <g transform="translate(80, 0)">
+      <rect x="0" y="0" width="1200" height="155" rx="14" fill="url(#stepBg)" stroke="#0284c7" stroke-width="1.8" filter="url(#cardShadow)"/>
+      <rect x="0" y="0" width="1200" height="34" rx="14" fill="#0369a1"/>
+      <text x="18" y="23" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.6">FASE 1: PARSING HTML, CONFIGURACIÓN PREVIA Y DETECCIÓN DEL ENTORNO</text>
+      <text x="800" y="23" font-size="12" fill="#bae6fd">Archivos: index.html ➔ js/PreConfig.js ➔ js/bootstrap.js</text>
+
+      <!-- Subbloques -->
+      <g transform="translate(18, 48)">
+        <!-- Bloque 1.1 -->
+        <rect x="0" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#38bdf8">1.1. Carga DOM &amp; Estilos Base</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">El navegador lee <tspan fill="#e2e8f0" font-weight="600">index.html</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Crea el contenedor splash <tspan fill="#cbd5e1">#geInfo</tspan> con spinner.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Descarga <tspan fill="#e2e8f0">grapheditor.css</tspan> y <tspan fill="#e2e8f0">high-contrast.css</tspan>.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Inicializa layout geClassic y body.</text>
+
+        <!-- Bloque 1.2 -->
+        <rect x="390" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#38bdf8">1.2. Parsing de Parámetros (bootstrap.js)</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Construye el objeto global <tspan fill="#facc15" font-weight="600">urlParams</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Procesa flags: <tspan fill="#38bdf8">dev, test, sync, lightbox, chrome</tspan>.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Desempaqueta parámetros en Hash (<tspan fill="#facc15">#P{...}</tspan>)</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Evita invalidación de cachés de CDN en navegadores.</text>
+
+        <!-- Bloque 1.3 -->
+        <rect x="780" y="0" width="380" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#38bdf8">1.3. Detección de Runtime &amp; Electron</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Evalúa <tspan fill="#e2e8f0" font-weight="600">navigator.userAgent</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Bandera <tspan fill="#34d399">mxIsElectron</tspan> activa modo Desktop.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Carga scripts condicionales (modo minificado o dev)</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Prepara DRAWIO_BASE_URL y SERVICE_WORKER.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión 1 -> 2 -->
+  <line x1="680" y1="270" x2="680" y2="300" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ================= FASE 2: GATILLO PRINCIPAL & MAIN.JS ================= -->
+  <g transform="translate(90, 305)">
+    <!-- Nodo Circular de Timeline -->
+    <circle cx="30" cy="40" r="24" fill="url(#phase2Grad)" stroke="#818cf8" stroke-width="2" filter="url(#nodeGlow)"/>
+    <text x="30" y="46" font-size="15" font-weight="800" fill="#ffffff" text-anchor="middle">2</text>
+
+    <!-- Tarjeta Fase 2 -->
+    <g transform="translate(80, 0)">
+      <rect x="0" y="0" width="1200" height="155" rx="14" fill="url(#stepBg)" stroke="#6366f1" stroke-width="1.8" filter="url(#cardShadow)"/>
+      <rect x="0" y="0" width="1200" height="34" rx="14" fill="#4338ca"/>
+      <text x="18" y="23" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.6">FASE 2: SINCRONIZACIÓN DE RECURSOS Y EJECUCIÓN DEL GATILLO PRINCIPAL</text>
+      <text x="830" y="23" font-size="12" fill="#c7d2fe">Archivos: js/main.js ➔ js/diagramly/App.js (App.main)</text>
+
+      <g transform="translate(18, 48)">
+        <!-- Bloque 2.1 -->
+        <rect x="0" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#a5b4fc">2.1. main.js &amp; Evento 'load'</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Escucha <tspan fill="#e2e8f0" font-weight="600">window.addEventListener('load')</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Activa bandera <tspan fill="#818cf8">mxWinLoaded = true</tspan>.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Comprueba si HTML5 Canvas está soportado.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Si no es dev: invoca checkAllLoaded().</text>
+
+        <!-- Bloque 2.2 -->
+        <rect x="390" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#a5b4fc">2.2. Invoca App.main()</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Punto central de entrada JavaScript.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Elimina el overlay de carga del DOM inicial.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Verifica requerimientos mínimos del navegador.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Inicializa configuración de internacionalización.</text>
+
+        <!-- Bloque 2.3 -->
+        <rect x="780" y="0" width="380" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#a5b4fc">2.3. Carga de Diccionarios i18n</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Consulta locale del usuario (<tspan fill="#cbd5e1">urlParams['lang']</tspan>).</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Carga archivo de recursos: <tspan fill="#34d399">mxResources</tspan>.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Traduce etiquetas de menús, botones y alertas.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">mxClient.languageConfigured = true.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión 2 -> 3 -->
+  <line x1="680" y1="465" x2="680" y2="495" stroke="#818cf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ================= FASE 3: INSTANCIACIÓN DEL NÚCLEO MVC ================= -->
+  <g transform="translate(90, 500)">
+    <!-- Nodo Circular de Timeline -->
+    <circle cx="30" cy="40" r="24" fill="url(#phase3Grad)" stroke="#2dd4bf" stroke-width="2" filter="url(#nodeGlow)"/>
+    <text x="30" y="46" font-size="15" font-weight="800" fill="#ffffff" text-anchor="middle">3</text>
+
+    <!-- Tarjeta Fase 3 -->
+    <g transform="translate(80, 0)">
+      <rect x="0" y="0" width="1200" height="155" rx="14" fill="url(#stepBg)" stroke="#0d9488" stroke-width="1.8" filter="url(#cardShadow)"/>
+      <rect x="0" y="0" width="1200" height="34" rx="14" fill="#0f766e"/>
+      <text x="18" y="23" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.6">FASE 3: INSTANCIACIÓN DEL NÚCLEO MVC (MODEL - VIEW - CONTROLLER)</text>
+      <text x="840" y="23" font-size="12" fill="#99f6e4">Archivos: Editor.js ➔ Graph.js ➔ mxGraphModel.js</text>
+
+      <g transform="translate(18, 48)">
+        <!-- Bloque 3.1 -->
+        <rect x="0" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#2dd4bf">3.1. new Editor() &amp; Stencils</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Crea el contenedor de estado del editor.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Ejecuta <tspan fill="#5eead4">initStencilRegistry()</tspan> para figuras.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Instancia <tspan fill="#cbd5e1">mxUndoManager</tspan> para Deshacer/Rehacer.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Inicializa propiedades de página por defecto.</text>
+
+        <!-- Bloque 3.2 -->
+        <rect x="390" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#2dd4bf">3.2. Modelo del Grafo (mxGraphModel)</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Crea la raíz jerárquica: <tspan fill="#facc15" font-weight="600">mxCell(id=0, id=1)</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Configura listeners de cambios transaccionales.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Vincula eventos de modificación con <tspan fill="#2dd4bf">setModified(true)</tspan>.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Estructura preparada para árboles de celdas.</text>
+
+        <!-- Bloque 3.3 -->
+        <rect x="780" y="0" width="380" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#2dd4bf">3.3. Vista y Renderizador (Graph.js)</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Hereda de <tspan fill="#e2e8f0" font-weight="600">mxGraph</tspan> e inicializa <tspan fill="#5eead4">mxGraphView</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Configura <tspan fill="#cbd5e1">useCssTransforms</tspan> para zoom ultra-rápido.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Conecta handlers de panning, drag &amp; drop y selección.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Carga hoja de estilos visuales mxStylesheet.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión 3 -> 4 -->
+  <line x1="680" y1="660" x2="680" y2="690" stroke="#2dd4bf" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ================= FASE 4: CONSTRUCCIÓN DEL LAYOUT & UI ================= -->
+  <g transform="translate(90, 695)">
+    <!-- Nodo Circular de Timeline -->
+    <circle cx="30" cy="40" r="24" fill="url(#phase4Grad)" stroke="#34d399" stroke-width="2" filter="url(#nodeGlow)"/>
+    <text x="30" y="46" font-size="15" font-weight="800" fill="#ffffff" text-anchor="middle">4</text>
+
+    <!-- Tarjeta Fase 4 -->
+    <g transform="translate(80, 0)">
+      <rect x="0" y="0" width="1200" height="155" rx="14" fill="url(#stepBg)" stroke="#059669" stroke-width="1.8" filter="url(#cardShadow)"/>
+      <rect x="0" y="0" width="1200" height="34" rx="14" fill="#047857"/>
+      <text x="18" y="23" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.6">FASE 4: ENSAMBLAJE DE COMPONENTES DE INTERFAZ (UI COMPOSITION)</text>
+      <text x="820" y="23" font-size="12" fill="#a7f3d0">Archivos: EditorUi.js ➔ Sidebar.js ➔ Format.js ➔ Menus.js</text>
+
+      <g transform="translate(18, 48)">
+        <!-- Bloque 4.1 -->
+        <rect x="0" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#34d399">4.1. Menubar &amp; Toolbar Superior</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Instancia <tspan fill="#e2e8f0" font-weight="600">Menus.js</tspan> y <tspan fill="#e2e8f0" font-weight="600">Toolbar.js</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Configura acciones globales en <tspan fill="#34d399">Actions.js</tspan>.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Menús: Archivo, Editar, Ver, Disposición, Ayuda.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Crea barra de herramientas con iconos SVG en línea.</text>
+
+        <!-- Bloque 4.2 -->
+        <rect x="390" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#34d399">4.2. Paleta Izquierda (Sidebar.js)</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Crea paletas colapsables de figuras.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Construye grafo temporal <tspan fill="#cbd5e1">createTemporaryGraph()</tspan></text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">para pre-renderizar miniaturas de formas en SVG.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Instala listeners de drop sobre el canvas principal.</text>
+
+        <!-- Bloque 4.3 -->
+        <rect x="780" y="0" width="380" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#34d399">4.3. Panel Derecho (Format.js) &amp; Tabs</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Inspector reactivo de estilos y opciones de página.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">Escucha <tspan fill="#facc15">graph.getSelectionModel()</tspan>.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Instancia <tspan fill="#34d399">Pages.js</tspan> para barra inferior de pestañas.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Actualiza dinámicamente según selección actual.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión 4 -> 5 -->
+  <line x1="680" y1="855" x2="680" y2="885" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- ================= FASE 5: CARGA DEL ARCHIVO & RENDERIZADO ================= -->
+  <g transform="translate(90, 890)">
+    <!-- Nodo Circular de Timeline -->
+    <circle cx="30" cy="40" r="24" fill="url(#phase5Grad)" stroke="#fbbf24" stroke-width="2" filter="url(#nodeGlow)"/>
+    <text x="30" y="46" font-size="15" font-weight="800" fill="#ffffff" text-anchor="middle">5</text>
+
+    <!-- Tarjeta Fase 5 -->
+    <g transform="translate(80, 0)">
+      <rect x="0" y="0" width="1200" height="155" rx="14" fill="url(#stepBg)" stroke="#d97706" stroke-width="1.8" filter="url(#cardShadow)"/>
+      <rect x="0" y="0" width="1200" height="34" rx="14" fill="#b45309"/>
+      <text x="18" y="23" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.6">FASE 5: RESOLUCIÓN DE ORIGEN DEL ARCHIVO, DECODIFICACIÓN XML Y RENDER</text>
+      <text x="830" y="23" font-size="12" fill="#fde68a">Archivos: DrawioFile.js ➔ mxCodec.js ➔ mxGraph.js</text>
+
+      <g transform="translate(18, 48)">
+        <!-- Bloque 5.1 -->
+        <rect x="0" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#fbbf24">5.1. Detección de Origen de Datos</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1">Evalúa parámetros de carga:</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8">• Si hay Hash/URL: Carga desde <tspan fill="#cbd5e1">Drive / GitHub / Dropbox</tspan>.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">• Si es nuevo: Abre diálogo o plantilla XML en blanco.</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">Crea la instancia hija correspondiente de DrawioFile.</text>
+
+        <!-- Bloque 5.2 -->
+        <rect x="390" y="0" width="370" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#fbbf24">5.2. Parsing XML &amp; Shadow Pages</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1"><tspan fill="#fbbf24">mxUtils.parseXml()</tspan> decodifica el árbol XML.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8"><tspan fill="#38bdf8">mxCodec.decode()</tspan> deserializa nodos a mxCells.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Guarda copia pura en <tspan fill="#facc15" font-weight="600">shadowPages</tspan> para el</text>
+        <text x="12" y="84" font-size="10" fill="#64748b">motor de resolución de conflictos 3-Way Merge.</text>
+
+        <!-- Bloque 5.3 -->
+        <rect x="780" y="0" width="380" height="92" rx="8" fill="#1e293b" stroke="#334155"/>
+        <text x="12" y="20" font-size="12" font-weight="700" fill="#fbbf24">5.3. Renderizado y Disparo de Eventos</text>
+        <text x="12" y="38" font-size="11" fill="#cbd5e1"><tspan fill="#34d399">model.beginUpdate()</tspan> ➔ inyecta celdas ➔ <tspan fill="#34d399">endUpdate()</tspan>.</text>
+        <text x="12" y="54" font-size="11" fill="#94a3b8"><tspan fill="#e2e8f0">mxGraphView.revalidate()</tspan> calcula geometría.</text>
+        <text x="12" y="70" font-size="11" fill="#94a3b8">Genera nodos SVG en el contenedor del navegador.</text>
+        <text x="12" y="84" font-size="10" fill="#34d399" font-weight="700">¡EL EDITOR ESTÁ LISTO PARA RECIBIR ACCIONES!</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PIE DE PÁGINA / BUCLE DE VIDA ================= -->
+  <g transform="translate(170, 1070)">
+    <rect x="0" y="0" width="1200" height="50" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+    <text x="24" y="30" font-size="12" font-weight="700" fill="#38bdf8">BUCLE OPERATIVO POST-BOOTSTRAP:</text>
+    <text x="270" y="30" font-size="12" fill="#cbd5e1">
+      Cualquier acción del usuario dispara <tspan fill="#facc15" font-weight="600">mxEvent.CHANGE</tspan> ➔ activa <tspan fill="#38bdf8">setModified(true)</tspan> ➔ inicia timer de <tspan fill="#34d399">autosaveDelay</tspan> en <tspan fill="#a78bfa">DrawioFile</tspan> hacia la nube o disco.
+    </text>
+  </g>
+</svg>

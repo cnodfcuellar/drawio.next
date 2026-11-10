@@ -1,0 +1,343 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 1150" width="100%" height="100%" style="background:#060913; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y resplandor -->
+    <filter id="pillarShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+    <filter id="coreGlow8" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Gradientes de Cabecera -->
+    <linearGradient id="headerGrad8" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="30%" stop-color="#818cf8"/>
+      <stop offset="70%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+
+    <!-- Gradientes de cada Pilar -->
+    <linearGradient id="p1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#082f49"/>
+    </linearGradient>
+    <linearGradient id="p2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="p3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <linearGradient id="p4Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+
+    <!-- Fondo de Tarjeta Interna -->
+    <linearGradient id="cardInnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <!-- Marcadores de Flechas -->
+    <marker id="arrowCyan8" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGreen8" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#34d399"/>
+    </marker>
+  </defs>
+
+  <!-- ================= ENCABEZADO PRINCIPAL ================= -->
+  <g transform="translate(60, 42)">
+    <text x="0" y="0" font-size="26" font-weight="800" fill="url(#headerGrad8)" letter-spacing="0.5">
+      PUNTO 8: LOS 4 PILARES MAESTROS DE LA EJECUCIÓN EN DRAW.IO
+    </text>
+    <text x="0" y="24" font-size="13" fill="#94a3b8">
+      Síntesis y principios directores de arquitectura: Cómo coexisten el rendimiento cliente, la concurrencia y la soberanía de datos
+    </text>
+  </g>
+
+  <!-- ================= VIGA SUPERIOR: ARQUITECTURA DISTRIBUIDA ZERO-KNOWLEDGE ================= -->
+  <g transform="translate(60, 92)" filter="url(#pillarShadow)">
+    <rect width="1500" height="46" rx="8" fill="#111827" stroke="#374151" stroke-width="1.8"/>
+    <rect x="0" y="0" width="8" height="46" rx="4" fill="#38bdf8"/>
+    <text x="25" y="28" font-size="12" font-weight="800" fill="#38bdf8">MODELO OPERATIVO GLOBAL:</text>
+    <text x="210" y="28" font-size="12" fill="#e2e8f0">
+      Zero-Knowledge en Servidor | Todo el cómputo gráfico y cálculo de diferencias corre en la CPU del navegador del cliente | Soporte 100% Offline
+    </text>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- ================= PILAR 1: FRONTEND DESACOPLADO Y REACTIVO ============= -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 160)" filter="url(#pillarShadow)">
+    <!-- Columna Principal -->
+    <rect width="350" height="790" rx="14" fill="#091424" stroke="#0284c7" stroke-width="2"/>
+    <rect width="350" height="52" rx="14" fill="url(#p1Grad)"/>
+    <circle cx="26" cy="26" r="12" fill="#38bdf8"/>
+    <text x="26" y="31" font-size="13" font-weight="900" fill="#082f49" text-anchor="middle">1</text>
+    <text x="48" y="24" font-size="13" font-weight="800" fill="#ffffff">FRONTEND CLIENTE</text>
+    <text x="48" y="40" font-size="10.5" fill="#bae6fd">Desacoplado y 100% Reactivo</text>
+
+    <!-- Módulo 1.1: Motor Matemático en Navegador -->
+    <g transform="translate(16, 70)">
+      <rect width="318" height="155" rx="10" fill="url(#cardInnerGrad)" stroke="#0369a1" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">Cómputo en CPU Local</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• Cero latencia de red al dibujar o mover.</text>
+      <text x="14" y="62" font-size="11" fill="#cbd5e1">• Algoritmos de enrutamiento ortogonal,</text>
+      <text x="14" y="78" font-size="11" fill="#cbd5e1">  árboles y bezier ejecutados por <tspan fill="#38bdf8" font-weight="600">mxGraph</tspan>.</text>
+      <text x="14" y="96" font-size="11" fill="#cbd5e1">• Renderizado nativo de nodos <tspan fill="#facc15">&lt;svg&gt;</tspan> vía</text>
+      <text x="14" y="112" font-size="11" fill="#cbd5e1">  <tspan fill="#38bdf8">mxSvgCanvas2D</tspan> sin depender de WebGL.</text>
+      <text x="14" y="136" font-size="10" fill="#34d399" font-weight="700">➔ Independencia total del backend.</text>
+    </g>
+
+    <!-- Módulo 1.2: Transacciones Atómicas (beginUpdate) -->
+    <g transform="translate(16, 245)">
+      <rect width="318" height="165" rx="10" fill="url(#cardInnerGrad)" stroke="#0369a1" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">Transacciones mxGraphModel</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">beginUpdate() / endUpdate():</tspan></text>
+      <text x="14" y="62" font-size="11" fill="#cbd5e1">  Agrupa cientos de micro-cambios en un</text>
+      <text x="14" y="78" font-size="11" fill="#cbd5e1">  único repintado visual (Evita reflows).</text>
+      <text x="14" y="98" font-size="11" fill="#cbd5e1">• Pila de Deshacer/Rehacer:</text>
+      <text x="14" y="114" font-size="11" fill="#cbd5e1">  <tspan fill="#38bdf8">mxUndoManager</tspan> almacena diferencias</text>
+      <text x="14" y="130" font-size="11" fill="#cbd5e1">  atómicas consumiendo memoria mínima.</text>
+      <text x="14" y="152" font-size="10" fill="#34d399" font-weight="700">➔ Fluidez a 60 FPS garantizada.</text>
+    </g>
+
+    <!-- Módulo 1.3: Event-Driven UI -->
+    <g transform="translate(16, 430)">
+      <rect width="318" height="160" rx="10" fill="url(#cardInnerGrad)" stroke="#0369a1" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">Arquitectura Event-Driven</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• Desacoplamiento absoluto:</text>
+      <text x="14" y="62" font-size="11" fill="#cbd5e1">  El modelo notifica vía <tspan fill="#facc15">mxEvent.CHANGE</tspan>.</text>
+      <text x="14" y="80" font-size="11" fill="#cbd5e1">• <tspan fill="#38bdf8">Format.js</tspan> actualiza los paneles de color</text>
+      <text x="14" y="96" font-size="11" fill="#cbd5e1">  únicamente cuando cambia la selección.</text>
+      <text x="14" y="114" font-size="11" fill="#cbd5e1">• El árbol visual de figuras no sabe</text>
+      <text x="14" y="130" font-size="11" fill="#cbd5e1">  dónde ni cómo se guardará el archivo.</text>
+      <text x="14" y="148" font-size="10" fill="#a7f3d0">Separación estricta de responsabilidades.</text>
+    </g>
+
+    <!-- Módulo 1.4: Resumen Clave Pilar 1 -->
+    <g transform="translate(16, 610)">
+      <rect width="318" height="155" rx="10" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="12" font-weight="800" fill="#facc15">BENEFICIO ESTRATÉGICO:</text>
+      <text x="14" y="46" font-size="11" fill="#ffffff">Costes de Servidor Casi Nulos.</text>
+      <text x="14" y="66" font-size="10.5" fill="#e0f2fe">El 99% de la computación ocurre en el cliente.</text>
+      <text x="14" y="84" font-size="10.5" fill="#e0f2fe">La app puede atender a millones de usuarios</text>
+      <text x="14" y="102" font-size="10.5" fill="#e0f2fe">simultáneos sin sobrecargar la infraestructura</text>
+      <text x="14" y="120" font-size="10.5" fill="#e0f2fe">gracias a su motor estático en JavaScript.</text>
+      <text x="14" y="140" font-size="10" fill="#38bdf8" font-weight="700">Escalabilidad horizontal infinita.</text>
+    </g>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- ================= PILAR 2: ABSTRACCIÓN DE ALMACENAMIENTO =============== -->
+  <!-- ========================================================================= -->
+  <g transform="translate(440, 160)" filter="url(#pillarShadow)">
+    <rect width="350" height="790" rx="14" fill="#120e2e" stroke="#6366f1" stroke-width="2"/>
+    <rect width="350" height="52" rx="14" fill="url(#p2Grad)"/>
+    <circle cx="26" cy="26" r="12" fill="#818cf8"/>
+    <text x="26" y="31" font-size="13" font-weight="900" fill="#1e1b4b" text-anchor="middle">2</text>
+    <text x="48" y="24" font-size="13" font-weight="800" fill="#ffffff">ALMACENAMIENTO UNIFICADO</text>
+    <text x="48" y="40" font-size="10.5" fill="#c7d2fe">Soberanía de Datos &amp; Multi-Cloud</text>
+
+    <!-- Módulo 2.1: Interfaz Homogénea -->
+    <g transform="translate(16, 70)">
+      <rect width="318" height="155" rx="10" fill="url(#cardInnerGrad)" stroke="#4338ca" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#a5b4fc">Abstracción DrawioFile</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• El editor solo interactúa con:</text>
+      <text x="14" y="60" font-size="11" fill="#ffffff" font-weight="600">  file.save(), file.saveAs(), file.sync()</text>
+      <text x="14" y="80" font-size="11" fill="#cbd5e1">• Ninguna pantalla o menú sabe si el</text>
+      <text x="14" y="96" font-size="11" fill="#cbd5e1">  archivo está en un bucket de Google Drive,</text>
+      <text x="14" y="112" font-size="11" fill="#cbd5e1">  en un commit de GitHub o en disco local.</text>
+      <text x="14" y="136" font-size="10" fill="#34d399" font-weight="700">➔ Polimorfismo puro en JavaScript.</text>
+    </g>
+
+    <!-- Módulo 2.2: Especializaciones -->
+    <g transform="translate(16, 245)">
+      <rect width="318" height="165" rx="10" fill="url(#cardInnerGrad)" stroke="#4338ca" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#a5b4fc">Especialización de Proveedores</text>
+      <text x="14" y="44" font-size="10.5" fill="#cbd5e1">• <tspan fill="#38bdf8" font-weight="600">DriveFile:</tspan> Maneja ETags y carpetas Drive.</text>
+      <text x="14" y="62" font-size="10.5" fill="#cbd5e1">• <tspan fill="#c084fc" font-weight="600">GitHubFile:</tspan> Trabaja con ramas y SHAs.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#818cf8" font-weight="600">OneDriveFile:</tspan> Compatible con SharePoint.</text>
+      <text x="14" y="98" font-size="10.5" fill="#cbd5e1">• <tspan fill="#34d399" font-weight="600">LocalFile:</tspan> File System Access API nativa.</text>
+      <text x="14" y="116" font-size="10.5" fill="#fbbf24" font-weight="600">• StorageFile:</text>
+      <text x="24" y="132" font-size="10" fill="#cbd5e1">localStorage con sync entre pestañas.</text>
+      <text x="14" y="152" font-size="10" fill="#34d399" font-weight="700">➔ Cero vendor lock-in.</text>
+    </g>
+
+    <!-- Módulo 2.3: Formato XML Autónomo -->
+    <g transform="translate(16, 430)">
+      <rect width="318" height="160" rx="10" fill="url(#cardInnerGrad)" stroke="#4338ca" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#a5b4fc">Formato mxfile Autónomo</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• Estructura estándar abierta:</text>
+      <text x="14" y="62" font-size="11" fill="#e2e8f0">  <tspan fill="#facc15">&lt;mxfile host="..."&gt;&lt;diagram&gt;...&lt;/diagram&gt;</tspan></text>
+      <text x="14" y="80" font-size="11" fill="#cbd5e1">• Puede incrustarse dentro de:</text>
+      <text x="14" y="96" font-size="11" fill="#cbd5e1">  - Imágenes PNG (en metadatos tEXt).</text>
+      <text x="14" y="112" font-size="11" fill="#cbd5e1">  - Gráficos SVG (en etiquetas &lt;content&gt;).</text>
+      <text x="14" y="128" font-size="11" fill="#cbd5e1">  - Documentos PDF interactivos.</text>
+      <text x="14" y="148" font-size="10" fill="#a7f3d0">El diagrama viaja dentro de la imagen.</text>
+    </g>
+
+    <!-- Módulo 2.4: Resumen Clave Pilar 2 -->
+    <g transform="translate(16, 610)">
+      <rect width="318" height="155" rx="10" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="12" font-weight="800" fill="#facc15">BENEFICIO ESTRATÉGICO:</text>
+      <text x="14" y="46" font-size="11" fill="#ffffff">Privacidad y Soberanía de Datos.</text>
+      <text x="14" y="66" font-size="10.5" fill="#e0e7ff">Los diagramas pertenecen al usuario:</text>
+      <text x="14" y="84" font-size="10.5" fill="#e0e7ff">draw.io no posee servidores que almacenen</text>
+      <text x="14" y="102" font-size="10.5" fill="#e0e7ff">archivos privados. Cumple GDPR y normativas</text>
+      <text x="14" y="120" font-size="10.5" fill="#e0e7ff">corporativas de seguridad por diseño.</text>
+      <text x="14" y="140" font-size="10" fill="#818cf8" font-weight="700">Modelo Zero-Trust de almacenamiento.</text>
+    </g>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- ================= PILAR 3: RESISTENCIA Y 3-WAY MERGE ==================== -->
+  <!-- ========================================================================= -->
+  <g transform="translate(820, 160)" filter="url(#pillarShadow)">
+    <rect width="350" height="790" rx="14" fill="#061e16" stroke="#059669" stroke-width="2"/>
+    <rect width="350" height="52" rx="14" fill="url(#p3Grad)"/>
+    <circle cx="26" cy="26" r="12" fill="#34d399"/>
+    <text x="26" y="31" font-size="13" font-weight="900" fill="#064e3b" text-anchor="middle">3</text>
+    <text x="48" y="24" font-size="13" font-weight="800" fill="#ffffff">RESILENCIA Y CONCURRENCIA</text>
+    <text x="48" y="40" font-size="10.5" fill="#a7f3d0">Algoritmo 3-Way &amp; Shadow Pages</text>
+
+    <!-- Módulo 3.1: Shadow Pages -->
+    <g transform="translate(16, 70)">
+      <rect width="318" height="155" rx="10" fill="url(#cardInnerGrad)" stroke="#047857" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">Shadow Pages en Memoria</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• Mantiene una copia "limpia" del XML</text>
+      <text x="14" y="60" font-size="11" fill="#cbd5e1">  tal como estaba en el último guardado.</text>
+      <text x="14" y="80" font-size="11" fill="#cbd5e1">• Actúa como el ancestro común (Base)</text>
+      <text x="14" y="96" font-size="11" fill="#cbd5e1">  para calcular deltas bidireccionales</text>
+      <text x="14" y="112" font-size="11" fill="#cbd5e1">  cuando se detectan colisiones remotas.</text>
+      <text x="14" y="136" font-size="10" fill="#34d399" font-weight="700">➔ Control de versiones local integrado.</text>
+    </g>
+
+    <!-- Módulo 3.2: Algoritmo 3-Way Merge -->
+    <g transform="translate(16, 245)">
+      <rect width="318" height="165" rx="10" fill="url(#cardInnerGrad)" stroke="#047857" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">Fusión de 3 Vías (3-Way Merge)</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• Al recibir HTTP 412 (Drive) o 409 (Git):</text>
+      <text x="14" y="62" font-size="11" fill="#ffffff" font-weight="600">  Diff([Local] vs [ShadowPages])</text>
+      <text x="14" y="78" font-size="11" fill="#ffffff" font-weight="600">  Diff([Remoto] vs [ShadowPages])</text>
+      <text x="14" y="98" font-size="11" fill="#cbd5e1">• Reconciliación celda por celda:</text>
+      <text x="14" y="114" font-size="11" fill="#cbd5e1">  Integra cambios ajenos sin machacar</text>
+      <text x="14" y="130" font-size="11" fill="#cbd5e1">  las figuras que tú estás editando.</text>
+      <text x="14" y="152" font-size="10" fill="#34d399" font-weight="700">➔ Cero sobrescrituras accidentales.</text>
+    </g>
+
+    <!-- Módulo 3.3: Modo Desconectado -->
+    <g transform="translate(16, 430)">
+      <rect width="318" height="160" rx="10" fill="url(#cardInnerGrad)" stroke="#047857" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">Tolerancia a Caídas de Red</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• Si la conexión a Internet se interrumpe:</text>
+      <text x="14" y="62" font-size="11" fill="#cbd5e1">  El usuario puede seguir dibujando sin</text>
+      <text x="14" y="78" font-size="11" fill="#cbd5e1">  interrupciones en su navegador.</text>
+      <text x="14" y="98" font-size="11" fill="#cbd5e1">• Al volver la conexión, <tspan fill="#34d399">DrawioFile</tspan></text>
+      <text x="14" y="114" font-size="11" fill="#cbd5e1">  detecta el desfase y ejecuta el merge</text>
+      <text x="14" y="130" font-size="11" fill="#cbd5e1">  automáticamente en segundo plano.</text>
+      <text x="14" y="148" font-size="10" fill="#a7f3d0">Offline-first por naturaleza.</text>
+    </g>
+
+    <!-- Módulo 3.4: Resumen Clave Pilar 3 -->
+    <g transform="translate(16, 610)">
+      <rect width="318" height="155" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="12" font-weight="800" fill="#facc15">BENEFICIO ESTRATÉGICO:</text>
+      <text x="14" y="46" font-size="11" fill="#ffffff">Colaboración Concurrente Segura.</text>
+      <text x="14" y="66" font-size="10.5" fill="#d1fae5">Permite a múltiples ingenieros o diseñadores</text>
+      <text x="14" y="84" font-size="10.5" fill="#d1fae5">editar el mismo diagrama simultáneamente</text>
+      <text x="14" y="102" font-size="10.5" fill="#d1fae5">sobre infraestructuras de archivo tradicionales</text>
+      <text x="14" y="120" font-size="10.5" fill="#d1fae5">sin necesidad de base de datos relacional.</text>
+      <text x="14" y="140" font-size="10" fill="#34d399" font-weight="700">Integridad garantizada matemática.</text>
+    </g>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- ================= PILAR 4: BACKEND STATELESS LIGERO ===================== -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1200, 160)" filter="url(#pillarShadow)">
+    <rect width="360" height="790" rx="14" fill="#201108" stroke="#d97706" stroke-width="2"/>
+    <rect width="360" height="52" rx="14" fill="url(#p4Grad)"/>
+    <circle cx="26" cy="26" r="12" fill="#fbbf24"/>
+    <text x="26" y="31" font-size="13" font-weight="900" fill="#451a03" text-anchor="middle">4</text>
+    <text x="48" y="24" font-size="13" font-weight="800" fill="#ffffff">BACKEND JAVA STATELESS</text>
+    <text x="48" y="40" font-size="10.5" fill="#fde68a">Asistencia Segura sin Estado</text>
+
+    <!-- Módulo 4.1: Custodia de Secretos -->
+    <g transform="translate(16, 70)">
+      <rect width="328" height="155" rx="10" fill="url(#cardInnerGrad)" stroke="#b45309" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fde047">Custodia OAuth 2.0 Segura</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">AbsAuth.java</tspan> custodia las claves</text>
+      <text x="14" y="60" font-size="11" fill="#cbd5e1">  privadas (<tspan fill="#fbbf24">client_secret</tspan>) en el servidor.</text>
+      <text x="14" y="80" font-size="11" fill="#cbd5e1">• Intercambia auth_codes por tokens</text>
+      <text x="14" y="96" font-size="11" fill="#cbd5e1">  usando caché efímera (<tspan fill="#facc15">CacheFacade</tspan>).</text>
+      <text x="14" y="112" font-size="11" fill="#cbd5e1">• Emite cookies cifradas seguras HTTP-only.</text>
+      <text x="14" y="136" font-size="10" fill="#34d399" font-weight="700">➔ Claves privadas nunca expuestas.</text>
+    </g>
+
+    <!-- Módulo 4.2: Proxy y Pasarela CORS -->
+    <g transform="translate(16, 245)">
+      <rect width="328" height="165" rx="10" fill="url(#cardInnerGrad)" stroke="#b45309" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fde047">Bypass CORS &amp; SSRF Shield</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">ProxyServlet.java (/proxy):</tspan></text>
+      <text x="14" y="62" font-size="11" fill="#cbd5e1">  Descarga imágenes e iconos de terceros</text>
+      <text x="14" y="78" font-size="11" fill="#cbd5e1">  que carecen de cabeceras CORS en origen.</text>
+      <text x="14" y="98" font-size="11" fill="#cbd5e1">• Escudo de seguridad activo:</text>
+      <text x="14" y="114" font-size="11" fill="#cbd5e1">  <tspan fill="#fbbf24">Utils.sanitizeUrl()</tspan> bloquea IPs internas</text>
+      <text x="14" y="130" font-size="11" fill="#cbd5e1">  y previene ataques Server-Side (SSRF).</text>
+      <text x="14" y="152" font-size="10" fill="#34d399" font-weight="700">➔ Pasarela segura hacia la Web abierta.</text>
+    </g>
+
+    <!-- Módulo 4.3: Exportación Binaria -->
+    <g transform="translate(16, 430)">
+      <rect width="328" height="160" rx="10" fill="url(#cardInnerGrad)" stroke="#b45309" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fde047">Conversión &amp; Forzado de Descarga</text>
+      <text x="14" y="44" font-size="11" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">ExportProxyServlet (/export):</tspan></text>
+      <text x="14" y="62" font-size="11" fill="#cbd5e1">  Inyecta <tspan fill="#fbbf24">Content-Disposition</tspan> para forzar</text>
+      <text x="14" y="78" font-size="11" fill="#cbd5e1">  guardado de archivos en navegadores.</text>
+      <text x="14" y="98" font-size="11" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">ConverterServlet (/convert):</tspan></text>
+      <text x="14" y="114" font-size="11" fill="#cbd5e1">  Descomprime formatos legados o Visio.</text>
+      <text x="14" y="130" font-size="11" fill="#cbd5e1">• No guarda archivos: flujo en streaming.</text>
+      <text x="14" y="148" font-size="10" fill="#a7f3d0">Puro pipeline de entrada / salida.</text>
+    </g>
+
+    <!-- Módulo 4.4: Resumen Clave Pilar 4 -->
+    <g transform="translate(16, 610)">
+      <rect width="328" height="155" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="12" font-weight="800" fill="#facc15">BENEFICIO ESTRATÉGICO:</text>
+      <text x="14" y="46" font-size="11" fill="#ffffff">Mantenimiento Cero y Resiliencia.</text>
+      <text x="14" y="66" font-size="10.5" fill="#fef3c7">Al no tener base de datos ni retener sesión:</text>
+      <text x="14" y="84" font-size="10.5" fill="#fef3c7">los servlets pueden reiniciarse, escalarse o</text>
+      <text x="14" y="102" font-size="10.5" fill="#fef3c7">caerse sin que ningún usuario pierda datos</text>
+      <text x="14" y="120" font-size="10.5" fill="#fef3c7">ni se desconecte de su sesión de edición.</text>
+      <text x="14" y="140" font-size="10" fill="#fbbf24" font-weight="700">Arquitectura verdaderamente Cloud-Native.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= BASE DE CIMENTACIÓN: SÍNTESIS FINAL ================= -->
+  <g transform="translate(60, 980)" filter="url(#coreGlow8)">
+    <rect width="1500" height="110" rx="14" fill="#0f172a" stroke="url(#headerGrad8)" stroke-width="2.5"/>
+    
+    <g transform="translate(30, 24)">
+      <text x="0" y="0" font-size="14" font-weight="800" fill="#facc15" letter-spacing="0.8">SÍNTESIS FINAL DE LA INGENIERÍA DE DRAW.IO:</text>
+      
+      <text x="0" y="26" font-size="11.5" fill="#e2e8f0">
+        El éxito de draw.io reside en la perfecta <tspan fill="#38bdf8" font-weight="700">simetría de sus 4 pilares</tspan>: delega la potencia gráfica al <tspan fill="#38bdf8" font-weight="700">Frontend</tspan> para lograr velocidad nativa, independiza los archivos mediante una <tspan fill="#818cf8" font-weight="700">Abstracción Unificada</tspan> para garantizar privacidad, resuelve la colaboración con <tspan fill="#34d399" font-weight="700">3-Way Merge</tspan> sin requerir base de datos centralizada, y utiliza un <tspan fill="#fbbf24" font-weight="700">Backend Stateless</tspan> estrictamente como pasarela de seguridad y puente de compatibilidad.
+      </text>
+
+      <text x="0" y="52" font-size="11" font-weight="600" fill="#94a3b8">
+        El resultado es una de las aplicaciones web más escalables, robustas y privadas del mundo, capaz de ejecutarse idénticamente en navegador web, Electron Desktop o contenedores Docker locales aislados.
+      </text>
+    </g>
+  </g>
+</svg>

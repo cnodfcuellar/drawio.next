@@ -1,0 +1,259 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1350 1180" width="100%" height="100%" style="background:#0d1117; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Marcador de flecha de llamada síncrona -->
+    <marker id="callArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff" />
+    </marker>
+    <!-- Marcador de flecha de retorno / respuesta -->
+    <marker id="returnArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950" />
+    </marker>
+    <!-- Marcador de flecha interna/evento -->
+    <marker id="eventArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d29922" />
+    </marker>
+
+    <!-- Sombra sutil para las cajas de participantes -->
+    <filter id="boxShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- ================= TÍTULO Y LEYENDA ================= -->
+  <g transform="translate(50, 40)">
+    <text x="0" y="0" font-size="24" font-weight="700" fill="#f0f6fc">DIAGRAMA DE SECUENCIA: FLUJO DE ARRANQUE (BOOTSTRAPPING)</text>
+    <text x="0" y="24" font-size="13" fill="#8b949e">Traza real de llamadas a métodos, funciones y constructores entre archivos fuente del proyecto</text>
+  </g>
+
+  <!-- Leyenda técnica -->
+  <g transform="translate(850, 25)">
+    <rect x="0" y="0" width="450" height="42" rx="6" fill="#161b22" stroke="#30363d"/>
+    <!-- Llamada -->
+    <line x1="15" y1="21" x2="45" y2="21" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="52" y="25" font-size="11" fill="#c9d1d9">Llamada a método / new</text>
+    <!-- Retorno -->
+    <line x1="190" y1="21" x2="220" y2="21" stroke="#3fb950" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow)"/>
+    <text x="227" y="25" fill="#c9d1d9" font-size="11">Retorno / Evento</text>
+    <!-- Acción interna -->
+    <circle cx="340" cy="21" r="5" fill="#d29922"/>
+    <text x="352" y="25" fill="#c9d1d9" font-size="11">Ejecución interna</text>
+  </g>
+
+  <!-- ================= LÍNEAS DE VIDA (LIFELINES DE LOS ARCHIVOS) ================= -->
+  <!-- Columna 1: Navegador / Usuario (x=90) -->
+  <line x1="90" y1="130" x2="90" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 2: index.html (x=240) -->
+  <line x1="240" y1="130" x2="240" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 3: bootstrap.js (x=390) -->
+  <line x1="390" y1="130" x2="390" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 4: main.js (x=530) -->
+  <line x1="530" y1="130" x2="530" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 5: App.js (x=680) -->
+  <line x1="680" y1="130" x2="680" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 6: Editor.js (x=830) -->
+  <line x1="830" y1="130" x2="830" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 7: EditorUi.js (x=980) -->
+  <line x1="980" y1="130" x2="980" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 8: Graph.js / mxGraph (x=1130) -->
+  <line x1="1130" y1="130" x2="1130" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Columna 9: DrawioFile.js / Storage (x=1260) -->
+  <line x1="1260" y1="130" x2="1260" y2="1120" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- ================= CABECERAS DE PARTICIPANTES ================= -->
+  <!-- 1. Navegador -->
+  <g transform="translate(30, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#1f2937" stroke="#374151" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#f3f4f6" text-anchor="middle">Navegador Web</text>
+    <text x="60" y="34" font-size="10" fill="#9ca3af" text-anchor="middle">Cliente / DOM</text>
+  </g>
+
+  <!-- 2. index.html -->
+  <g transform="translate(180, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#0f2d4a" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#93c5fd" text-anchor="middle">index.html</text>
+    <text x="60" y="34" font-size="10" fill="#60a5fa" text-anchor="middle">Documento raíz</text>
+  </g>
+
+  <!-- 3. bootstrap.js -->
+  <g transform="translate(330, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#1e1b4b" stroke="#4338ca" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#c7d2fe" text-anchor="middle">bootstrap.js</text>
+    <text x="60" y="34" font-size="10" fill="#818cf8" text-anchor="middle">urlParams &amp; config</text>
+  </g>
+
+  <!-- 4. main.js -->
+  <g transform="translate(470, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#1e1b4b" stroke="#4338ca" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#c7d2fe" text-anchor="middle">main.js</text>
+    <text x="60" y="34" font-size="10" fill="#818cf8" text-anchor="middle">Event Listener 'load'</text>
+  </g>
+
+  <!-- 5. App.js -->
+  <g transform="translate(620, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#064e3b" stroke="#059669" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#a7f3d0" text-anchor="middle">App.js</text>
+    <text x="60" y="34" font-size="10" fill="#34d399" text-anchor="middle">diagramly/App.js</text>
+  </g>
+
+  <!-- 6. Editor.js -->
+  <g transform="translate(770, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#134e4a" stroke="#0d9488" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#99f6e4" text-anchor="middle">Editor.js</text>
+    <text x="60" y="34" font-size="10" fill="#2dd4bf" text-anchor="middle">grapheditor/Editor</text>
+  </g>
+
+  <!-- 7. EditorUi.js -->
+  <g transform="translate(920, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#3b0764" stroke="#7e22ce" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#e9d5ff" text-anchor="middle">EditorUi.js</text>
+    <text x="60" y="34" font-size="10" fill="#c084fc" text-anchor="middle">UI &amp; Componentes</text>
+  </g>
+
+  <!-- 8. Graph.js / mxGraph -->
+  <g transform="translate(1070, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#042f2e" stroke="#0f766e" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#ccfbf1" text-anchor="middle">Graph.js</text>
+    <text x="60" y="34" font-size="10" fill="#5eead4" text-anchor="middle">mxGraph / Modelo</text>
+  </g>
+
+  <!-- 9. DrawioFile.js / Cloud -->
+  <g transform="translate(1200, 85)" filter="url(#boxShadow)">
+    <rect width="120" height="42" rx="6" fill="#78350f" stroke="#b45309" stroke-width="1.5"/>
+    <text x="60" y="20" font-size="12" font-weight="700" fill="#fef3c7" text-anchor="middle">DrawioFile.js</text>
+    <text x="60" y="34" font-size="10" fill="#f59e0b" text-anchor="middle">Storage &amp; Sync</text>
+  </g>
+
+
+  <!-- ================= SECUENCIA DE PASOS ================= -->
+
+  <!-- PASO 1: Navegador solicita index.html -->
+  <g transform="translate(0, 160)">
+    <line x1="90" y1="0" x2="240" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="165" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">1. Solicitud GET /index.html</text>
+  </g>
+
+  <!-- PASO 2: index.html evalúa scripts (bootstrap.js) -->
+  <g transform="translate(0, 205)">
+    <line x1="240" y1="0" x2="390" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="315" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">2. Carga &lt;script src="js/bootstrap.js"&gt;</text>
+  </g>
+
+  <!-- PASO 3: bootstrap.js ejecuta parsing de URL y Hash -->
+  <g transform="translate(390, 240)">
+    <!-- Barra de activación -->
+    <rect x="-6" y="0" width="12" height="45" fill="#4338ca" rx="2"/>
+    <path d="M 6 10 L 40 10 L 40 32 L 8 32" fill="none" stroke="#d29922" stroke-width="1.8" marker-end="url(#eventArrow)"/>
+    <text x="48" y="24" font-size="11" fill="#e3b341">3. parseUrlParams(location.search) + decodifica #P{...}</text>
+  </g>
+
+  <!-- PASO 4: index.html carga main.js -->
+  <g transform="translate(0, 315)">
+    <line x1="240" y1="0" x2="530" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="385" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">4. Carga &lt;script src="js/main.js"&gt;</text>
+  </g>
+
+  <!-- PASO 5: main.js registra listener load y espera -->
+  <g transform="translate(530, 350)">
+    <rect x="-6" y="0" width="12" height="40" fill="#4338ca" rx="2"/>
+    <path d="M 6 8 L 35 8 L 35 28 L 8 28" fill="none" stroke="#d29922" stroke-width="1.8" marker-end="url(#eventArrow)"/>
+    <text x="42" y="21" font-size="11" fill="#e3b341">5. window.addEventListener('load') -> mxWinLoaded = true</text>
+  </g>
+
+  <!-- PASO 6: Disparo de evento load y llamada a App.main() -->
+  <g transform="translate(0, 420)">
+    <line x1="90" y1="0" x2="530" y2="0" stroke="#3fb950" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow)"/>
+    <text x="310" y="-7" font-size="11" fill="#7ee787" text-anchor="middle">6. Evento DOM 'load' disparado por el Navegador</text>
+  </g>
+
+  <!-- PASO 7: main.js llama a App.main() -->
+  <g transform="translate(0, 460)">
+    <line x1="530" y1="0" x2="680" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="605" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">7. App.main()</text>
+  </g>
+
+  <!-- PASO 8: App.js crea new Editor() -->
+  <g transform="translate(0, 505)">
+    <line x1="680" y1="0" x2="830" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="755" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">8. var editor = new Editor()</text>
+  </g>
+
+  <!-- PASO 9: Editor inicializa el Graph y el Modelo -->
+  <g transform="translate(0, 545)">
+    <line x1="830" y1="0" x2="1130" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="980" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">9. this.createGraph() ➔ new Graph(new mxGraphModel())</text>
+  </g>
+
+  <!-- PASO 10: Graph.js crea la jerarquía raíz de celdas -->
+  <g transform="translate(1130, 575)">
+    <rect x="-6" y="0" width="12" height="40" fill="#0f766e" rx="2"/>
+    <path d="M 6 8 L 35 8 L 35 28 L 8 28" fill="none" stroke="#d29922" stroke-width="1.8" marker-end="url(#eventArrow)"/>
+    <text x="42" y="21" font-size="11" fill="#e3b341">10. model.clear() ➔ mxCell(id=0 raíz, id=1 capa base)</text>
+  </g>
+
+  <!-- PASO 11: Retorno de instancia graph al Editor -->
+  <g transform="translate(0, 640)">
+    <line x1="1130" y1="0" x2="830" y2="0" stroke="#3fb950" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow)"/>
+    <text x="980" y="-7" font-size="11" fill="#7ee787" text-anchor="middle">11. Retorna instancia Graph configurada con mxStylesheet</text>
+  </g>
+
+  <!-- PASO 12: Editor.js completa inicialización -->
+  <g transform="translate(0, 680)">
+    <line x1="830" y1="0" x2="680" y2="0" stroke="#3fb950" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow)"/>
+    <text x="755" y="-7" font-size="11" fill="#7ee787" text-anchor="middle">12. new UndoManager() + init() ➔ Retorna editor</text>
+  </g>
+
+  <!-- PASO 13: App.js instancia la UI: new App() que invoca EditorUi.call -->
+  <g transform="translate(0, 725)">
+    <line x1="680" y1="0" x2="980" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="830" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">13. EditorUi.call(this, editor, container)</text>
+  </g>
+
+  <!-- PASO 14: EditorUi.js construye los paneles de interfaz -->
+  <g transform="translate(980, 755)">
+    <rect x="-6" y="0" width="12" height="65" fill="#7e22ce" rx="2"/>
+    <path d="M 6 10 L 40 10 L 40 48 L 8 48" fill="none" stroke="#d29922" stroke-width="1.8" marker-end="url(#eventArrow)"/>
+    <text x="48" y="24" font-size="11" fill="#e3b341">14.1. this.createMenus() ➔ new Menus(this)</text>
+    <text x="48" y="42" font-size="11" fill="#e3b341">14.2. this.createSidebar() ➔ new Sidebar(this, container)</text>
+    <text x="48" y="60" font-size="11" fill="#e3b341">14.3. this.createFormat() ➔ new Format(this, container)</text>
+  </g>
+
+  <!-- PASO 15: EditorUi conecta listeners de eventos al Grafo -->
+  <g transform="translate(0, 845)">
+    <line x1="980" y1="0" x2="1130" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="1055" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">15. graph.getModel().addListener(mxEvent.CHANGE, updateUi)</text>
+  </g>
+
+  <!-- PASO 16: UI terminada, App.js carga el diagrama inicial -->
+  <g transform="translate(0, 890)">
+    <line x1="680" y1="0" x2="1260" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="970" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">16. this.openFile() / this.loadUrl() ➔ new DriveFile() o StorageFile()</text>
+  </g>
+
+  <!-- PASO 17: DrawioFile obtiene XML y crea Shadow Pages -->
+  <g transform="translate(1260, 920)">
+    <rect x="-6" y="0" width="12" height="45" fill="#b45309" rx="2"/>
+    <path d="M 6 8 L 35 8 L 35 32 L 8 32" fill="none" stroke="#d29922" stroke-width="1.8" marker-end="url(#eventArrow)"/>
+    <text x="42" y="20" font-size="11" fill="#e3b341">17.1. parseXml(data) ➔ setShadowPages()</text>
+    <text x="42" y="38" font-size="11" fill="#e3b341">17.2. mxCodec.decode(xmlDoc)</text>
+  </g>
+
+  <!-- PASO 18: Inyección del modelo decodificado en Graph -->
+  <g transform="translate(0, 995)">
+    <line x1="1260" y1="0" x2="1130" y2="0" stroke="#58a6ff" stroke-width="2" marker-end="url(#callArrow)"/>
+    <text x="1195" y="-7" font-size="11" font-weight="600" fill="#79c0ff" text-anchor="middle">18. model.beginUpdate() ➔ setGraphXml() ➔ model.endUpdate()</text>
+  </g>
+
+  <!-- PASO 19: mxGraphView revalida geometría y dibuja SVG -->
+  <g transform="translate(1130, 1025)">
+    <rect x="-6" y="0" width="12" height="35" fill="#0f766e" rx="2"/>
+    <path d="M 6 8 L 35 8 L 35 24 L 8 24" fill="none" stroke="#d29922" stroke-width="1.8" marker-end="url(#eventArrow)"/>
+    <text x="42" y="20" font-size="11" fill="#3fb950">19. view.revalidate() ➔ mxSvgCanvas2D genera nodos &lt;svg&gt;</text>
+  </g>
+
+  <!-- PASO 20: El diagrama aparece en el navegador y splash es retirado -->
+  <g transform="translate(0, 1085)">
+    <line x1="1130" y1="0" x2="90" y2="0" stroke="#3fb950" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#returnArrow)"/>
+    <text x="610" y="-8" font-size="12" font-weight="700" fill="#3fb950" text-anchor="middle">20. ¡Canvas interactivo listo! El DOM oculta spinner #geInfo e inicia escucha de ratón / touch</text>
+  </g>
+
+</svg>

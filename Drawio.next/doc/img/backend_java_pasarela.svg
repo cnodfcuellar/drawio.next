@@ -1,0 +1,350 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1100" width="100%" height="100%" style="background:#0a0c16; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y resplandor -->
+    <filter id="backendShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="gatewayGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Gradientes de Cabecera y Canales -->
+    <linearGradient id="headerGrad5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="50%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <!-- Gradientes de Columnas -->
+    <linearGradient id="frontColGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="routerColGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="servletColGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#be123c"/>
+      <stop offset="100%" stop-color="#881337"/>
+    </linearGradient>
+    <linearGradient id="cloudColGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#064e3b"/>
+    </linearGradient>
+
+    <!-- Marcadores de Flechas de Enrutamiento -->
+    <marker id="routeArrow" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#fb7185"/>
+    </marker>
+    <marker id="cloudArrow" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="returnArrow5" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#38bdf8"/>
+    </marker>
+  </defs>
+
+  <!-- ================= TÍTULO Y DESCRIPCIÓN ================= -->
+  <g transform="translate(60, 42)">
+    <text x="0" y="0" font-size="26" font-weight="800" fill="url(#headerGrad5)" letter-spacing="0.5">
+      PUNTO 5: PASARELA Y SERVICIOS SEGUROS DEL BACKEND JAVA
+    </text>
+    <text x="0" y="24" font-size="13" fill="#94a3b8">
+      Panel de enrutamiento y seguridad: Cómo web.xml canaliza las peticiones hacia los Servlets (com.mxgraph.online.*)
+    </text>
+  </g>
+
+  <!-- ================= ENTORNO CONTAINER / WEB.XML BANNER ================= -->
+  <g transform="translate(60, 92)">
+    <rect width="1440" height="38" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+    <text x="20" y="24" font-size="11" font-weight="700" fill="#f43f5e">DESPLIEGUE STATELESS:</text>
+    <text x="175" y="24" font-size="11" fill="#cbd5e1">
+      Contenedor Servlet 3.1 (Tomcat / Jetty / Google App Engine GAE) | Enrutador: <tspan fill="#fb923c" font-weight="600">WEB-INF/web.xml</tspan> | Memoria: <tspan fill="#34d399">javax.cache.Cache</tspan> (Ehcache)
+    </text>
+  </g>
+
+
+  <!-- ================= SECCIÓN 1 (IZQUIERDA): FRONTEND ORIGIN (x=60, w=220) ================= -->
+  <g transform="translate(60, 150)" filter="url(#backendShadow)">
+    <rect width="220" height="850" rx="12" fill="#0c1929" stroke="#0284c7" stroke-width="1.8"/>
+    <rect width="220" height="42" rx="12" fill="url(#frontColGrad)"/>
+    <text x="110" y="26" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">FRONTEND CLIENTE</text>
+    <text x="110" y="58" font-size="10" fill="#7dd3fc" text-anchor="middle">Peticiones JS (Fetch / XHR)</text>
+
+    <!-- Tarjeta Front 1: OAuth -->
+    <g transform="translate(15, 80)">
+      <rect width="190" height="150" rx="8" fill="#0f2744" stroke="#0284c7" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#38bdf8">Solicitud OAuth 2.0</text>
+      <text x="12" y="40" font-size="10" fill="#cbd5e1">El usuario pulsa "Login"</text>
+      <text x="12" y="56" font-size="10" fill="#94a3b8">Envía auth_code temporal</text>
+      <rect x="12" y="72" width="166" height="24" rx="4" fill="#0369a1"/>
+      <text x="95" y="88" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">GET /github2, /google</text>
+      <text x="12" y="116" font-size="9" fill="#7dd3fc">No expone client_secret</text>
+      <text x="12" y="132" font-size="9" fill="#94a3b8">en código JavaScript.</text>
+    </g>
+
+    <!-- Tarjeta Front 2: Recursos Externos -->
+    <g transform="translate(15, 270)">
+      <rect width="190" height="150" rx="8" fill="#0f2744" stroke="#0284c7" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#38bdf8">Recurso CORS Bloqueado</text>
+      <text x="12" y="40" font-size="10" fill="#cbd5e1">El lienzo necesita imagen,</text>
+      <text x="12" y="56" font-size="10" fill="#94a3b8">icono SVG o XML foráneo.</text>
+      <rect x="12" y="72" width="166" height="24" rx="4" fill="#0369a1"/>
+      <text x="95" y="88" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">GET /proxy?url=...</text>
+      <text x="12" y="116" font-size="9" fill="#7dd3fc">El navegador rechaza CORS</text>
+      <text x="12" y="132" font-size="9" fill="#94a3b8">hacia dominios remotos.</text>
+    </g>
+
+    <!-- Tarjeta Front 3: Descarga Binaria -->
+    <g transform="translate(15, 460)">
+      <rect width="190" height="150" rx="8" fill="#0f2744" stroke="#0284c7" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#38bdf8">Exportación Binaria</text>
+      <text x="12" y="40" font-size="10" fill="#cbd5e1">Exportar a PNG, PDF, JPG</text>
+      <text x="12" y="56" font-size="10" fill="#94a3b8">Envía Base64 al servidor</text>
+      <rect x="12" y="72" width="166" height="24" rx="4" fill="#0369a1"/>
+      <text x="95" y="88" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">POST /export, /service/*</text>
+      <text x="12" y="116" font-size="9" fill="#7dd3fc">Fuerza descarga como</text>
+      <text x="12" y="132" font-size="9" fill="#94a3b8">archivo descargable local.</text>
+    </g>
+
+    <!-- Tarjeta Front 4: Telemetría -->
+    <g transform="translate(15, 650)">
+      <rect width="190" height="150" rx="8" fill="#0f2744" stroke="#0284c7" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#38bdf8">Auditoría y Conversión</text>
+      <text x="12" y="40" font-size="10" fill="#cbd5e1">Errores de runtime / Crash</text>
+      <text x="12" y="56" font-size="10" fill="#94a3b8">Formatos antiguos legados</text>
+      <rect x="12" y="72" width="166" height="24" rx="4" fill="#0369a1"/>
+      <text x="95" y="88" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">POST /log, /convert</text>
+      <text x="12" y="116" font-size="9" fill="#7dd3fc">Envío silencioso de logs</text>
+      <text x="12" y="132" font-size="9" fill="#94a3b8">y analítica de fallos.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= SECCIÓN 2: WEB.XML ENRUTADOR (x=330, w=260) ================= -->
+  <g transform="translate(330, 150)" filter="url(#backendShadow)">
+    <rect width="260" height="850" rx="12" fill="#17122b" stroke="#7c3aed" stroke-width="1.8"/>
+    <rect width="260" height="42" rx="12" fill="url(#routerColGrad)"/>
+    <text x="130" y="26" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">ENRUTADOR WEB.XML</text>
+    <text x="130" y="58" font-size="10" fill="#c4b5fd" text-anchor="middle">Filtros, Endpoints y Mappings</text>
+
+    <!-- Mapping 1: OAuth -->
+    <g transform="translate(15, 80)">
+      <rect width="230" height="150" rx="8" fill="#241947" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#c4b5fd">&lt;servlet-mapping&gt; Auth</text>
+      <text x="12" y="42" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/github2</tspan></text>
+      <text x="12" y="58" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/google</tspan></text>
+      <text x="12" y="74" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/dropbox</tspan></text>
+      <text x="12" y="90" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/gitlab</tspan></text>
+      <text x="12" y="106" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/microsoft</tspan></text>
+      <line x1="12" y1="116" x2="218" y2="116" stroke="#4c1d95" stroke-width="1"/>
+      <text x="12" y="134" font-size="10" fill="#a78bfa">Canaliza hacia AbsAuth</text>
+    </g>
+
+    <!-- Mapping 2: Proxy -->
+    <g transform="translate(15, 270)">
+      <rect width="230" height="150" rx="8" fill="#241947" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#c4b5fd">&lt;servlet-mapping&gt; Proxy</text>
+      <text x="12" y="45" font-size="10" fill="#e2e8f0">• servlet-name: ProxyServlet</text>
+      <text x="12" y="65" font-size="10" fill="#facc15" font-weight="600">• url-pattern: /proxy</text>
+      <line x1="12" y1="80" x2="218" y2="80" stroke="#4c1d95" stroke-width="1"/>
+      <text x="12" y="100" font-size="10" fill="#cbd5e1">Filtro de seguridad:</text>
+      <text x="12" y="118" font-size="9" fill="#e2e8f0">Revisa ENABLE_DRAWIO_PROXY</text>
+      <text x="12" y="134" font-size="9" fill="#a78bfa">Verifica referer y origin.</text>
+    </g>
+
+    <!-- Mapping 3: Export -->
+    <g transform="translate(15, 460)">
+      <rect width="230" height="150" rx="8" fill="#241947" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#c4b5fd">&lt;servlet-mapping&gt; Export</text>
+      <text x="12" y="45" font-size="10" fill="#e2e8f0">• servlet-name: ExportProxy</text>
+      <text x="12" y="65" font-size="10" fill="#facc15" font-weight="600">• url-pattern: /export</text>
+      <text x="12" y="82" font-size="10" fill="#facc15" font-weight="600">• url-pattern: /service/*</text>
+      <line x1="12" y1="96" x2="218" y2="96" stroke="#4c1d95" stroke-width="1"/>
+      <text x="12" y="116" font-size="10" fill="#cbd5e1">Configura MIME types:</text>
+      <text x="12" y="134" font-size="9" fill="#a78bfa">image/png, application/pdf</text>
+    </g>
+
+    <!-- Mapping 4: Logs & Convert -->
+    <g transform="translate(15, 650)">
+      <rect width="230" height="150" rx="8" fill="#241947" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#c4b5fd">&lt;servlet-mapping&gt; Misc</text>
+      <text x="12" y="45" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/log</tspan></text>
+      <text x="12" y="65" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/convert</tspan></text>
+      <text x="12" y="85" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/embed.js / /embed2.js</tspan></text>
+      <text x="12" y="105" font-size="10" fill="#e2e8f0">• url-pattern: <tspan fill="#facc15">/i/*</tspan> (ImgurRedirect)</text>
+      <line x1="12" y1="116" x2="218" y2="116" stroke="#4c1d95" stroke-width="1"/>
+      <text x="12" y="134" font-size="9" fill="#a78bfa">Gestión de recursos estáticos.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= SECCIÓN 3: MOTOR DE SERVLETS JAVA (x=640, w=480) ================= -->
+  <g transform="translate(640, 150)" filter="url(#backendShadow)">
+    <rect width="480" height="850" rx="12" fill="#200a14" stroke="#f43f5e" stroke-width="1.8"/>
+    <rect width="480" height="42" rx="12" fill="url(#servletColGrad)"/>
+    <text x="240" y="26" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">SERVLETS JAVA (COM.MXGRAPH.ONLINE.*)</text>
+    <text x="240" y="58" font-size="10" fill="#fda4af" text-anchor="middle">Lógica de Negocio y Seguridad Servidor</text>
+
+    <!-- Servlet 1: AbsAuth & Familia -->
+    <g transform="translate(20, 80)">
+      <rect width="440" height="150" rx="8" fill="#38091a" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="16" y="24" font-size="12" font-weight="700" fill="#fecdd3">AbsAuth.java (Base Abstracta de Seguridad)</text>
+      <text x="16" y="42" font-size="10" fill="#ffffff">Subclases: GitHubAuth, GoogleAuth, DropboxAuth, MSGraphAuth</text>
+      <line x1="16" y1="50" x2="424" y2="50" stroke="#881337" stroke-width="1"/>
+      
+      <g transform="translate(16, 60)">
+        <text x="0" y="14" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">clientSecretMap:</tspan> Lee claves secretas privadas desde archivos de configuración.</text>
+        <text x="0" y="30" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">tokenCache (CacheFacade):</tspan> Almacena access_tokens evitando re-autenticar.</text>
+        <text x="0" y="46" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">STATE_COOKIE &amp; TOKEN_COOKIE:</tspan> Emite cookies seguras HTTP-only al cliente.</text>
+        <text x="0" y="62" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">postType:</tspan> X_WWW_FORM_URLENCODED o JSON según requiera el proveedor.</text>
+        <text x="0" y="78" font-size="10" fill="#facc15" font-weight="600">Garantiza: El navegador jamás tiene posesión del Client Secret.</text>
+      </g>
+    </g>
+
+    <!-- Servlet 2: ProxyServlet -->
+    <g transform="translate(20, 270)">
+      <rect width="440" height="150" rx="8" fill="#38091a" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="16" y="24" font-size="12" font-weight="700" fill="#fecdd3">ProxyServlet.java (Pasarela CORS &amp; SSRF Shield)</text>
+      <line x1="16" y1="36" x2="424" y2="36" stroke="#881337" stroke-width="1"/>
+      
+      <g transform="translate(16, 46)">
+        <text x="0" y="14" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Utils.sanitizeUrl(urlParam):</tspan> Valida protocolo HTTP/S y previene SSRF interno.</text>
+        <text x="0" y="30" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">getCorsDomain(referer, ua):</tspan> Restringe peticiones a dominios permitidos.</text>
+        <text x="0" y="46" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">TIMEOUT = 29000ms:</tspan> Respeta límites de Google App Engine (30s) evitando caídas.</text>
+        <text x="0" y="62" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Streaming I/O:</tspan> Conexión por bloques de bytes mediante BufferedInputStream.</text>
+        <text x="0" y="78" font-size="10" fill="#facc15" font-weight="600">Garantiza: El frontend obtiene imágenes y XML ajenos sin violar CORS.</text>
+      </g>
+    </g>
+
+    <!-- Servlet 3: ExportProxyServlet -->
+    <g transform="translate(20, 460)">
+      <rect width="440" height="150" rx="8" fill="#38091a" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="16" y="24" font-size="12" font-weight="700" fill="#fecdd3">ExportProxyServlet.java (Generador de Descargas)</text>
+      <line x1="16" y1="36" x2="424" y2="36" stroke="#881337" stroke-width="1"/>
+      
+      <g transform="translate(16, 46)">
+        <text x="0" y="14" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Content-Disposition: attachment; filename="...":</tspan> Fuerza guardado en disco.</text>
+        <text x="0" y="30" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxBase64.decode(xml/data):</tspan> Decodifica buffers binarios PNG, PDF o SVG.</text>
+        <text x="0" y="46" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Reenvío de Exportación:</tspan> Conecta con servicios de renderizado externos.</text>
+        <text x="0" y="62" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Validación de Tamaño:</tspan> Previene ataques de agotamiento de memoria.</text>
+        <text x="0" y="78" font-size="10" fill="#facc15" font-weight="600">Garantiza: Descargas limpias en navegadores antiguos o móviles.</text>
+      </g>
+    </g>
+
+    <!-- Servlet 4: Servlets Complementarios -->
+    <g transform="translate(20, 650)">
+      <rect width="440" height="150" rx="8" fill="#38091a" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="16" y="24" font-size="12" font-weight="700" fill="#fecdd3">ConverterServlet &amp; LogServlet (Soporte)</text>
+      <line x1="16" y1="36" x2="424" y2="36" stroke="#881337" stroke-width="1"/>
+      
+      <g transform="translate(16, 46)">
+        <text x="0" y="14" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">ConverterServlet (/convert):</tspan> Conversión de XML comprimido legado a XML plano.</text>
+        <text x="0" y="30" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">LogServlet (/log):</tspan> Receptor de errores de consola del navegador y auditoría.</text>
+        <text x="0" y="46" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">EmbedServlet2 (/embed2.js):</tspan> Sirve el bundle JS para modo integrado/IFrame.</text>
+        <text x="0" y="62" font-size="10" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">WellKnownServlet:</tspan> Responde /.well-known para verificaciones de dominio.</text>
+        <text x="0" y="78" font-size="10" fill="#facc15" font-weight="600">Garantiza: Estabilidad total y recolección proactiva de errores.</text>
+      </g>
+    </g>
+  </g>
+
+
+  <!-- ================= SECCIÓN 4: NUBE & RECURSOS EXTERNOS (x=1170, w=330) ================= -->
+  <g transform="translate(1170, 150)" filter="url(#backendShadow)">
+    <rect width="330" height="850" rx="12" fill="#06241a" stroke="#059669" stroke-width="1.8"/>
+    <rect width="330" height="42" rx="12" fill="url(#cloudColGrad)"/>
+    <text x="165" y="26" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">PROVEEDORES Y NUBE EXTERNA</text>
+    <text x="165" y="58" font-size="10" fill="#6ee7b7" text-anchor="middle">APIs de Terceros e Internet</text>
+
+    <!-- Nube 1: Servidores OAuth -->
+    <g transform="translate(15, 80)">
+      <rect width="300" height="150" rx="8" fill="#0c3829" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="11" font-weight="700" fill="#6ee7b7">Servidores de Autorización OAuth</text>
+      <text x="14" y="40" font-size="10" fill="#cbd5e1">• GitHub: <tspan fill="#facc15">github.com/login/oauth</tspan></text>
+      <text x="14" y="56" font-size="10" fill="#cbd5e1">• Google: <tspan fill="#facc15">oauth2.googleapis.com/token</tspan></text>
+      <text x="14" y="72" font-size="10" fill="#cbd5e1">• Dropbox: <tspan fill="#facc15">api.dropboxapi.com/oauth2</tspan></text>
+      <text x="14" y="88" font-size="10" fill="#cbd5e1">• Microsoft: <tspan fill="#facc15">login.microsoftonline.com</tspan></text>
+      <line x1="14" y1="98" x2="286" y2="98" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="116" font-size="9" fill="#a7f3d0">Java envía: client_id + client_secret + code</text>
+      <text x="14" y="132" font-size="9" fill="#34d399">Recibe: access_token seguro.</text>
+    </g>
+
+    <!-- Nube 2: Servidores Web Foráneos -->
+    <g transform="translate(15, 270)">
+      <rect width="300" height="150" rx="8" fill="#0c3829" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="11" font-weight="700" fill="#6ee7b7">Servidores Web / CDNs Externos</text>
+      <text x="14" y="42" font-size="10" fill="#cbd5e1">• Servidores de imágenes (AWS S3, Wikimedia)</text>
+      <text x="14" y="58" font-size="10" fill="#cbd5e1">• Servidores de bibliotecas de iconos</text>
+      <text x="14" y="74" font-size="10" fill="#cbd5e1">• Repositorios públicos sin CORS habilitado</text>
+      <line x1="14" y1="92" x2="286" y2="92" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="112" font-size="9" fill="#a7f3d0">Java actúa como cliente HTTP puro</text>
+      <text x="14" y="128" font-size="9" fill="#34d399">Descarga el stream y lo reenvía al browser.</text>
+    </g>
+
+    <!-- Nube 3: Export Servers -->
+    <g transform="translate(15, 460)">
+      <rect width="300" height="150" rx="8" fill="#0c3829" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="11" font-weight="700" fill="#6ee7b7">Motores de Renderizado Gráfico</text>
+      <text x="14" y="42" font-size="10" fill="#cbd5e1">• Servicio Chromium headless (Puppeteer)</text>
+      <text x="14" y="58" font-size="10" fill="#cbd5e1">• Generadores de PDF de alta resolución</text>
+      <text x="14" y="74" font-size="10" fill="#cbd5e1">• CloudConvert API</text>
+      <line x1="14" y1="92" x2="286" y2="92" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="112" font-size="9" fill="#a7f3d0">Transforma XML/SVG a mapa de bits</text>
+      <text x="14" y="128" font-size="9" fill="#34d399">o documentos vectoriales imprimibles.</text>
+    </g>
+
+    <!-- Nube 4: Cloud Logging & Infra -->
+    <g transform="translate(15, 650)">
+      <rect width="300" height="150" rx="8" fill="#0c3829" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="11" font-weight="700" fill="#6ee7b7">Infraestructura y Monitoreo Cloud</text>
+      <text x="14" y="42" font-size="10" fill="#cbd5e1">• Google Cloud Logging (Stackdriver)</text>
+      <text x="14" y="58" font-size="10" fill="#cbd5e1">• Memcache / App Engine Datastore</text>
+      <text x="14" y="74" font-size="10" fill="#cbd5e1">• Registros Log4j / java.util.logging</text>
+      <line x1="14" y1="92" x2="286" y2="92" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="112" font-size="9" fill="#a7f3d0">Auditoría centralizada y alertas</text>
+      <text x="14" y="128" font-size="9" fill="#34d399">ante anomalías en tiempo real.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= LÍNEAS / FLECHAS DE FLUJO HORIZONTAL ENTRE COLUMNAS ================= -->
+  <!-- Nivel 1: OAuth (y=290) -->
+  <path d="M 280 290 L 330 290" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 590 290 L 640 290" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 1120 290 L 1170 290" fill="none" stroke="#34d399" stroke-width="2.5" marker-end="url(#cloudArrow)"/>
+  <!-- Retorno OAuth (y=310) -->
+  <path d="M 1170 310 L 1120 310" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow5)"/>
+  <path d="M 640 310 L 280 310" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow5)"/>
+
+  <!-- Nivel 2: Proxy CORS (y=480) -->
+  <path d="M 280 480 L 330 480" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 590 480 L 640 480" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 1120 480 L 1170 480" fill="none" stroke="#34d399" stroke-width="2.5" marker-end="url(#cloudArrow)"/>
+  <!-- Retorno Proxy (y=500) -->
+  <path d="M 1170 500 L 1120 500" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow5)"/>
+  <path d="M 640 500 L 280 500" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow5)"/>
+
+  <!-- Nivel 3: Export (y=670) -->
+  <path d="M 280 670 L 330 670" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 590 670 L 640 670" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 1120 670 L 1170 670" fill="none" stroke="#34d399" stroke-width="2.5" marker-end="url(#cloudArrow)"/>
+  <!-- Retorno Export (y=690) -->
+  <path d="M 640 690 L 280 690" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#returnArrow5)"/>
+
+  <!-- Nivel 4: Logs & Convert (y=860) -->
+  <path d="M 280 860 L 330 860" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 590 860 L 640 860" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#routeArrow)"/>
+  <path d="M 1120 860 L 1170 860" fill="none" stroke="#34d399" stroke-width="2.5" marker-end="url(#cloudArrow)"/>
+
+
+  <!-- ================= PIE DE PÁGINA EXPLICATIVO ================= -->
+  <g transform="translate(60, 1025)">
+    <rect width="1440" height="50" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+    <text x="25" y="30" font-size="12" font-weight="700" fill="#f43f5e">PRINCIPIO CLAVE DE DISEÑO:</text>
+    <text x="225" y="30" font-size="11" fill="#cbd5e1">
+      El backend Java es un servidor de asistencia <tspan fill="#facc15" font-weight="600">completamente stateless</tspan>: no almacena diagramas ni estados de sesión en base de datos. Su único propósito es resolver barreras técnicas que el navegador no puede ejecutar por restricciones de seguridad (CORS, resguardo de claves OAuth y descargas forzadas).
+    </text>
+  </g>
+</svg>

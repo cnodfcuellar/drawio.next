@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 1080" width="100%" height="100%" style="background:#090d16; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y efectos de brillo -->
+    <filter id="shadowBox" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="ancestorGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Gradiente de Cabecera -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+
+    <!-- Gradientes de Raíces -->
+    <linearGradient id="ancestorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="clientStemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="fileStemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9333ea"/>
+      <stop offset="100%" stop-color="#7e22ce"/>
+    </linearGradient>
+
+    <!-- Marcadores de Flechas de Herencia -->
+    <marker id="inheritArrowBlue" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#38bdf8" />
+    </marker>
+    <marker id="inheritArrowPurple" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#c084fc" />
+    </marker>
+    <marker id="bridgeArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <circle cx="4" cy="4" r="3" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <!-- ================= TÍTULO Y DESCRIPCIÓN ================= -->
+  <g transform="translate(60, 45)">
+    <text x="0" y="0" font-size="25" font-weight="800" fill="url(#headerGrad)" letter-spacing="0.5">
+      PUNTO 3: RELACIÓN DE HERENCIA Y JERARQUÍA DE CLASES CLAVE
+    </text>
+    <text x="0" y="24" font-size="13" fill="#94a3b8">
+      Mapa de ramificación evolutiva: El árbol de Autenticación/Conexión (Clients) frente al árbol de Datos/Persistencia (Files)
+    </text>
+  </g>
+
+  <!-- ================= NODO ANCESTRO COMÚN (RAÍZ MÁXIMA): mxEventSource ================= -->
+  <g transform="translate(740, 115)" filter="url(#ancestorGlow)">
+    <rect x="-170" y="-35" width="340" height="70" rx="14" fill="url(#ancestorGrad)" stroke="#64748b" stroke-width="2.5"/>
+    <text x="0" y="-12" font-size="10" font-weight="700" fill="#94a3b8" text-anchor="middle" letter-spacing="1">ANCESTRO COMÚN (CORE)</text>
+    <text x="0" y="10" font-size="17" font-weight="800" fill="#f8fafc" text-anchor="middle">mxEventSource</text>
+    <text x="0" y="25" font-size="11" fill="#cbd5e1" text-anchor="middle">+addListener()  |  +removeListener()  |  +fireEvent()</text>
+  </g>
+
+  <!-- Bifurcación del ancestro hacia las dos ramas principales -->
+  <!-- Rama Izquierda (Azul - Clients) -->
+  <path d="M 640 150 C 450 180 370 210 370 240" fill="none" stroke="#38bdf8" stroke-width="3" marker-end="url(#inheritArrowBlue)"/>
+  <!-- Rama Derecha (Púrpura - Files) -->
+  <path d="M 840 150 C 1030 180 1110 210 1110 240" fill="none" stroke="#c084fc" stroke-width="3" marker-end="url(#inheritArrowPurple)"/>
+
+  <!-- ================= RAMA TRONCAL IZQUIERDA: DrawioClient ================= -->
+  <g transform="translate(370, 280)" filter="url(#shadowBox)">
+    <rect x="-190" y="-40" width="380" height="80" rx="12" fill="url(#clientStemGrad)" stroke="#38bdf8" stroke-width="2"/>
+    <text x="0" y="-18" font-size="11" font-weight="700" fill="#bae6fd" text-anchor="middle">RAMA DE CONECTIVIDAD &amp; OAUTH</text>
+    <text x="0" y="7" font-size="18" font-weight="800" fill="#ffffff" text-anchor="middle">DrawioClient</text>
+    <text x="0" y="25" font-size="11" fill="#e0f2fe" text-anchor="middle">+getPersistentToken() | +setPersistentToken() | +setUser()</text>
+  </g>
+
+  <!-- ================= RAMA TRONCAL DERECHA: DrawioFile ================= -->
+  <g transform="translate(1110, 280)" filter="url(#shadowBox)">
+    <rect x="-190" y="-40" width="380" height="80" rx="12" fill="url(#fileStemGrad)" stroke="#c084fc" stroke-width="2"/>
+    <text x="0" y="-18" font-size="11" font-weight="700" fill="#f3e8ff" text-anchor="middle">RAMA DE PERSISTENCIA &amp; FUSIÓN</text>
+    <text x="0" y="7" font-size="18" font-weight="800" fill="#ffffff" text-anchor="middle">DrawioFile</text>
+    <text x="0" y="25" font-size="11" fill="#faf5ff" text-anchor="middle">+synchronizeFile() | +mergeFile() | +shadowPages | +save()</text>
+  </g>
+
+
+  <!-- ================= 5 NIVELES DE ESPECIALIZACIÓN (HOJAS PARALELAS) ================= -->
+  <!-- Conexiones horizontales (Bridges) que muestran cómo cada Client crea/colabora con su File específico -->
+
+  <!-- ================= FILA 1: GOOGLE DRIVE (y=410) ================= -->
+  <!-- Conexión herencia Client -->
+  <path d="M 370 320 C 370 365 240 375 240 405" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#inheritArrowBlue)"/>
+  <!-- Conexión herencia File -->
+  <path d="M 1110 320 C 1110 365 1240 375 1240 405" fill="none" stroke="#c084fc" stroke-width="2" marker-end="url(#inheritArrowPurple)"/>
+
+  <!-- Caja: DriveClient -->
+  <g transform="translate(240, 440)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#38bdf8">DriveClient</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">Google Drive v2 API (OAuth 2.0)</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">Métodos: execute(), logout(), getUsersList()</text>
+  </g>
+
+  <!-- Puente de Cooperación (DriveClient <-> DriveFile) -->
+  <line x1="410" y1="440" x2="1070" y2="440" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <rect x="680" y="428" width="120" height="24" rx="6" fill="#1e1b4b" stroke="#facc15" stroke-width="1"/>
+  <text x="740" y="444" font-size="10" font-weight="700" fill="#facc15" text-anchor="middle">instancia / lee</text>
+
+  <!-- Caja: DriveFile -->
+  <g transform="translate(1240, 440)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#9333ea" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#c084fc">DriveFile</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">Descriptor Drive + ETag HTTP</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">saveFile(), isConflict(err=412), getFileUrl()</text>
+  </g>
+
+
+  <!-- ================= FILA 2: DROPBOX (y=535) ================= -->
+  <!-- Conexión herencia Client -->
+  <path d="M 370 320 C 370 450 240 490 240 530" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#inheritArrowBlue)"/>
+  <!-- Conexión herencia File -->
+  <path d="M 1110 320 C 1110 450 1240 490 1240 530" fill="none" stroke="#c084fc" stroke-width="2" marker-end="url(#inheritArrowPurple)"/>
+
+  <!-- Caja: DropboxClient -->
+  <g transform="translate(240, 565)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#38bdf8">DropboxClient</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">Dropbox JS SDK (/drawio-diagrams/)</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">Métodos: authenticate(), updateUser(), logout()</text>
+  </g>
+
+  <!-- Puente de Cooperación (DropboxClient <-> DropboxFile) -->
+  <line x1="410" y1="565" x2="1070" y2="565" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <rect x="680" y="553" width="120" height="24" rx="6" fill="#1e1b4b" stroke="#facc15" stroke-width="1"/>
+  <text x="740" y="569" font-size="10" font-weight="700" fill="#facc15" text-anchor="middle">revisa historial</text>
+
+  <!-- Caja: DropboxFile -->
+  <g transform="translate(1240, 565)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#9333ea" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#c084fc">DropboxFile</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">Metadatos 'stat' + content_hash</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">getRevisions(), getLatestVersion(), doSave()</text>
+  </g>
+
+
+  <!-- ================= FILA 3: ONEDRIVE / M365 (y=660) ================= -->
+  <!-- Conexión herencia Client -->
+  <path d="M 370 320 C 370 570 240 610 240 655" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#inheritArrowBlue)"/>
+  <!-- Conexión herencia File -->
+  <path d="M 1110 320 C 1110 570 1240 610 1240 655" fill="none" stroke="#c084fc" stroke-width="2" marker-end="url(#inheritArrowPurple)"/>
+
+  <!-- Caja: OneDriveClient -->
+  <g transform="translate(240, 690)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#38bdf8">OneDriveClient</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">Microsoft Graph API v1.0 + SharePoint</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">Métodos: get(), updateUser(), isValidFilename()</text>
+  </g>
+
+  <!-- Puente de Cooperación (OneDriveClient <-> OneDriveFile) -->
+  <line x1="410" y1="690" x2="1070" y2="690" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <rect x="680" y="678" width="120" height="24" rx="6" fill="#1e1b4b" stroke="#facc15" stroke-width="1"/>
+  <text x="740" y="694" font-size="10" font-weight="700" fill="#facc15" text-anchor="middle">sincroniza realtime</text>
+
+  <!-- Caja: OneDriveFile -->
+  <g transform="translate(1240, 690)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#9333ea" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#c084fc">OneDriveFile</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">ID compuesto: driveId + item.id</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">getChannelId(), autosaveDelay=500ms</text>
+  </g>
+
+
+  <!-- ================= FILA 4: GITHUB & GITLAB (y=785) ================= -->
+  <!-- Conexión herencia Client -->
+  <path d="M 370 320 C 370 690 240 735 240 780" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#inheritArrowBlue)"/>
+  <!-- Conexión herencia File -->
+  <path d="M 1110 320 C 1110 690 1240 735 1240 780" fill="none" stroke="#c084fc" stroke-width="2" marker-end="url(#inheritArrowPurple)"/>
+
+  <!-- Caja: GitHubClient & Sub-herencia GitLabClient -->
+  <g transform="translate(240, 820)" filter="url(#shadowBox)">
+    <rect x="-170" y="-38" width="340" height="76" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.8"/>
+    <text x="-155" y="-15" font-size="14" font-weight="700" fill="#38bdf8">GitHubClient</text>
+    <text x="-155" y="2" font-size="11" fill="#cbd5e1">GitHub REST API (commits, blobs, shas)</text>
+    <!-- Sub-caja GitLab -->
+    <rect x="-155" y="11" width="310" height="20" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="-145" y="25" font-size="10" font-weight="700" fill="#34d399">↳ GitLabClient</text>
+    <text x="-65" y="25" font-size="10" fill="#94a3b8">(subclase directa de GitHubClient)</text>
+  </g>
+
+  <!-- Puente de Cooperación (GitHubClient <-> GitHubFile) -->
+  <line x1="410" y1="820" x2="1070" y2="820" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <rect x="680" y="808" width="120" height="24" rx="6" fill="#1e1b4b" stroke="#facc15" stroke-width="1"/>
+  <text x="740" y="824" font-size="10" font-weight="700" fill="#facc15" text-anchor="middle">sha git = etag</text>
+
+  <!-- Caja: GitHubFile -->
+  <g transform="translate(1240, 820)" filter="url(#shadowBox)">
+    <rect x="-170" y="-38" width="340" height="76" rx="8" fill="#0f172a" stroke="#9333ea" stroke-width="1.8"/>
+    <text x="-155" y="-15" font-size="14" font-weight="700" fill="#c084fc">GitHubFile / GitLabFile</text>
+    <text x="-155" y="2" font-size="11" fill="#cbd5e1">Git SHA como validador de conflicto</text>
+    <text x="-155" y="19" font-size="10" fill="#94a3b8">isConflict(err=409), getDescriptorEtag()=sha</text>
+    <text x="-155" y="32" font-size="10" fill="#f43f5e">isAutosave() = false (requiere commit)</text>
+  </g>
+
+
+  <!-- ================= FILA 5: ALMACENAMIENTO LOCAL / BROWSER (y=920) ================= -->
+  <!-- Conexión herencia Client (Trello / Local) -->
+  <path d="M 370 320 C 370 820 240 870 240 915" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#inheritArrowBlue)"/>
+  <!-- Conexión herencia File (LocalFile / StorageFile) -->
+  <path d="M 1110 320 C 1110 820 1240 870 1240 915" fill="none" stroke="#c084fc" stroke-width="2" marker-end="url(#inheritArrowPurple)"/>
+
+  <!-- Caja: TrelloClient (Sin File System API) -->
+  <g transform="translate(240, 950)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#38bdf8">TrelloClient</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">Trello SDK + Tarjetas y Adjuntos</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">getFile(), getLibrary(), maneja CORS vía PROXY</text>
+  </g>
+
+  <!-- Puente de Cooperación (Local / Browser Storage) -->
+  <line x1="410" y1="950" x2="1070" y2="950" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <rect x="660" y="938" width="160" height="24" rx="6" fill="#1e1b4b" stroke="#facc15" stroke-width="1"/>
+  <text x="740" y="954" font-size="10" font-weight="700" fill="#facc15" text-anchor="middle">disco local / localStorage</text>
+
+  <!-- Caja: LocalFile & StorageFile -->
+  <g transform="translate(1240, 950)" filter="url(#shadowBox)">
+    <rect x="-170" y="-32" width="340" height="68" rx="8" fill="#0f172a" stroke="#9333ea" stroke-width="1.8"/>
+    <text x="-155" y="-10" font-size="14" font-weight="700" fill="#c084fc">LocalFile &amp; StorageFile</text>
+    <text x="-155" y="9" font-size="11" fill="#cbd5e1">File System Access API / localStorage</text>
+    <text x="-155" y="24" font-size="10" fill="#94a3b8">saveAs(), isPolling()=true (sync entre pestañas)</text>
+  </g>
+
+  <!-- ================= PIE DE PÁGINA EXPLICATIVO ================= -->
+  <g transform="translate(100, 1015)">
+    <rect width="1280" height="42" rx="8" fill="#111827" stroke="#374151"/>
+    <text x="20" y="26" font-size="12" font-weight="700" fill="#38bdf8">PATRÓN DE DISEÑO DUAL:</text>
+    <text x="185" y="26" font-size="11" fill="#cbd5e1">
+      Los <tspan fill="#38bdf8" font-weight="600">Clients</tspan> gobiernan la sesión externa y la autenticación OAuth, mientras que los <tspan fill="#c084fc" font-weight="600">Files</tspan> encapsulan el estado XML del dibujo, fusionando deltas con el editor mediante <tspan fill="#facc15">Shadow Pages</tspan>.
+    </text>
+  </g>
+</svg>

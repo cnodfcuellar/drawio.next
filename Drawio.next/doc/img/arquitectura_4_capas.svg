@@ -1,0 +1,391 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1350" width="100%" height="100%" style="background:#070b14; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y profundidad -->
+    <filter id="layerShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="pillShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Gradientes de Cabecera -->
+    <linearGradient id="headerGrad4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="35%" stop-color="#818cf8"/>
+      <stop offset="70%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+
+    <!-- Gradientes de cada Capa -->
+    <linearGradient id="l4Banner" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="l3Banner" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <linearGradient id="l2Banner" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="l1Banner" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#be123c"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </linearGradient>
+
+    <!-- Marcadores de Conectores -->
+    <marker id="arrowDownCyan" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowDownIndigo" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#818cf8"/>
+    </marker>
+    <marker id="arrowDownGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#34d399"/>
+    </marker>
+  </defs>
+
+  <!-- ================= TÍTULO Y DESCRIPCIÓN ================= -->
+  <g transform="translate(60, 40)">
+    <text x="0" y="0" font-size="26" font-weight="800" fill="url(#headerGrad4)" letter-spacing="0.5">
+      PUNTO 1: ARQUITECTURA EN 4 CAPAS CONCÉNTRICAS DE DRAW.IO
+    </text>
+    <text x="0" y="24" font-size="13" fill="#94a3b8">
+      Estructura de dependencias, abstracción, separación de responsabilidades y flujo entre capas a nivel de código
+    </text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- ================= CAPA 4: DIAGRAMLY (APLICACIÓN DRAW.IO) ================= -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 90)" filter="url(#layerShadow)">
+    <!-- Contenedor de Capa -->
+    <rect width="1480" height="260" rx="14" fill="#081c30" stroke="#0284c7" stroke-width="2"/>
+    <rect width="1480" height="42" rx="14" fill="url(#l4Banner)"/>
+    <!-- Etiqueta Capa -->
+    <circle cx="26" cy="21" r="12" fill="#38bdf8"/>
+    <text x="26" y="26" font-size="13" font-weight="900" fill="#082f49" text-anchor="middle">4</text>
+    <text x="48" y="26" font-size="14" font-weight="800" fill="#ffffff" letter-spacing="0.5">CAPA 4: DIAGRAMLY (src/main/webapp/js/diagramly/)</text>
+    <text x="650" y="26" font-size="12" fill="#bae6fd">Plataforma Web Completa draw.io: Sincronización, Integración Nube, Temas y Conversores</text>
+
+    <!-- 4 Cajas Rellenas con Información Completa -->
+    <!-- Caja 4.1: App.js & EditorUi.js -->
+    <g transform="translate(20, 56)">
+      <rect width="345" height="188" rx="8" fill="#0f2b48" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#7dd3fc">App.js / EditorUi.js (ext)</text>
+      <text x="14" y="38" font-size="10.5" fill="#bae6fd">Orquestador Supremo del Sistema</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#0369a1" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">App.main():</tspan> Punto de arranque tras 'load'.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">openFile() / saveFile():</tspan> Control de archivos.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Pages.js:</tspan> Gestión de pestañas multi-página.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Temas Visuales:</tspan> Kennedy, Dark, Min, Atlas.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Dialogs.js:</tspan> Modales de inicio, exportación.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Hereda de EditorUi base y agrega lógica cloud.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#082f49"/>
+      <text x="20" y="171" font-size="9.5" fill="#38bdf8" font-weight="700">Comanda: Guardado, Diálogos y UI general</text>
+    </g>
+
+    <!-- Caja 4.2: DrawioFile & Sincronización -->
+    <g transform="translate(385, 56)">
+      <rect width="345" height="188" rx="8" fill="#0f2b48" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#7dd3fc">DrawioFile.js &amp; DrawioFileSync.js</text>
+      <text x="14" y="38" font-size="10.5" fill="#bae6fd">Abstracción de Archivo y 3-Way Merge</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#0369a1" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">shadowPages:</tspan> Copia limpia en memoria.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mergeFile():</tspan> Reconciliación de 3 vías.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">autosaveDelay (1500ms):</tspan> Temporizador debounced.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">DiffSync.js &amp; P2PCollab:</tspan> Deltas JSON en vivo.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Checksum:</tspan> Validación MD5 contra pérdidas.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Control de versiones integrado en cliente.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#082f49"/>
+      <text x="20" y="171" font-size="9.5" fill="#38bdf8" font-weight="700">Garantiza: Edición colaborativa sin colisiones</text>
+    </g>
+
+    <!-- Caja 4.3: Clientes Cloud de Almacenamiento -->
+    <g transform="translate(750, 56)">
+      <rect width="345" height="188" rx="8" fill="#0f2b48" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#7dd3fc">Cloud Storage Clients &amp; Files</text>
+      <text x="14" y="38" font-size="10.5" fill="#bae6fd">Controladores de Nube y REST APIs</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#0369a1" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">DriveClient / DriveFile:</tspan> Google Drive API v2.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">GitHubClient / GitHubFile:</tspan> Git commits &amp; SHAs.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">OneDriveClient:</tspan> Graph API y SharePoint.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">DropboxClient / TrelloClient:</tspan> SDKs específicos.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">LocalFile:</tspan> File System Access API nativa.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Gestionan autenticación OAuth y picks de archivo.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#082f49"/>
+      <text x="20" y="171" font-size="9.5" fill="#38bdf8" font-weight="700">Unifica: Multi-cloud sin vendor lock-in</text>
+    </g>
+
+    <!-- Caja 4.4: Parsers e Importadores -->
+    <g transform="translate(1115, 56)">
+      <rect width="345" height="188" rx="8" fill="#0f2b48" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#7dd3fc">vsdx/importer.js &amp; Parsers</text>
+      <text x="14" y="38" font-size="10.5" fill="#bae6fd">Traducción de Formatos Externos</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#0369a1" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxVsdxCodec:</tspan> Parser nativo Visio (.vsdx).</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">vertexMap / edgeShapeMap:</tspan> Mapea a mxCell.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">emf-svg.js:</tspan> Convierte gráficos vectoriales EMF.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Gliffy &amp; Lucidchart:</tspan> Importadores directos.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">PlantUML &amp; Mermaid:</tspan> Inserción de texto a dibujo.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Descomprime OOXML en cliente sin servidor.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#082f49"/>
+      <text x="20" y="171" font-size="9.5" fill="#38bdf8" font-weight="700">Compatibilidad: Importa diagramas de terceros</text>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión Capa 4 -> Capa 3 -->
+  <line x1="800" y1="350" x2="800" y2="385" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowDownCyan)"/>
+  <rect x="670" y="357" width="260" height="22" rx="4" fill="#0c1929" stroke="#38bdf8" stroke-width="1"/>
+  <text x="800" y="372" font-size="10" font-weight="700" fill="#7dd3fc" text-anchor="middle">Hereda Layout base y comanda creación del Grafo</text>
+
+  <!-- ========================================================================= -->
+  <!-- ================= CAPA 3: GRAPHEDITOR (EDITOR BASE & UI) ================= -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 390)" filter="url(#layerShadow)">
+    <rect width="1480" height="260" rx="14" fill="#120e2e" stroke="#6366f1" stroke-width="2"/>
+    <rect width="1480" height="42" rx="14" fill="url(#l3Banner)"/>
+    <circle cx="26" cy="21" r="12" fill="#818cf8"/>
+    <text x="26" y="26" font-size="13" font-weight="900" fill="#1e1b4b" text-anchor="middle">3</text>
+    <text x="48" y="26" font-size="14" font-weight="800" fill="#ffffff" letter-spacing="0.5">CAPA 3: GRAPHEDITOR (src/main/webapp/js/grapheditor/)</text>
+    <text x="650" y="26" font-size="12" fill="#c7d2fe">Editor Visual de Diagramas Base: Componentes de UI, Paletas de Formas, Acciones y Formato</text>
+
+    <!-- Caja 3.1: EditorUi.js Base -->
+    <g transform="translate(20, 56)">
+      <rect width="345" height="188" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#c7d2fe">EditorUi.js (Layout Físico)</text>
+      <text x="14" y="38" font-size="10.5" fill="#a5b4fc">Ensamblador del Entorno de Usuario</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#4338ca" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">init():</tspan> Construye la jerarquía visual del DOM.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">createMenus() &amp; createToolbar():</tspan> Cabeceras.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">createSidebar() &amp; createFormat():</tspan> Paneles.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">lazyZoom():</tspan> Zoom fluido mediante transforms CSS.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">selectionStateListener:</tspan> Refresca controles.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Conecta las barras de herramientas con el lienzo.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#17122b"/>
+      <text x="20" y="171" font-size="9.5" fill="#818cf8" font-weight="700">Estructura: Ensambla el layout del editor visual</text>
+    </g>
+
+    <!-- Caja 3.2: Graph.js -->
+    <g transform="translate(385, 56)">
+      <rect width="345" height="188" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#c7d2fe">Graph.js (Extensión de mxGraph)</text>
+      <text x="14" y="38" font-size="10.5" fill="#a5b4fc">Lienzo Interactivo de Dibujo Técnico</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#4338ca" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Extiende mxGraph:</tspan> Adapta para diagramas web.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Atajos de Teclado:</tspan> Ctrl+C, Ctrl+V, Flechas, Del.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Auto-conexión:</tspan> Flechas dinámicas entre figuras.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">sanitizeHtml():</tspan> Seguridad XSS en etiquetas HTML.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">updatePlaceholders():</tspan> Variables de texto %page%.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Gobierna la interacción directa con el usuario.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#17122b"/>
+      <text x="20" y="171" font-size="9.5" fill="#818cf8" font-weight="700">Interacción: Control de mouse, selección y atajos</text>
+    </g>
+
+    <!-- Caja 3.3: Sidebar.js & Shapes.js -->
+    <g transform="translate(750, 56)">
+      <rect width="345" height="188" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#c7d2fe">Sidebar.js &amp; Shapes.js</text>
+      <text x="14" y="38" font-size="10.5" fill="#a5b4fc">Paleta Izquierda y Drag &amp; Drop</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#4338ca" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">createTemporaryGraph():</tspan> Grafo oculto en RAM.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Miniaturas Vectoriales:</tspan> Pre-renderiza SVG.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">addPalette():</tspan> Secciones colapsables de figuras.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">createDragSource():</tspan> Arrastre suave al canvas.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Shapes.js:</tspan> Biblioteca masiva (UML, AWS, GCP).</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Búsqueda rápida de figuras por palabras clave.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#17122b"/>
+      <text x="20" y="171" font-size="9.5" fill="#818cf8" font-weight="700">Catálogo: Paletas de formas y drag &amp; drop</text>
+    </g>
+
+    <!-- Caja 3.4: Format, Menus & Actions -->
+    <g transform="translate(1115, 56)">
+      <rect width="345" height="188" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#c7d2fe">Format.js / Menus.js / Actions.js</text>
+      <text x="14" y="38" font-size="10.5" fill="#a5b4fc">Inspector Lateral y Comandos</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#4338ca" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Format.js:</tspan> Panel derecho reactivo de celda.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Pestañas:</tspan> Estilo (color, trazo), Texto y Organizar.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Menus.js:</tspan> Menús Archivo, Editar, Ver, Ayuda.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Actions.js:</tspan> Registro central de comandos.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Editor.js:</tspan> mxUndoManager y setModified(true).</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Muta estilos y dispara transacciones atómicas.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#17122b"/>
+      <text x="20" y="171" font-size="9.5" fill="#818cf8" font-weight="700">Edición: Inspección de propiedades y comandos</text>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión Capa 3 -> Capa 2 -->
+  <line x1="800" y1="650" x2="800" y2="685" stroke="#818cf8" stroke-width="3" marker-end="url(#arrowDownIndigo)"/>
+  <rect x="670" y="657" width="260" height="22" rx="4" fill="#111827" stroke="#818cf8" stroke-width="1"/>
+  <text x="800" y="672" font-size="10" font-weight="700" fill="#c7d2fe" text-anchor="middle">Modifica celdas y escucha mxEvent.CHANGE</text>
+
+  <!-- ========================================================================= -->
+  <!-- ================= CAPA 2: MXGRAPH CORE (MOTOR GRÁFICO) =================== -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 690)" filter="url(#layerShadow)">
+    <rect width="1480" height="260" rx="14" fill="#042018" stroke="#059669" stroke-width="2"/>
+    <rect width="1480" height="42" rx="14" fill="url(#l2Banner)"/>
+    <circle cx="26" cy="21" r="12" fill="#34d399"/>
+    <text x="26" y="26" font-size="13" font-weight="900" fill="#064e3b" text-anchor="middle">2</text>
+    <text x="48" y="26" font-size="14" font-weight="800" fill="#ffffff" letter-spacing="0.5">CAPA 2: MXGRAPH CORE (src/main/webapp/mxgraph/src/)</text>
+    <text x="650" y="26" font-size="12" fill="#a7f3d0">Motor Gráfico y Matemático Puro: Modelo de Celdas, Cálculo de Geometría y Renderizado SVG</text>
+
+    <!-- Caja 2.1: Model -->
+    <g transform="translate(20, 56)">
+      <rect width="345" height="188" rx="8" fill="#062e24" stroke="#34d399" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#6ee7b7">model/ (mxCell &amp; mxGraphModel)</text>
+      <text x="14" y="38" font-size="10.5" fill="#a7f3d0">Estructura de Datos Jerárquica</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxCell:</tspan> Nodo atómico (Vértice o Arista).</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Raíz Fija:</tspan> mxCell(id="0", root) y mxCell(id="1").</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">beginUpdate() / endUpdate():</tspan> Transacciones.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxGeometry:</tspan> Coordenadas (x, y, ancho, alto).</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxUndoableEdit:</tspan> Átomo de cambio para historial.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Independiente de la vista y del navegador.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#022c22"/>
+      <text x="20" y="171" font-size="9.5" fill="#34d399" font-weight="700">Estado: Árbol de objetos y transacciones atómicas</text>
+    </g>
+
+    <!-- Caja 2.2: View -->
+    <g transform="translate(385, 56)">
+      <rect width="345" height="188" rx="8" fill="#062e24" stroke="#34d399" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#6ee7b7">view/ (mxGraph, mxGraphView)</text>
+      <text x="14" y="38" font-size="10.5" fill="#a7f3d0">Transformación y Geometría en Pantalla</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxGraphView:</tspan> Mapea modelo a pantalla.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxCellState:</tspan> Estado visual precomputado.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">view.scale &amp; translate:</tspan> Zoom y desplazamiento.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">revalidate():</tspan> Recálculo de puntos de conexión.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxStylesheet:</tspan> Reglas de renderizado gráfico.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Convierte datos abstractos en píxeles reales.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#022c22"/>
+      <text x="20" y="171" font-size="9.5" fill="#34d399" font-weight="700">Matemática: Enrutamiento de líneas y escalado</text>
+    </g>
+
+    <!-- Caja 2.3: Handlers & Layout -->
+    <g transform="translate(750, 56)">
+      <rect width="345" height="188" rx="8" fill="#062e24" stroke="#34d399" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#6ee7b7">handler/ &amp; layout/</text>
+      <text x="14" y="38" font-size="10.5" fill="#a7f3d0">Interacción de Puntero y Algoritmos</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxConnectionHandler:</tspan> Conexión interactiva.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxGraphHandler:</tspan> Mover, clonar y agrupar.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxHierarchicalLayout:</tspan> Ordena flujos de datos.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxCompactTreeLayout:</tspan> Organigramas limpios.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxParallelEdgeLayout:</tspan> Separa aristas paralelas.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Algoritmos clásicos de grafos matemáticos.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#022c22"/>
+      <text x="20" y="171" font-size="9.5" fill="#34d399" font-weight="700">Algoritmia: Auto-diseño y física del puntero</text>
+    </g>
+
+    <!-- Caja 2.4: IO & Util (Canvas SVG) -->
+    <g transform="translate(1115, 56)">
+      <rect width="345" height="188" rx="8" fill="#062e24" stroke="#34d399" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#6ee7b7">io/ &amp; util/ (mxCodec &amp; SVG)</text>
+      <text x="14" y="38" font-size="10.5" fill="#a7f3d0">Serialización XML y Dibujo Vectorial</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxCodec.encode():</tspan> Serializa modelo a XML.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxCodec.decode():</tspan> Reconstruye mxCells vivas.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxSvgCanvas2D:</tspan> Dibuja paths nativos SVG.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxUtils.parseXml():</tspan> Parser seguro de strings XML.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxEventSource:</tspan> Sistema universal de eventos.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Salida limpia en formato estándar abierto.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#022c22"/>
+      <text x="20" y="171" font-size="9.5" fill="#34d399" font-weight="700">Render: Genera el DOM vectorial &lt;svg&gt; real</text>
+    </g>
+  </g>
+
+  <!-- Flecha de Conexión Capas JS -> Backend -->
+  <line x1="800" y1="950" x2="800" y2="985" stroke="#34d399" stroke-width="3" marker-end="url(#arrowDownGreen)"/>
+  <rect x="650" y="957" width="300" height="22" rx="4" fill="#111827" stroke="#34d399" stroke-width="1"/>
+  <text x="800" y="972" font-size="10" font-weight="700" fill="#a7f3d0" text-anchor="middle">Peticiones HTTP Asíncronas (OAuth, CORS y Export)</text>
+
+  <!-- ========================================================================= -->
+  <!-- ================= CAPA 1: BACKEND JAVA (NÚCLEO SERVIDOR) ================= -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 990)" filter="url(#layerShadow)">
+    <rect width="1480" height="260" rx="14" fill="#240713" stroke="#e11d48" stroke-width="2"/>
+    <rect width="1480" height="42" rx="14" fill="url(#l1Banner)"/>
+    <circle cx="26" cy="21" r="12" fill="#fb7185"/>
+    <text x="26" y="26" font-size="13" font-weight="900" fill="#4c0519" text-anchor="middle">1</text>
+    <text x="48" y="26" font-size="14" font-weight="800" fill="#ffffff" letter-spacing="0.5">CAPA 1: BACKEND JAVA (src/main/java/com/mxgraph/online/)</text>
+    <text x="650" y="26" font-size="12" fill="#fecdd3">Servlets Stateless de Asistencia Segura: Bypass CORS, Custodia OAuth y Exportación Binaria</text>
+
+    <!-- Caja 1.1: AbsAuth y Servlets OAuth -->
+    <g transform="translate(20, 56)">
+      <rect width="345" height="188" rx="8" fill="#3b081d" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#fecdd3">AbsAuth.java &amp; OAuth Servlets</text>
+      <text x="14" y="38" font-size="10.5" fill="#fda4af">Custodia Segura de Credenciales</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#9f1239" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">/github2, /google, /dropbox:</tspan> Rutas auth.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">clientSecretMap:</tspan> Claves secretas protegidas.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Canje de Auth Code:</tspan> Por token de acceso.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Cookies Seguras:</tspan> auth-token HTTP-only.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">tokenCache:</tspan> Memoria efímera (Ehcache/GAE).</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">El navegador jamás ve el secreto del cliente.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#1c030c"/>
+      <text x="20" y="171" font-size="9.5" fill="#fb7185" font-weight="700">Seguridad: Flujo OAuth 2.0 sin fugas de claves</text>
+    </g>
+
+    <!-- Caja 1.2: ProxyServlet -->
+    <g transform="translate(385, 56)">
+      <rect width="345" height="188" rx="8" fill="#3b081d" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#fecdd3">ProxyServlet.java (/proxy)</text>
+      <text x="14" y="38" font-size="10.5" fill="#fda4af">Pasarela CORS y Escudo SSRF</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#9f1239" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Bypass CORS:</tspan> Descarga imágenes remotas.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Utils.sanitizeUrl():</tspan> Bloquea IPs privadas.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">getCorsDomain():</tspan> Control de cabeceras Origin.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">TIMEOUT = 29000ms:</tspan> Previene cuelgues GAE.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Streaming I/O:</tspan> Reenvío por BufferedStream.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Permite cargar recursos sin romper Same-Origin.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#1c030c"/>
+      <text x="20" y="171" font-size="9.5" fill="#fb7185" font-weight="700">Conectividad: Descarga de recursos externos seguros</text>
+    </g>
+
+    <!-- Caja 1.3: ExportProxyServlet -->
+    <g transform="translate(750, 56)">
+      <rect width="345" height="188" rx="8" fill="#3b081d" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#fecdd3">ExportProxyServlet.java (/export)</text>
+      <text x="14" y="38" font-size="10.5" fill="#fda4af">Generador de Descargas Forzadas</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#9f1239" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Content-Disposition: attachment:</tspan> Descarga.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">mxBase64.decode():</tspan> Decodifica buffers binarios.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Exportación a PNG/PDF:</tspan> Conversión nativa.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">/service/* mapping:</tspan> Puertos de integración.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Control de Memoria:</tspan> Previene buffer overflow.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Facilita el guardado local en navegadores legacy.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#1c030c"/>
+      <text x="20" y="171" font-size="9.5" fill="#fb7185" font-weight="700">Exportación: Forzado de descarga de imágenes</text>
+    </g>
+
+    <!-- Caja 1.4: Soporte y Telemetría -->
+    <g transform="translate(1115, 56)">
+      <rect width="345" height="188" rx="8" fill="#3b081d" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="22" font-size="13" font-weight="700" fill="#fecdd3">ConverterServlet &amp; LogServlet</text>
+      <text x="14" y="38" font-size="10.5" fill="#fda4af">Telemetría, Conversores y Compatibilidad</text>
+      <line x1="14" y1="46" x2="330" y2="46" stroke="#9f1239" stroke-width="1"/>
+      <text x="14" y="64" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">ConverterServlet (/convert):</tspan> Formatos legados.</text>
+      <text x="14" y="80" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">LogServlet (/log):</tspan> Recolección de crash reports.</text>
+      <text x="14" y="96" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">EmbedServlet2:</tspan> Empaqueta el editor para IFrames.</text>
+      <text x="14" y="112" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">WellKnownServlet:</tspan> Validaciones de dominio.</text>
+      <text x="14" y="128" font-size="10.5" fill="#cbd5e1">• <tspan fill="#ffffff" font-weight="600">Zero-State:</tspan> Sin bases de datos ni sesiones.</text>
+      <text x="14" y="146" font-size="10" fill="#94a3b8">Servidor 100% inmune a caídas o reinicios.</text>
+      <rect x="14" y="156" width="317" height="22" rx="4" fill="#1c030c"/>
+      <text x="20" y="171" font-size="9.5" fill="#fb7185" font-weight="700">Robustez: Auditoría y retrocompatibilidad total</text>
+    </g>
+  </g>
+
+  <!-- ================= RESUMEN DE FLUJOS ENTRE CAPAS (PIE) ================= -->
+  <g transform="translate(60, 1270)">
+    <rect width="1480" height="52" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+    <text x="20" y="32" font-size="12" font-weight="800" fill="#facc15">RELACIONES Y LLAMADAS ENTRE CAPAS:</text>
+    <text x="290" y="32" font-size="11" fill="#cbd5e1">
+      <tspan fill="#38bdf8" font-weight="700">Descendente (4➔3➔2):</tspan> Herencia de clases e inyección de datos. | 
+      <tspan fill="#34d399" font-weight="700">Ascendente (2➔3➔4):</tspan> mxEvent.CHANGE notifica al modelo para autoguardado. | 
+      <tspan fill="#fb7185" font-weight="700">Cliente a Servidor (4/3➔1):</tspan> Peticiones HTTP asíncronas REST a Servlets.
+    </text>
+  </g>
+</svg>

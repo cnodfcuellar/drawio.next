@@ -1,0 +1,375 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1150" width="100%" height="100%" style="background:#070b14; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y resplandor -->
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="busGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Gradientes de Cabecera y Racks -->
+    <linearGradient id="mainHeaderGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="35%" stop-color="#818cf8"/>
+      <stop offset="70%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+
+    <!-- Gradientes de cada Rack / Tubería -->
+    <linearGradient id="rack1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <linearGradient id="rack2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#312e81"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="rack3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
+    </linearGradient>
+    <linearGradient id="rack4Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#881337"/>
+      <stop offset="100%" stop-color="#4c0519"/>
+    </linearGradient>
+
+    <!-- Marcadores de Buses de Datos -->
+    <marker id="busArrowGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#34d399"/>
+    </marker>
+    <marker id="busArrowIndigo" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#818cf8"/>
+    </marker>
+    <marker id="busArrowCyan" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/>
+    </marker>
+    <marker id="busArrowRose" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#fb7185"/>
+    </marker>
+  </defs>
+
+  <!-- ================= ENCABEZADO ================= -->
+  <g transform="translate(60, 42)">
+    <text x="0" y="0" font-size="26" font-weight="800" fill="url(#mainHeaderGrad)" letter-spacing="0.5">
+      PUNTO 4: MATRIZ DE PROCESAMIENTO Y FUNCIONAMIENTO INTERNO A NIVEL DE CÓDIGO
+    </text>
+    <text x="0" y="24" font-size="13" fill="#94a3b8">
+      Pipeline de micro-motores: Cómo procesan los datos, qué métodos exactos ejecutan y cómo viaja el estado entre los 4 módulos
+    </text>
+  </g>
+
+  <!-- ================= BUS MAESTRO SUPERIOR DE EVENTOS ================= -->
+  <g transform="translate(60, 95)">
+    <rect width="1480" height="34" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+    <text x="20" y="22" font-size="11" font-weight="700" fill="#facc15">BUS CENTRAL DE EVENTOS &amp; SINCRONIZACIÓN:</text>
+    <text x="290" y="22" font-size="11" fill="#cbd5e1">
+      <tspan fill="#34d399">mxEvent.CHANGE</tspan> (mutación modelo) ➔ <tspan fill="#818cf8">selectionStateListener</tspan> (UI activa) ➔ <tspan fill="#38bdf8">fileChanged()</tspan> (3-Way Merge) ➔ <tspan fill="#fb7185">HTTP Async Dispatch</tspan> (Servlets)
+    </text>
+  </g>
+
+  <!-- ================= RACK 1: MÓDULO MXGRAPH CORE (VERDE ESMERALDA) ================= -->
+  <g transform="translate(60, 150)" filter="url(#softShadow)">
+    <!-- Marco del Rack -->
+    <rect width="350" height="880" rx="14" fill="url(#rack1Grad)" stroke="#059669" stroke-width="2"/>
+    <!-- Cabecera del Rack -->
+    <rect width="350" height="48" rx="14" fill="#047857"/>
+    <circle cx="24" cy="24" r="10" fill="#34d399"/>
+    <text x="24" y="28" font-size="11" font-weight="800" fill="#064e3b" text-anchor="middle">1</text>
+    <text x="44" y="23" font-size="13" font-weight="800" fill="#ffffff">MÓDULO MXGRAPH CORE</text>
+    <text x="44" y="38" font-size="10" fill="#a7f3d0">mxgraph/src/ (Motor Matemático y SVG)</text>
+
+    <!-- Chip 1.1: mxGraphModel -->
+    <g transform="translate(18, 65)">
+      <rect width="314" height="180" rx="8" fill="#062e24" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">mxGraphModel &amp; mxCell</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Árbol jerárquico de nodos en memoria.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#065f46" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#34d399">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">beginUpdate() / endUpdate():</tspan> Transacciones.</text>
+      <text x="14" y="104" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">add(parent, child, index):</tspan> Inserción de celdas.</text>
+      <text x="14" y="120" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">setGeometry(cell, geo):</tspan> Coordenadas (x,y,w,h).</text>
+      <text x="14" y="136" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">setStyle(cell, style):</tspan> Cadena CSS de apariencia.</text>
+      <text x="14" y="160" font-size="10" fill="#facc15">• Dispara: fireEvent(new mxEventObject('change'))</text>
+    </g>
+
+    <!-- Chip 1.2: mxGraph & mxGraphView -->
+    <g transform="translate(18, 260)">
+      <rect width="314" height="195" rx="8" fill="#062e24" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">mxGraph &amp; mxGraphView</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Controlador de vista y transformaciones.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#065f46" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#34d399">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">view.scale &amp; view.translate:</tspan> Zoom y Panning.</text>
+      <text x="14" y="104" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">getState(cell):</tspan> Retorna coordenadas de pantalla.</text>
+      <text x="14" y="120" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">getSelectionModel():</tspan> Celdas seleccionadas.</text>
+      <text x="14" y="136" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">revalidate():</tspan> Recalcula geometría de aristas.</text>
+      <text x="14" y="152" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">isCellFoldable():</tspan> Colapso/expansión de grupos.</text>
+      <text x="14" y="175" font-size="10" fill="#67e8f9">• Conexión: Recibe celdas de mxGraphModel</text>
+    </g>
+
+    <!-- Chip 1.3: mxCodec & mxSvgCanvas2D -->
+    <g transform="translate(18, 470)">
+      <rect width="314" height="195" rx="8" fill="#062e24" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">mxCodec &amp; mxSvgCanvas2D</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Serialización XML y dibujado SVG real.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#065f46" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#34d399">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">encode(model):</tspan> Convierte celdas a XML.</text>
+      <text x="14" y="104" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">decode(xmlNode):</tspan> Reconstruye mxCells vivas.</text>
+      <text x="14" y="120" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">canvas.begin():</tspan> Comienza trazo SVG path.</text>
+      <text x="14" y="136" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">canvas.curveTo() / lineTo():</tspan> Geometría aristas.</text>
+      <text x="14" y="152" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">canvas.fillAndStroke():</tspan> Pinta color y borde.</text>
+      <text x="14" y="175" font-size="10" fill="#67e8f9">• Salida: Elementos DOM nativos &lt;svg&gt; y &lt;path&gt;</text>
+    </g>
+
+    <!-- Chip 1.4: Handlers & Layout -->
+    <g transform="translate(18, 680)">
+      <rect width="314" height="175" rx="8" fill="#062e24" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#6ee7b7">Handlers &amp; Layouts</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Manipuladores de mouse y auto-diseño.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#065f46" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#34d399">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">mxConnectionHandler:</tspan> Crea aristas interactivas.</text>
+      <text x="14" y="104" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">mxGraphHandler:</tspan> Mover, arrastrar y clonar celdas.</text>
+      <text x="14" y="120" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">mxHierarchicalLayout:</tspan> Ordena árboles y flujos.</text>
+      <text x="14" y="136" font-size="10" fill="#a7f3d0">• <tspan fill="#ffffff" font-weight="600">execute(parent):</tspan> Aplica algoritmo automático.</text>
+      <text x="14" y="158" font-size="10" fill="#a7f3d0">• Interacción de bajo nivel con el puntero.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= RACK 2: MÓDULO GRAPHEDITOR (ÍNDIGO / AZUL VIOLETA) ================= -->
+  <g transform="translate(440, 150)" filter="url(#softShadow)">
+    <rect width="350" height="880" rx="14" fill="url(#rack2Grad)" stroke="#6366f1" stroke-width="2"/>
+    <rect width="350" height="48" rx="14" fill="#4338ca"/>
+    <circle cx="24" cy="24" r="10" fill="#818cf8"/>
+    <text x="24" y="28" font-size="11" font-weight="800" fill="#1e1b4b" text-anchor="middle">2</text>
+    <text x="44" y="23" font-size="13" font-weight="800" fill="#ffffff">MÓDULO GRAPHEDITOR</text>
+    <text x="44" y="38" font-size="10" fill="#c7d2fe">grapheditor/ (Editor Visual y UI Base)</text>
+
+    <!-- Chip 2.1: Editor.js & UndoManager -->
+    <g transform="translate(18, 65)">
+      <rect width="314" height="180" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#c7d2fe">Editor.js &amp; UndoManager</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Estado del documento y Deshacer/Rehacer.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#3730a3" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#a5b4fc">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">setModified(true):</tspan> Marca cambios sin guardar.</text>
+      <text x="14" y="104" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">graphChangeListener():</tspan> Detecta edits válidos.</text>
+      <text x="14" y="120" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">undoManager.undo() / redo():</tspan> Historial.</text>
+      <text x="14" y="136" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">initStencilRegistry():</tspan> Carga formas XML.</text>
+      <text x="14" y="160" font-size="10" fill="#facc15">• Dispara: fireEvent('statusChanged')</text>
+    </g>
+
+    <!-- Chip 2.2: EditorUi.js (Base Layout) -->
+    <g transform="translate(18, 260)">
+      <rect width="314" height="195" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#c7d2fe">EditorUi.js (Layout Base)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Construcción del DOM del editor.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#3730a3" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#a5b4fc">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createMenus():</tspan> Instancia barra de menús.</text>
+      <text x="14" y="104" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createToolbar():</tspan> Acciones rápidas (Zoom, Del).</text>
+      <text x="14" y="120" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createSidebar():</tspan> Inicializa panel izquierdo.</text>
+      <text x="14" y="136" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createFormat():</tspan> Inicializa panel derecho.</text>
+      <text x="14" y="152" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">lazyZoom():</tspan> Zoom con transformadas CSS.</text>
+      <text x="14" y="175" font-size="10" fill="#38bdf8">• Orquesta la vista física en pantalla.</text>
+    </g>
+
+    <!-- Chip 2.3: Sidebar.js & Paletas -->
+    <g transform="translate(18, 470)">
+      <rect width="314" height="195" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#c7d2fe">Sidebar.js (Paleta de Formas)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Catálogo visual de figuras y drag &amp; drop.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#3730a3" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#a5b4fc">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createTemporaryGraph():</tspan> Mini-grafo oculto.</text>
+      <text x="14" y="104" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">addPalette(id, title):</tspan> Crea acordeón colapsable.</text>
+      <text x="14" y="120" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createVertexTemplate():</tspan> Genera icono SVG.</text>
+      <text x="14" y="136" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createDragSource():</tspan> Conecta arrastre al canvas.</text>
+      <text x="14" y="152" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">showTooltip():</tspan> Vista previa ampliada de figura.</text>
+      <text x="14" y="175" font-size="10" fill="#38bdf8">• Arrastre inyecta nodos en mxGraphModel.</text>
+    </g>
+
+    <!-- Chip 2.4: Format.js (Inspector de Estilos) -->
+    <g transform="translate(18, 680)">
+      <rect width="314" height="175" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#c7d2fe">Format.js (Panel de Estilos)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Inspector reactivo de propiedades.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#3730a3" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#a5b4fc">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">refresh():</tspan> Lee celdas seleccionadas.</text>
+      <text x="14" y="104" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createStyleMenu():</tspan> Paleta de colores Hex.</text>
+      <text x="14" y="120" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">createLineStyle():</tspan> Ortogonal, curva, recta.</text>
+      <text x="14" y="136" font-size="10" fill="#e0e7ff">• <tspan fill="#ffffff" font-weight="600">update():</tspan> Aplica cambios con beginUpdate().</text>
+      <text x="14" y="158" font-size="10" fill="#a5b4fc">• Muta directamente los estilos de mxCell.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= RACK 3: MÓDULO DIAGRAMLY (AZUL CIELO / CYAN) ================= -->
+  <g transform="translate(820, 150)" filter="url(#softShadow)">
+    <rect width="350" height="880" rx="14" fill="url(#rack3Grad)" stroke="#0284c7" stroke-width="2"/>
+    <rect width="350" height="48" rx="14" fill="#0369a1"/>
+    <circle cx="24" cy="24" r="10" fill="#38bdf8"/>
+    <text x="24" y="28" font-size="11" font-weight="800" fill="#0c4a6e" text-anchor="middle">3</text>
+    <text x="44" y="23" font-size="13" font-weight="800" fill="#ffffff">MÓDULO DIAGRAMLY</text>
+    <text x="44" y="38" font-size="10" fill="#bae6fd">diagramly/ (Sincronización, Nube, VSDX)</text>
+
+    <!-- Chip 3.1: App.js -->
+    <g transform="translate(18, 65)">
+      <rect width="314" height="180" rx="8" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">App.js (Controlador Supremo)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Orquestador de la aplicación draw.io.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#075985" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#38bdf8">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">App.main():</tspan> Punto de arranque tras 'load'.</text>
+      <text x="14" y="104" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">openFile() / loadUrl():</tspan> Abre diagramas.</text>
+      <text x="14" y="120" font-size="10" font-weight="700" fill="#facc15">• <tspan fill="#ffffff" font-weight="600">createFile(data):</tspan> Factoría de DrawioFile.</text>
+      <text x="14" y="136" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">saveFile(force):</tspan> Dispara guardado global.</text>
+      <text x="14" y="160" font-size="10" fill="#7dd3fc">• Gobierna el ciclo de vida del usuario.</text>
+    </g>
+
+    <!-- Chip 3.2: DrawioFile & DiffSync (3-Way Merge) -->
+    <g transform="translate(18, 260)">
+      <rect width="314" height="195" rx="8" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">DrawioFile &amp; 3-Way Merge</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Modelo de datos y resolución concurrente.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#075985" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#38bdf8">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">shadowPages:</tspan> Copia pura del último guardado.</text>
+      <text x="14" y="104" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">synchronizeFile():</tspan> Descarga y combina cambios.</text>
+      <text x="14" y="120" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">mergeFile(remote, shadow, local):</tspan> 3-Way.</text>
+      <text x="14" y="136" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">autosaveDelay (1500ms):</tspan> Temporizador debounced.</text>
+      <text x="14" y="152" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">patchRealtime():</tspan> Aplica deltas colaborativos.</text>
+      <text x="14" y="175" font-size="10" fill="#facc15">• Resuelve conflictos sin perder trabajo.</text>
+    </g>
+
+    <!-- Chip 3.3: Cloud Clients (OAuth & REST) -->
+    <g transform="translate(18, 470)">
+      <rect width="314" height="195" rx="8" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">Cloud Clients (Drive, GitHub...)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Conexión con proveedores de nube.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#075985" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#38bdf8">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">authenticate() / execute():</tspan> Flujo OAuth.</text>
+      <text x="14" y="104" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">getFile(id) / saveFile():</tspan> CRUD REST.</text>
+      <text x="14" y="120" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">isConflict(err):</tspan> Detecta 412 (Drive) o 409 (Git).</text>
+      <text x="14" y="136" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">getPersistentToken():</tspan> Token seguro en cookie.</text>
+      <text x="14" y="152" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">updateUser():</tspan> Refresca perfil DrawioUser.</text>
+      <text x="14" y="175" font-size="10" fill="#facc15">• Gestiona ETags y revisiones remotas.</text>
+    </g>
+
+    <!-- Chip 3.4: vsdx & parsers -->
+    <g transform="translate(18, 680)">
+      <rect width="314" height="175" rx="8" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#7dd3fc">vsdx/importer.js &amp; Parsers</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Motor de importación de Visio y vector.</text>
+      <line x1="14" y1="52" x2="300" y2="52" stroke="#075985" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#38bdf8">MÉTODOS CLAVE A NIVEL DE CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">mxVsdxCodec(ui):</tspan> Parser OOXML Visio.</text>
+      <text x="14" y="104" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">vertexMap &amp; edgeShapeMap:</tspan> Mapeo a mxCells.</text>
+      <text x="14" y="120" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">emf-svg.js:</tspan> Transforma vectoriales EMF a SVG.</text>
+      <text x="14" y="136" font-size="10" fill="#e0f2fe">• <tspan fill="#ffffff" font-weight="600">importGliffy() / importLucidchart():</tspan> Conversores.</text>
+      <text x="14" y="158" font-size="10" fill="#7dd3fc">• Traduce archivos foráneos a XML de mxGraph.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= RACK 4: MÓDULO BACKEND JAVA (ROSA / CARMESÍ) ================= -->
+  <g transform="translate(1200, 150)" filter="url(#softShadow)">
+    <rect width="340" height="880" rx="14" fill="url(#rack4Grad)" stroke="#e11d48" stroke-width="2"/>
+    <rect width="340" height="48" rx="14" fill="#be123c"/>
+    <circle cx="24" cy="24" r="10" fill="#fb7185"/>
+    <text x="24" y="28" font-size="11" font-weight="800" fill="#4c0519" text-anchor="middle">4</text>
+    <text x="44" y="23" font-size="13" font-weight="800" fill="#ffffff">MÓDULO BACKEND JAVA</text>
+    <text x="44" y="38" font-size="10" fill="#fecdd3">src/main/java/.../online/ (Servlets)</text>
+
+    <!-- Chip 4.1: AbsAuth & OAuth Servlets -->
+    <g transform="translate(18, 65)">
+      <rect width="304" height="180" rx="8" fill="#4c0519" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fecdd3">AbsAuth.java &amp; OAuth Servlets</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Intercambio seguro de tokens.</text>
+      <line x1="14" y1="52" x2="290" y2="52" stroke="#881337" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#fb7185">MÉTODOS &amp; ENDPOINTS EN CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">/github2, /google, /dropbox:</tspan> Rutas de Auth.</text>
+      <text x="14" y="104" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">doGet() / doPost():</tspan> Canje de auth_code.</text>
+      <text x="14" y="120" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">tokenCache (CacheFacade):</tspan> Memcached/Ehcache.</text>
+      <text x="14" y="136" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">clientSecretMap:</tspan> Custodia secretos privados.</text>
+      <text x="14" y="160" font-size="10" fill="#facc15">• Previene exposición de credenciales en cliente.</text>
+    </g>
+
+    <!-- Chip 4.2: ProxyServlet.java -->
+    <g transform="translate(18, 260)">
+      <rect width="304" height="195" rx="8" fill="#4c0519" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fecdd3">ProxyServlet.java (/proxy)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Pasarela CORS y descarga remota.</text>
+      <line x1="14" y1="52" x2="290" y2="52" stroke="#881337" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#fb7185">MÉTODOS &amp; ENDPOINTS EN CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">doGet(request, response):</tspan> Canal de reenvío.</text>
+      <text x="14" y="104" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">Utils.sanitizeUrl(urlParam):</tspan> Bloqueo SSRF.</text>
+      <text x="14" y="120" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">getCorsDomain():</tspan> Valida dominios autorizados.</text>
+      <text x="14" y="136" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">TIMEOUT (29000ms):</tspan> Evita deadlocks de GAE.</text>
+      <text x="14" y="152" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">SizeLimitExceededException:</tspan> Límite de carga.</text>
+      <text x="14" y="175" font-size="10" fill="#facc15">• Permite descargar imágenes y diagramas ajenos.</text>
+    </g>
+
+    <!-- Chip 4.3: ExportProxyServlet.java -->
+    <g transform="translate(18, 470)">
+      <rect width="304" height="195" rx="8" fill="#4c0519" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fecdd3">ExportProxyServlet (/export)</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Descarga forzada y exportador.</text>
+      <line x1="14" y1="52" x2="290" y2="52" stroke="#881337" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#fb7185">MÉTODOS &amp; ENDPOINTS EN CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">doPost(request, response):</tspan> Recibe payload.</text>
+      <text x="14" y="104" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">Content-Disposition: attachment:</tspan> Forzado.</text>
+      <text x="14" y="120" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">base64 = mxBase64.decode():</tspan> Binarios PNG/PDF.</text>
+      <text x="14" y="136" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">response.setContentType(mime):</tspan> Cabeceras.</text>
+      <text x="14" y="152" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">/service/* mapping:</tspan> Integraciones Cloud.</text>
+      <text x="14" y="175" font-size="10" fill="#facc15">• Facilita la descarga local en navegadores.</text>
+    </g>
+
+    <!-- Chip 4.4: Converter & LogServlets -->
+    <g transform="translate(18, 680)">
+      <rect width="304" height="175" rx="8" fill="#4c0519" stroke="#fb7185" stroke-width="1.2"/>
+      <text x="14" y="24" font-size="13" font-weight="700" fill="#fecdd3">Converter &amp; Log Servlets</text>
+      <text x="14" y="42" font-size="11" fill="#cbd5e1"><tspan font-weight="600" fill="#ffffff">Rol:</tspan> Telemetría, Logs y Conversores.</text>
+      <line x1="14" y1="52" x2="290" y2="52" stroke="#881337" stroke-width="1"/>
+      <text x="14" y="70" font-size="10" font-weight="700" fill="#fb7185">MÉTODOS &amp; ENDPOINTS EN CÓDIGO:</text>
+      <text x="14" y="88" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">ConverterServlet (/convert):</tspan> Formatos legados.</text>
+      <text x="14" y="104" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">LogServlet (/log):</tspan> Recopila crash reports.</text>
+      <text x="14" y="120" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">WellKnownServlet:</tspan> Verificaciones de dominio.</text>
+      <text x="14" y="136" font-size="10" fill="#ffe4e6">• <tspan fill="#ffffff" font-weight="600">GAE Stub Integration:</tspan> Compatibilidad Cloud.</text>
+      <text x="14" y="158" font-size="10" fill="#fecdd3">• Backend stateless 100% resiliente a fallos.</text>
+    </g>
+  </g>
+
+
+  <!-- ================= TUBERÍAS / PUENTES DE COMUNICACIÓN HORIZONTALES ================= -->
+  <!-- Puente 1 -> 2: mxGraph Core entrega Celdas a grapheditor (Nivel 1: y=200) -->
+  <path d="M 374 200 L 436 200" fill="none" stroke="#34d399" stroke-width="3" marker-end="url(#busArrowGreen)"/>
+  <!-- Puente 2 -> 1: grapheditor comanda transacciones con beginUpdate (y=215) -->
+  <path d="M 436 215 L 374 215" fill="none" stroke="#818cf8" stroke-width="2.5" marker-end="url(#busArrowIndigo)"/>
+
+  <!-- Puente 2 -> 3: grapheditor entrega el layout base a diagramly (Nivel 2: y=390) -->
+  <path d="M 794 390 L 816 390" fill="none" stroke="#818cf8" stroke-width="3" marker-end="url(#busArrowIndigo)"/>
+  <!-- Puente 3 -> 2: diagramly inyecta páginas múltiples y extensiones de UI (y=405) -->
+  <path d="M 816 405 L 794 405" fill="none" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#busArrowCyan)"/>
+
+  <!-- Puente 3 -> 4: diagramly envía peticiones OAuth y Proxy al backend (Nivel 3: y=590) -->
+  <path d="M 1174 590 L 1196 590" fill="none" stroke="#38bdf8" stroke-width="3" marker-end="url(#busArrowCyan)"/>
+  <!-- Puente 4 -> 3: Backend devuelve Access Tokens y datos saneados (y=605) -->
+  <path d="M 1196 605 L 1174 605" fill="none" stroke="#fb7185" stroke-width="2.5" marker-end="url(#busArrowRose)"/>
+
+
+  <!-- ================= BARRA INFERIOR DE CONCLUSIÓN ARQUITECTURAL ================= -->
+  <g transform="translate(60, 1050)">
+    <rect width="1480" height="55" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+    <text x="25" y="32" font-size="12" font-weight="700" fill="#38bdf8">CONCLUSIÓN DEL FUNCIONAMIENTO A NIVEL DE CÓDIGO:</text>
+    <text x="440" y="32" font-size="11" fill="#cbd5e1">
+      Cada módulo opera como una unidad autocontenida: <tspan fill="#34d399">mxGraph</tspan> computa geometría pura sin conocer la UI, <tspan fill="#818cf8">grapheditor</tspan> monta los paneles sin saber dónde se guardan los archivos, <tspan fill="#38bdf8">diagramly</tspan> administra la nube y el merge sin tocar sockets nativos, y el <tspan fill="#fb7185">Backend Java</tspan> asiste de manera stateless sin almacenar estado de sesión.
+    </text>
+  </g>
+</svg>

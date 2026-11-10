@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 1200" width="100%" height="100%" style="background:#090d16; font-family:'Segoe UI', -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y brillo -->
+    <filter id="flowShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+    <filter id="decisionGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Gradientes de Cabecera y Nodos -->
+    <linearGradient id="headerSyncGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- Gradientes de Camino Verde (Éxito) y Rojo (Conflicto) -->
+    <linearGradient id="greenNodeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <linearGradient id="amberNodeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="blueNodeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#082f49"/>
+    </linearGradient>
+    <linearGradient id="roseNodeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#4c0519"/>
+    </linearGradient>
+    <linearGradient id="purpleMergeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#2e1065"/>
+    </linearGradient>
+
+    <!-- Marcadores de Flechas de Flujo -->
+    <marker id="syncArrowBlue" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#38bdf8"/>
+    </marker>
+    <marker id="syncArrowGreen" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="syncArrowRose" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#fb7185"/>
+    </marker>
+    <marker id="syncArrowPurple" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#c084fc"/>
+    </marker>
+    <marker id="syncArrowAmber" markerWidth="9" markerHeight="7" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <!-- ================= TÍTULO Y DESCRIPCIÓN ================= -->
+  <g transform="translate(60, 42)">
+    <text x="0" y="0" font-size="26" font-weight="800" fill="url(#headerSyncGrad)" letter-spacing="0.5">
+      PUNTO 6: ÁRBOL DE DECISIÓN Y MOTOR 3-WAY MERGE DE AUTOGUARDADO
+    </text>
+    <text x="0" y="24" font-size="13" fill="#94a3b8">
+      Mecanismo de concurrencia: De la mutación local y el timer de debounce a la resolución de conflictos HTTP 412/409 con Shadow Pages
+    </text>
+  </g>
+
+  <!-- ================= FASE 1: EVENTO DISPARADOR (CANVAS & MODELO) ================= -->
+  <g transform="translate(660, 95)" filter="url(#flowShadow)">
+    <rect x="-190" y="0" width="380" height="90" rx="12" fill="url(#blueNodeGrad)" stroke="#38bdf8" stroke-width="2"/>
+    <text x="0" y="24" font-size="11" font-weight="800" fill="#7dd3fc" text-anchor="middle" letter-spacing="0.8">1. GATILLO DE MUTACIÓN LOCAL</text>
+    <text x="0" y="44" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">mxGraphModel ➔ mxEvent.CHANGE</text>
+    <text x="0" y="62" font-size="11" fill="#cbd5e1" text-anchor="middle">El usuario inserta celdas, mueve aristas o cambia texto</text>
+    <text x="0" y="78" font-size="10" fill="#94a3b8" text-anchor="middle">Dispara: editor.graphChangeListener() ➔ setModified(true)</text>
+  </g>
+
+  <!-- Flecha hacia Fase 2 -->
+  <line x1="660" y1="185" x2="660" y2="225" stroke="#38bdf8" stroke-width="3" marker-end="url(#syncArrowBlue)"/>
+
+  <!-- ================= FASE 2: MOTOR DE DEBOUNCE (DRAWIOFILE) ================= -->
+  <g transform="translate(660, 230)" filter="url(#flowShadow)">
+    <rect x="-210" y="0" width="420" height="105" rx="12" fill="url(#blueNodeGrad)" stroke="#38bdf8" stroke-width="2"/>
+    <text x="0" y="24" font-size="11" font-weight="800" fill="#7dd3fc" text-anchor="middle" letter-spacing="0.8">2. PLANIFICADOR DE AUTOGUARDADO</text>
+    <text x="0" y="44" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">DrawioFile.prototype.fileChanged()</text>
+    <text x="0" y="64" font-size="11" fill="#facc15" text-anchor="middle">Temporizador Debounced: autosaveDelay = 1500ms</text>
+    <text x="0" y="80" font-size="10" fill="#cbd5e1" text-anchor="middle">Agrupa ráfagas de tipeo continuo antes de contactar a la red</text>
+    <text x="0" y="94" font-size="10" fill="#94a3b8" text-anchor="middle">Calcula checksum MD5 y serializa modelo mediante mxCodec</text>
+  </g>
+
+  <!-- Flecha hacia Fase 3 (Rombo de Decisión) -->
+  <line x1="660" y1="335" x2="660" y2="385" stroke="#38bdf8" stroke-width="3" marker-end="url(#syncArrowBlue)"/>
+
+  <!-- ================= FASE 3: ROMBO DE DECISIÓN HTTP (RESPUESTA REMOTA) ================= -->
+  <g transform="translate(660, 460)" filter="url(#decisionGlow)">
+    <!-- Rombo de Decisión -->
+    <polygon points="0 -75, 180 0, 0 75, -180 0" fill="#1e1b4b" stroke="#facc15" stroke-width="3"/>
+    <text x="0" y="-20" font-size="11" font-weight="800" fill="#fde047" text-anchor="middle">3. PETICIÓN REST / PUT</text>
+    <text x="0" y="2" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">¿Estado HTTP del Guardado?</text>
+    <text x="0" y="20" font-size="10" fill="#cbd5e1" text-anchor="middle">Verifica If-Match / ETag del Archivo</text>
+    <text x="0" y="36" font-size="9" fill="#94a3b8" text-anchor="middle">(Google Drive, OneDrive, GitHub, etc.)</text>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- ================= BIFURCACIÓN IZQUIERDA: CAMINO VERDE (ÉXITO 200 OK) ===== -->
+  <!-- ========================================================================= -->
+  <!-- Flecha hacia la izquierda -->
+  <path d="M 480 460 L 320 460 L 320 540" fill="none" stroke="#34d399" stroke-width="3.5" marker-end="url(#syncArrowGreen)"/>
+  <rect x="335" y="442" width="125" height="24" rx="4" fill="#064e3b" stroke="#34d399" stroke-width="1.2"/>
+  <text x="397" y="458" font-size="11" font-weight="800" fill="#34d399" text-anchor="middle">HTTP 200 / 204 OK</text>
+
+  <!-- Nodo Verde 1: Actualización de ETag -->
+  <g transform="translate(320, 545)" filter="url(#flowShadow)">
+    <rect x="-180" y="0" width="360" height="95" rx="10" fill="url(#greenNodeGrad)" stroke="#10b981" stroke-width="2"/>
+    <text x="0" y="24" font-size="11" font-weight="800" fill="#a7f3d0" text-anchor="middle">4A. GUARDADO EXITOSO</text>
+    <text x="0" y="45" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">setDescriptorEtag(nuevoEtag)</text>
+    <text x="0" y="65" font-size="10" fill="#e2e8f0" text-anchor="middle">El servidor aceptó la nueva versión del diagrama.</text>
+    <text x="0" y="80" font-size="10" fill="#6ee7b7" text-anchor="middle">Almacena el nuevo ETag / Git SHA recibido.</text>
+  </g>
+
+  <!-- Flecha verde hacia Nodo Verde 2 -->
+  <line x1="320" y1="640" x2="320" y2="685" stroke="#34d399" stroke-width="3" marker-end="url(#syncArrowGreen)"/>
+
+  <!-- Nodo Verde 2: Actualización de Shadow Pages -->
+  <g transform="translate(320, 690)" filter="url(#flowShadow)">
+    <rect x="-180" y="0" width="360" height="110" rx="10" fill="url(#greenNodeGrad)" stroke="#10b981" stroke-width="2"/>
+    <text x="0" y="24" font-size="11" font-weight="800" fill="#a7f3d0" text-anchor="middle">5A. REFREZCO DE SHADOW PAGES</text>
+    <text x="0" y="45" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">updateShadowPages()</text>
+    <text x="0" y="66" font-size="10" fill="#e2e8f0" text-anchor="middle">Copia el estado actual de las celdas en memoria como</text>
+    <text x="0" y="81" font-size="10" fill="#facc15" font-weight="600" text-anchor="middle">nueva línea base limpia para futuros diffs.</text>
+    <text x="0" y="96" font-size="10" fill="#6ee7b7" text-anchor="middle">Invoca: setModified(false) ➔ Status: "Guardado"</text>
+  </g>
+
+  <!-- Flecha verde de retorno al bucle inicial -->
+  <path d="M 320 800 L 320 860 L 120 860 L 120 140 L 470 140" fill="none" stroke="#34d399" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#syncArrowGreen)"/>
+  <text x="210" y="850" font-size="11" font-weight="700" fill="#34d399">Ciclo limpio completado</text>
+
+
+  <!-- ========================================================================= -->
+  <!-- ================= BIFURCACIÓN DERECHA: CAMINO ROJO (CONFLICTO 412/409) == -->
+  <!-- ========================================================================= -->
+  <!-- Flecha hacia la derecha -->
+  <path d="M 840 460 L 1050 460 L 1050 540" fill="none" stroke="#fb7185" stroke-width="3.5" marker-end="url(#syncArrowRose)"/>
+  <rect x="855" y="442" width="175" height="24" rx="4" fill="#4c0519" stroke="#fb7185" stroke-width="1.2"/>
+  <text x="942" y="458" font-size="11" font-weight="800" fill="#fb7185" text-anchor="middle">ERROR 412 / 409 CONFLICT</text>
+
+  <!-- Nodo Rojo 1: Detección de Conflicto -->
+  <g transform="translate(1050, 545)" filter="url(#flowShadow)">
+    <rect x="-195" y="0" width="390" height="95" rx="10" fill="url(#roseNodeGrad)" stroke="#f43f5e" stroke-width="2"/>
+    <text x="0" y="24" font-size="11" font-weight="800" fill="#fecdd3" text-anchor="middle">4B. CONFLICTO CONCURRENTE DETECTADO</text>
+    <text x="0" y="45" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">DrawioFile.prototype.isConflict(err)</text>
+    <text x="0" y="65" font-size="10" fill="#cbd5e1" text-anchor="middle">• HTTP 412 (Precondition Failed / ETag desactualizado en Drive)</text>
+    <text x="0" y="80" font-size="10" fill="#cbd5e1" text-anchor="middle">• HTTP 409 (Git SHA mismatch / commit concurrente en GitHub)</text>
+  </g>
+
+  <!-- Flecha roja hacia Descarga Remota -->
+  <line x1="1050" y1="640" x2="1050" y2="685" stroke="#fb7185" stroke-width="3" marker-end="url(#syncArrowRose)"/>
+
+  <!-- Nodo Rojo 2: Descarga de Versión Remota -->
+  <g transform="translate(1050, 690)" filter="url(#flowShadow)">
+    <rect x="-195" y="0" width="390" height="95" rx="10" fill="url(#amberNodeGrad)" stroke="#f59e0b" stroke-width="2"/>
+    <text x="0" y="24" font-size="11" font-weight="800" fill="#fde68a" text-anchor="middle">5B. DESCARGA DEL ESTADO REMOTO</text>
+    <text x="0" y="45" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">file.getLatestVersion(successFn)</text>
+    <text x="0" y="65" font-size="10" fill="#cbd5e1" text-anchor="middle">El cliente descarga silenciosamente el XML del colaborador</text>
+    <text x="0" y="80" font-size="10" fill="#fde047" text-anchor="middle">Dispone de: (1) Remoto nuevo, (2) Local actual, (3) ShadowPages base</text>
+  </g>
+
+  <!-- Flecha hacia el Núcleo del 3-Way Merge -->
+  <line x1="1050" y1="785" x2="1050" y2="835" stroke="#c084fc" stroke-width="3.5" marker-end="url(#syncArrowPurple)"/>
+
+  <!-- ================= FASE 6: EL NÚCLEO DEL MOTOR 3-WAY MERGE ================= -->
+  <g transform="translate(1050, 840)" filter="url(#flowShadow)">
+    <rect x="-240" y="0" width="480" height="195" rx="14" fill="url(#purpleMergeGrad)" stroke="#c084fc" stroke-width="2.5"/>
+    <rect x="-240" y="0" width="480" height="34" rx="14" fill="#6b21a8"/>
+    <text x="0" y="23" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="0.8">6. ALGORITMO 3-WAY MERGE (RESOLUCIÓN CELDA POR CELDA)</text>
+    
+    <g transform="translate(-220, 48)">
+      <text x="0" y="16" font-size="13" font-weight="700" fill="#e9d5ff">DrawioFile.prototype.mergeFile(remote, shadow, local)</text>
+      <text x="0" y="36" font-size="10.5" fill="#f3e8ff">• <tspan font-weight="700" fill="#38bdf8">Cálculo de Diff 1:</tspan> Compara [Local] vs [ShadowPages] ➔ Cambios del usuario.</text>
+      <text x="0" y="54" font-size="10.5" fill="#f3e8ff">• <tspan font-weight="700" fill="#34d399">Cálculo de Diff 2:</tspan> Compara [Remoto] vs [ShadowPages] ➔ Cambios ajenos.</text>
+      <text x="0" y="72" font-size="10.5" fill="#facc15">• <tspan font-weight="700" fill="#fde047">Celdas No Conflictivas:</tspan> Aplica deltas remotos en celdas no tocadas.</text>
+      <text x="0" y="90" font-size="10.5" fill="#f43f5e">• <tspan font-weight="700" fill="#fb7185">Colisión en la misma celda:</tspan> Prevalece regla LAST_WRITE_WINS</text>
+      <text x="14" y="106" font-size="10" fill="#cbd5e1">o genera diálogo interactivo de resolución si hay desincronización grave.</text>
+      <text x="0" y="128" font-size="10.5" fill="#a7f3d0" font-weight="700">• Inyección atómica: model.beginUpdate() ➔ patchCells() ➔ endUpdate()</text>
+    </g>
+  </g>
+
+  <!-- Flecha de Reintento desde el Merge hacia la Re-sincronización -->
+  <path d="M 810 930 L 660 930 L 660 360" fill="none" stroke="#c084fc" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#syncArrowPurple)"/>
+  <rect x="680" y="650" width="180" height="28" rx="6" fill="#2e1065" stroke="#c084fc" stroke-width="1.2"/>
+  <text x="770" y="668" font-size="10" font-weight="700" fill="#e9d5ff" text-anchor="middle">Reintenta Guardado fusionado</text>
+
+
+  <!-- ================= BARRAS LATERALES: WEBSOCKET / P2P REALTIME ================= -->
+  <g transform="translate(60, 910)" filter="url(#flowShadow)">
+    <rect width="460" height="120" rx="10" fill="#0f172a" stroke="#0ea5e9" stroke-width="1.5"/>
+    <text x="18" y="24" font-size="12" font-weight="800" fill="#38bdf8">CANAL COLABORATIVO REALTIME (WEBSOCKET / WEBRTC)</text>
+    <text x="18" y="44" font-size="10.5" fill="#cbd5e1">• Módulos: <tspan fill="#facc15">DrawioFileSync.js, DiffSync.js, P2PCollab.js</tspan></text>
+    <text x="18" y="62" font-size="10.5" fill="#cbd5e1">• No envía el archivo completo: Transmite <tspan fill="#34d399">parches JSON delta</tspan> instantáneos.</text>
+    <text x="18" y="80" font-size="10.5" fill="#cbd5e1">• Muestra cursores remotos y selección en vivo de otros colaboradores.</text>
+    <text x="18" y="98" font-size="10" fill="#94a3b8">Fallback automático: Si WebSocket cae, conmuta a polling HTTP.</text>
+  </g>
+
+  <!-- ================= PIE DE PÁGINA RESUMEN ================= -->
+  <g transform="translate(60, 1070)">
+    <rect width="1500" height="50" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+    <text x="24" y="30" font-size="12" font-weight="700" fill="#facc15">GARANTÍA DE INTEGRIDAD DE DATOS DE DRAW.IO:</text>
+    <text x="320" y="30" font-size="11" fill="#cbd5e1">
+      El uso de <tspan fill="#a7f3d0" font-weight="600">Shadow Pages</tspan> actúa como un control de versiones Git en memoria dentro del navegador. Aunque dos usuarios editen el mismo archivo a la vez sin servidor centralizado, el algoritmo de 3 vías reconcilia las diferencias preservando los trazos de ambos sin sobrescrituras destructivas.
+    </text>
+  </g>
+</svg>
