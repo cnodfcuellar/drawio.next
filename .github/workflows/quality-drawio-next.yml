@@ -1,0 +1,55 @@
+name: Quality Gate — Drawio.next
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Drawio.next/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: 'pnpm', cache-dependency-path: 'Drawio.next/app/pnpm-lock.yaml' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec svelte-check --tsconfig ./tsconfig.json
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Drawio.next/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: 'pnpm', cache-dependency-path: 'Drawio.next/app/pnpm-lock.yaml' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test --run --reporter=verbose
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Drawio.next/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: 'pnpm', cache-dependency-path: 'Drawio.next/app/pnpm-lock.yaml' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm exec playwright test
