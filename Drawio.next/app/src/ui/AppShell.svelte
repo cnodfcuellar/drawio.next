@@ -48,8 +48,8 @@
       var(--toolbar-h)
       1fr
       var(--statusbar-h);
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     overflow: hidden;
   }
 
