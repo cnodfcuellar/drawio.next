@@ -7,18 +7,18 @@ function createThemeStore() {
     ? localStorage.getItem('drawio-theme')
     : null) as Theme | null
 
-  const { subscribe, set } = writable<Theme>(stored ?? 'dark')
+  const { subscribe, set, update } = writable<Theme>(stored ?? 'dark')
 
   return {
     subscribe,
     toggle() {
-      set((current: Theme) => {
+      update((current) => {
         const next: Theme = current === 'dark' ? 'light' : 'dark'
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('drawio-theme', next)
         }
         return next
-      } as unknown as Theme)
+      })
     },
     setTheme(t: Theme) {
       if (typeof localStorage !== 'undefined') {

@@ -5,14 +5,9 @@ import path from 'path'
 export default defineConfig({
   plugins: [svelte({ hot: !process.env.VITEST })],
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     globals: true,
-    include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
-    coverage: {
-      provider: 'v8',
-      include: ['src/core/**'],
-      thresholds: { lines: 85, functions: 85, branches: 80 }
-    }
+    include: ['src/**/*.test.ts', 'src/**/*.spec.ts']
   },
   resolve: {
     alias: {

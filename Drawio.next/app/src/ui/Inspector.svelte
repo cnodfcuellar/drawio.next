@@ -44,20 +44,20 @@
       {:else if activeTab === 'Arrange'}
         <div class="prop-grid">
           <div class="prop-row">
-            <label class="prop-label">X</label>
-            <input class="prop-input" type="number" value="0" />
+            <label class="prop-label" for="prop-x">X</label>
+            <input id="prop-x" class="prop-input" type="number" value="0" />
           </div>
           <div class="prop-row">
-            <label class="prop-label">Y</label>
-            <input class="prop-input" type="number" value="0" />
+            <label class="prop-label" for="prop-y">Y</label>
+            <input id="prop-y" class="prop-input" type="number" value="0" />
           </div>
           <div class="prop-row">
-            <label class="prop-label">W</label>
-            <input class="prop-input" type="number" value="120" />
+            <label class="prop-label" for="prop-w">W</label>
+            <input id="prop-w" class="prop-input" type="number" value="120" />
           </div>
           <div class="prop-row">
-            <label class="prop-label">H</label>
-            <input class="prop-input" type="number" value="60" />
+            <label class="prop-label" for="prop-h">H</label>
+            <input id="prop-h" class="prop-input" type="number" value="60" />
           </div>
         </div>
       {:else if activeTab === 'Text'}
