@@ -39,6 +39,22 @@ export class GraphController {
       throw new Error('mxGraph no está disponible en el entorno global (window.mxGraph).')
     }
 
+    // Parche de compatibilidad: draw.io mxClient espera isSpecialColor en mxGraph.prototype
+    const proto = window.mxGraph.prototype as any
+    if (!proto.isSpecialColor) {
+      proto.isSpecialColor = function (color: string) {
+        if (!color) return false
+        const special = [
+          window.mxConstants?.STYLE_STROKECOLOR || 'strokeColor',
+          window.mxConstants?.STYLE_FILLCOLOR || 'fillColor',
+          'inherit',
+          'swimlane',
+          'indicated'
+        ]
+        return special.indexOf(color) >= 0
+      }
+    }
+
     // Instanciar motor mxGraph sobre el contenedor DOM
     this.graph = new window.mxGraph(container)
     this.setupDefaults(options)

@@ -185,6 +185,7 @@ describe('GraphController', () => {
     ;(globalThis as any).window.mxGraph = mocks.MockGraph
     ;(globalThis as any).window.mxUndoManager = mocks.MockUndoManager
     ;(globalThis as any).window.mxRubberband = mocks.MockRubberband
+    ;(globalThis as any).window.mxConstants = { STYLE_STROKECOLOR: 'strokeColor', STYLE_FILLCOLOR: 'fillColor' }
 
     container = { id: 'test-container' } as unknown as HTMLElement
     controller = new GraphController(container)

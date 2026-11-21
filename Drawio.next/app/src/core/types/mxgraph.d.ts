@@ -138,6 +138,7 @@ export declare class mxGraph {
   selectionModel: mxSelectionModel
   enabled: boolean
 
+  isSpecialColor?(color?: string): boolean
   getDefaultParent(): mxCell
   insertVertex(
     parent: mxCell | null,
@@ -219,6 +220,7 @@ declare global {
     mxClient: typeof mxClient
     mxUtils: typeof mxUtils
     mxEvent: typeof mxEvent
+    mxConstants: any
     __graphController?: any
   }
 }

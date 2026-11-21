@@ -12,6 +12,22 @@
       window.mxLoadStylesheets = true;
     </script>
     <script src="/mxgraph/mxClient.js"></script>
+    <script>
+      // Polyfill para métodos de draw.io esperados por el renderer de mxClient
+      if (window.mxGraph && !window.mxGraph.prototype.isSpecialColor) {
+        window.mxGraph.prototype.isSpecialColor = function(color) {
+          if (!color) return false;
+          var special = [
+            (window.mxConstants && window.mxConstants.STYLE_STROKECOLOR) || 'strokeColor',
+            (window.mxConstants && window.mxConstants.STYLE_FILLCOLOR) || 'fillColor',
+            'inherit',
+            'swimlane',
+            'indicated'
+          ];
+          return special.indexOf(color) >= 0;
+        };
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
