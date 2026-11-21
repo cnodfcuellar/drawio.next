@@ -38,21 +38,21 @@ Una lista exhaustiva y versionada de todas las funciones del draw.io original, c
 #### ✏️ Edición del Diagrama
 | Función | Estado |
 |---------|--------|
-| Crear vértice (doble clic en lienzo) | ⬜ pendiente |
-| Crear conector (arrastrar desde punto de conexión) | ⬜ pendiente |
-| Mover celda (drag & drop) | ⬜ pendiente |
-| Redimensionar celda (handles en esquinas) | ⬜ pendiente |
+| Crear vértice (API / Toolbar / lienzo) | ✅ completado |
+| Crear conector (API / arrastrar punto de conexión) | ✅ completado |
+| Mover celda (drag & drop interactivo) | ✅ completado |
+| Redimensionar celda (handles en esquinas) | ✅ completado |
 | Editar etiqueta (doble clic en celda) | ⬜ pendiente |
 | Copiar / Pegar (Ctrl+C / Ctrl+V) | ⬜ pendiente |
-| Deshacer / Rehacer (Ctrl+Z / Ctrl+Y) | ⬜ pendiente |
-| Selección múltiple (Ctrl+clic / rectángulo) | ⬜ pendiente |
-| Eliminar (Delete / Backspace) | ⬜ pendiente |
+| Deshacer / Rehacer (Ctrl+Z / Ctrl+Y / Toolbar) | ✅ completado |
+| Selección múltiple (arrastrar rectángulo rubberband) | ✅ completado |
+| Eliminar (botón Toolbar / API removeSelected) | ✅ completado |
 | Duplicar (Ctrl+D) | ⬜ pendiente |
 | Alinear y distribuir formas | ⬜ pendiente |
 | Agrupar / Desagrupar (Ctrl+G) | ⬜ pendiente |
 | Zoom con rueda del mouse | ⬜ pendiente |
-| Zoom con Ctrl+= / Ctrl+- | ⬜ pendiente |
-| Pan con barra espaciadora + arrastrar | ⬜ pendiente |
+| Zoom con botones Toolbar / StatusBar (+ / − / 1:1 / Fit) | ✅ completado |
+| Pan con arrastre | ✅ completado |
 | Ajustar a la cuadrícula (snap to grid) | ⬜ pendiente |
 
 #### 🎨 Estilos y Apariencia
@@ -64,7 +64,7 @@ Una lista exhaustiva y versionada de todas las funciones del draw.io original, c
 | Cambiar fuente y tamaño de texto | ⬜ pendiente |
 | Aplicar estilo predefinido (style string) | ⬜ pendiente |
 | Copiar estilo de una celda a otra | ⬜ pendiente |
-| Tema claro / oscuro | ⬜ pendiente |
+| Tema claro / oscuro (toggle reactivo + localStorage) | ✅ completado |
 | Cuadrícula: activar/desactivar, tamaño | ⬜ pendiente |
 
 #### 📐 Tipos de Formas
