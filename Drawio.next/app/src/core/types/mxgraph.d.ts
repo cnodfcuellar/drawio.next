@@ -180,6 +180,7 @@ export declare class mxGraph {
   setDropEnabled(dropEnabled: boolean): void
   setPanning(panning: boolean): void
   setTooltips(tooltips: boolean): void
+  setAllowLoops(allow: boolean): void
   setEnabled(enabled: boolean): void
 
   getModel(): mxGraphModel

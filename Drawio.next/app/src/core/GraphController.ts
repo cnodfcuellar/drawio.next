@@ -31,6 +31,7 @@ export class GraphController {
   private graph: mxGraph
   private undoManager: mxUndoManager | null = null
   private rubberband: mxRubberband | null = null
+  private keydownHandler: ((e: KeyboardEvent) => void) | null = null
   private destroyed = false
 
   constructor(container: HTMLElement, options: GraphControllerOptions = {}) {
@@ -42,24 +43,41 @@ export class GraphController {
     this.graph = new window.mxGraph(container)
     this.setupDefaults(options)
     this.setupUndoManager()
+    this.setupKeyHandler()
   }
 
   /**
    * Configura las opciones e interacciones por defecto del canvas
    */
   private setupDefaults(options: GraphControllerOptions): void {
-    const { enableRubberband = true, enableConnect = true } = options
+    const { enableRubberband = true } = options
 
-    this.graph.setConnectable(enableConnect)
+    // 1. Habilitar interacción completa de celdas
+    this.graph.setEnabled(true)
     this.graph.setCellsMovable(true)
     this.graph.setCellsResizable(true)
     this.graph.setCellsEditable(true)
     this.graph.setDropEnabled(true)
-    this.graph.setPanning(true)
     this.graph.setTooltips(true)
-    this.graph.setEnabled(true)
+    this.graph.setAllowLoops(true)
 
-    // Habilitar selección por arrastre (rubberband)
+    // 2. Desactivar panning por defecto con botón izquierdo para no capturar el arrastre de celdas
+    const anyGraph = this.graph as any
+    if (anyGraph.panningHandler) {
+      anyGraph.panningHandler.useLeftButtonForPanning = false
+      anyGraph.panningHandler.panningEnabled = false
+      anyGraph.panningHandler.ignoreCell = true
+    }
+
+    // 3. Desactivar el inicio de conexión desde el cuerpo de la celda.
+    // Esto es CRUCIAL: en mxGraph por defecto cualquier click en una celda
+    // inicia una conexión y bloquea el movimiento y redimensionado.
+    if (anyGraph.connectionHandler) {
+      anyGraph.connectionHandler.isValidSource = () => false
+      anyGraph.connectionHandler.setCreateTarget(false)
+    }
+
+    // 4. Habilitar selección por arrastre (rubberband)
     if (enableRubberband && window.mxRubberband) {
       this.rubberband = new window.mxRubberband(this.graph)
     }
@@ -81,6 +99,52 @@ export class GraphController {
     }
 
     this.graph.getModel().addListener('undo', listener)
+  }
+
+  /**
+   * Configura atajos de teclado globales (Delete, Backspace, Ctrl+Z, Ctrl+Y, Ctrl+A)
+   */
+  private setupKeyHandler(): void {
+    if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return
+
+    this.keydownHandler = (e: KeyboardEvent) => {
+      if (this.destroyed) return
+
+      // Si el foco está en un input o textarea editable, no interceptar
+      const target = e.target as HTMLElement
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return
+      }
+
+      // Borrar celda seleccionada con tecla Supr o Backspace
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (this.getSelectedCells().length > 0) {
+          e.preventDefault()
+          this.removeSelected()
+        }
+      }
+      // Ctrl+Z / Cmd+Z (Undo) y Ctrl+Shift+Z (Redo)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault()
+        if (e.shiftKey) {
+          this.redo()
+        } else {
+          this.undo()
+        }
+      }
+      // Ctrl+Y / Cmd+Y (Redo)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault()
+        this.redo()
+      }
+      // Ctrl+A / Cmd+A (Seleccionar todo)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        this.selectAll()
+      }
+    }
+
+    window.addEventListener('keydown', this.keydownHandler)
   }
 
   /**
@@ -139,12 +203,87 @@ export class GraphController {
   }
 
   /**
+   * Modifica la geometría (posición y tamaño) de una celda
+   */
+  setCellGeometry(cellId: string, x: number, y: number, width: number, height: number): void {
+    const cell = this.graph.getModel().getCell(cellId)
+    if (!cell || !cell.geometry) return
+
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      const geo = (window.mxUtils ? window.mxUtils.clone(cell.geometry) : { ...cell.geometry })
+      geo.x = x
+      geo.y = y
+      geo.width = width
+      geo.height = height
+      model.setGeometry(cell, geo)
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
+   * Modifica el valor textual / label de una celda
+   */
+  setCellValue(cellId: string, value: any): void {
+    const cell = this.graph.getModel().getCell(cellId)
+    if (!cell) return
+
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      model.setValue(cell, value)
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
+   * Modifica el color de relleno de una celda
+   */
+  setCellFillColor(cellId: string, color: string): void {
+    const cell = this.graph.getModel().getCell(cellId)
+    if (!cell) return
+
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      let currentStyle = model.getStyle(cell) || ''
+      if (currentStyle.includes('fillColor=')) {
+        currentStyle = currentStyle.replace(/fillColor=[^;]+/, `fillColor=${color}`)
+      } else {
+        currentStyle += `;fillColor=${color}`
+      }
+      model.setStyle(cell, currentStyle)
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
    * Elimina las celdas actualmente seleccionadas
    */
   removeSelected(): mxCell[] {
     const cells = this.graph.getSelectionCells()
     if (!cells || cells.length === 0) return []
     return this.graph.removeCells(cells, true)
+  }
+
+  /**
+   * Selecciona todas las celdas del diagrama
+   */
+  selectAll(): void {
+    const anyGraph = this.graph as any
+    if (anyGraph.selectAll) {
+      anyGraph.selectAll()
+    } else {
+      const parent = this.graph.getDefaultParent()
+      const model = this.graph.getModel() as any
+      if (model.getChildCells) {
+        this.graph.setSelectionCells(model.getChildCells(parent, true, true))
+      }
+    }
   }
 
   /**
@@ -238,8 +377,7 @@ export class GraphController {
     selectionModel.addListener('change', listener)
 
     return () => {
-      // mxGraph no provee un removeListener estándar directo en selectionModel
-      // el listener revisa this.destroyed para auto-inactivarse
+      // El listener revisa this.destroyed para auto-inactivarse
     }
   }
 
@@ -248,6 +386,10 @@ export class GraphController {
    */
   destroy(): void {
     this.destroyed = true
+    if (this.keydownHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
+      window.removeEventListener('keydown', this.keydownHandler)
+      this.keydownHandler = null
+    }
     if (this.rubberband) {
       this.rubberband.destroy()
       this.rubberband = null

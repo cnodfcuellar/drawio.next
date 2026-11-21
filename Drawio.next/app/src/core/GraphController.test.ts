@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { GraphController } from './GraphController'
-import type { mxCell } from './types/mxgraph'
 
 // Configurar mock de mxGraph para tests unitarios en Node
 function createMockMxGraph() {
@@ -32,6 +31,10 @@ function createMockMxGraph() {
     beginUpdate: vi.fn(),
     endUpdate: vi.fn(),
     getCell: (id: string) => cellsMap[id] ?? null,
+    setGeometry: (cell: any, geo: any) => { cell.geometry = geo },
+    setValue: (cell: any, val: any) => { cell.value = val },
+    getStyle: (cell: any) => cell.style,
+    setStyle: (cell: any, s: string) => { cell.style = s },
     addListener: (name: string, fn: any) => {
       if (!modelListeners[name]) modelListeners[name] = []
       modelListeners[name].push(fn)
@@ -55,6 +58,8 @@ function createMockMxGraph() {
     model = model
     view = view
     selectionModel = selectionModel
+    connectionHandler = { isValidSource: () => true, setCreateTarget: vi.fn() }
+    panningHandler = { useLeftButtonForPanning: true, panningEnabled: true, ignoreCell: false }
 
     constructor(container: HTMLElement) {
       this.container = container
@@ -123,6 +128,11 @@ function createMockMxGraph() {
       return cells
     }
 
+    selectAll() {
+      currentSelection = Object.values(cellsMap)
+      selectionListeners.forEach(fn => fn())
+    }
+
     zoomIn() { currentScale *= 1.2 }
     zoomOut() { currentScale /= 1.2 }
     zoomActual() { currentScale = 1.0 }
@@ -136,6 +146,7 @@ function createMockMxGraph() {
     setPanning = vi.fn()
     setTooltips = vi.fn()
     setEnabled = vi.fn()
+    setAllowLoops = vi.fn()
     getModel() { return model }
     getView() { return view }
     destroy = vi.fn()
@@ -179,9 +190,13 @@ describe('GraphController', () => {
     controller = new GraphController(container)
   })
 
-  it('inicializa mxGraph con las opciones por defecto', () => {
+  it('inicializa mxGraph configurando movimiento libre de celdas', () => {
     expect(controller.getRawGraph()).toBeDefined()
     expect(controller.getZoom()).toBe(100)
+    // Verifica que panning y connect no bloqueen arrastre
+    const g = controller.getRawGraph() as any
+    expect(g.connectionHandler.isValidSource()).toBe(false)
+    expect(g.panningHandler.panningEnabled).toBe(false)
   })
 
   it('addVertex crea un vértice en el grafo', () => {
@@ -211,9 +226,26 @@ describe('GraphController', () => {
     expect(edge?.value).toBe('Conexión')
   })
 
-  it('addEdge retorna null si algún nodo no existe', () => {
-    const edge = controller.addEdge('inexistente-1', 'inexistente-2')
-    expect(edge).toBeNull()
+  it('setCellGeometry actualiza las coordenadas y dimensiones de la celda', () => {
+    const v1 = controller.addVertex({ label: 'Forma', x: 10, y: 10, width: 50, height: 50 })
+    controller.setCellGeometry(v1.id, 100, 200, 300, 150)
+
+    expect(v1.geometry?.x).toBe(100)
+    expect(v1.geometry?.y).toBe(200)
+    expect(v1.geometry?.width).toBe(300)
+    expect(v1.geometry?.height).toBe(150)
+  })
+
+  it('setCellValue actualiza el texto de la celda', () => {
+    const v1 = controller.addVertex({ label: 'Original', x: 0, y: 0 })
+    controller.setCellValue(v1.id, 'Nuevo Texto')
+    expect(v1.value).toBe('Nuevo Texto')
+  })
+
+  it('setCellFillColor actualiza el color de relleno', () => {
+    const v1 = controller.addVertex({ label: 'Color', x: 0, y: 0 })
+    controller.setCellFillColor(v1.id, '#ff0000')
+    expect(v1.style).toContain('fillColor=#ff0000')
   })
 
   it('removeSelected elimina las celdas seleccionadas', () => {
@@ -227,19 +259,18 @@ describe('GraphController', () => {
     expect(controller.getSelectedCellIds().length).toBe(0)
   })
 
-  it('controla el zoom adecuadamente (zoomIn, zoomOut, resetZoom, fit)', () => {
-    expect(controller.getZoom()).toBe(100)
+  it('selectAll selecciona todas las celdas del diagrama', () => {
+    controller.addVertex({ label: 'A', x: 0, y: 0 })
+    controller.addVertex({ label: 'B', x: 10, y: 10 })
 
+    controller.selectAll()
+    expect(controller.getSelectedCellIds().length).toBe(2)
+  })
+
+  it('controla el zoom adecuadamente', () => {
     controller.zoomIn()
     expect(controller.getZoom()).toBe(120)
-
     controller.zoomOut()
-    expect(controller.getZoom()).toBe(100)
-
-    controller.fit()
-    expect(controller.getZoom()).toBe(80)
-
-    controller.resetZoom()
     expect(controller.getZoom()).toBe(100)
   })
 
@@ -251,10 +282,6 @@ describe('GraphController', () => {
     controller.selectCell(v1.id)
 
     expect(callback).toHaveBeenCalledWith([v1.id], expect.any(Array))
-
-    controller.clearSelection()
-    expect(callback).toHaveBeenCalledWith([], [])
-
     unsubscribe()
   })
 

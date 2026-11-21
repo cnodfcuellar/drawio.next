@@ -1,8 +1,59 @@
 <script lang="ts">
-  import { hasSelection } from '../stores/selection'
+  import { hasSelection, selectedIds } from '../stores/selection'
+  import { activeGraph } from '../stores/graph'
 
   const tabs = ['Style', 'Arrange', 'Text'] as const
   let activeTab: typeof tabs[number] = $state('Style')
+
+  // Obtener celda seleccionada actual
+  let firstSelectedId = $derived(Array.from($selectedIds)[0] ?? null)
+  let selectedCell = $derived.by(() => {
+    if (!firstSelectedId || !$activeGraph) return null
+    return $activeGraph.getRawGraph().getModel().getCell(firstSelectedId)
+  })
+
+  // Propiedades geométricas
+  let posX = $derived(selectedCell?.geometry?.x ?? 0)
+  let posY = $derived(selectedCell?.geometry?.y ?? 0)
+  let posW = $derived(selectedCell?.geometry?.width ?? 120)
+  let posH = $derived(selectedCell?.geometry?.height ?? 60)
+  let cellText = $derived(selectedCell?.value ?? '')
+
+  function updateX(val: number) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setCellGeometry(firstSelectedId, val, posY, posW, posH)
+    }
+  }
+
+  function updateY(val: number) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setCellGeometry(firstSelectedId, posX, val, posW, posH)
+    }
+  }
+
+  function updateW(val: number) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setCellGeometry(firstSelectedId, posX, posY, Math.max(10, val), posH)
+    }
+  }
+
+  function updateH(val: number) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setCellGeometry(firstSelectedId, posX, posY, posW, Math.max(10, val))
+    }
+  }
+
+  function updateText(val: string) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setCellValue(firstSelectedId, val)
+    }
+  }
+
+  function updateColor(color: string) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setCellFillColor(firstSelectedId, color)
+    }
+  }
 </script>
 
 <aside class="inspector" data-testid="inspector">
@@ -12,7 +63,7 @@
       <button
         class="tab-btn"
         class:active={activeTab === tab}
-        onclick={() => activeTab = tab}
+        onclick={() => (activeTab = tab)}
         data-testid="inspector-tab-{tab.toLowerCase()}"
       >
         {tab}
@@ -25,45 +76,76 @@
     {#if !$hasSelection}
       <div class="no-selection">
         <span class="no-sel-icon">⬚</span>
-        <p>Select a shape to edit its properties</p>
+        <p>Selecciona una forma en el lienzo para ver y editar sus propiedades</p>
       </div>
     {:else}
       {#if activeTab === 'Style'}
         <div class="prop-group">
-          <div class="prop-label">Fill Color</div>
-          <div class="color-preview" style="background: #dae8fc;">
-            <span>#dae8fc</span>
-          </div>
-        </div>
-        <div class="prop-group">
-          <div class="prop-label">Stroke Color</div>
-          <div class="color-preview" style="background: #6c8ebf;">
-            <span>#6c8ebf</span>
+          <div class="prop-label">Color de Relleno</div>
+          <div class="color-palette">
+            {#each ['#dae8fc', '#d5e8d4', '#ffe6cc', '#f8cecc', '#e1d5e7', '#fff2cc'] as color}
+              <button
+                class="color-btn"
+                style="background-color: {color};"
+                title="Cambiar color a {color}"
+                onclick={() => updateColor(color)}
+              ></button>
+            {/each}
           </div>
         </div>
       {:else if activeTab === 'Arrange'}
         <div class="prop-grid">
           <div class="prop-row">
             <label class="prop-label" for="prop-x">X</label>
-            <input id="prop-x" class="prop-input" type="number" value="0" />
+            <input
+              id="prop-x"
+              class="prop-input"
+              type="number"
+              value={posX}
+              onchange={(e) => updateX(Number(e.currentTarget.value))}
+            />
           </div>
           <div class="prop-row">
             <label class="prop-label" for="prop-y">Y</label>
-            <input id="prop-y" class="prop-input" type="number" value="0" />
+            <input
+              id="prop-y"
+              class="prop-input"
+              type="number"
+              value={posY}
+              onchange={(e) => updateY(Number(e.currentTarget.value))}
+            />
           </div>
           <div class="prop-row">
-            <label class="prop-label" for="prop-w">W</label>
-            <input id="prop-w" class="prop-input" type="number" value="120" />
+            <label class="prop-label" for="prop-w">Ancho</label>
+            <input
+              id="prop-w"
+              class="prop-input"
+              type="number"
+              value={posW}
+              onchange={(e) => updateW(Number(e.currentTarget.value))}
+            />
           </div>
           <div class="prop-row">
-            <label class="prop-label" for="prop-h">H</label>
-            <input id="prop-h" class="prop-input" type="number" value="60" />
+            <label class="prop-label" for="prop-h">Alto</label>
+            <input
+              id="prop-h"
+              class="prop-input"
+              type="number"
+              value={posH}
+              onchange={(e) => updateH(Number(e.currentTarget.value))}
+            />
           </div>
         </div>
       {:else if activeTab === 'Text'}
         <div class="prop-group">
-          <div class="prop-label">Font Size</div>
-          <input class="prop-input" type="number" value="12" style="width:60px" />
+          <label class="prop-label" for="prop-text">Texto de la Forma</label>
+          <input
+            id="prop-text"
+            class="prop-input text-input"
+            type="text"
+            value={cellText}
+            oninput={(e) => updateText(e.currentTarget.value)}
+          />
         </div>
       {/if}
     {/if}
@@ -71,84 +153,125 @@
 
   <!-- Diagram props (siempre visible) -->
   <div class="diagram-section">
-    <div class="section-title">Diagram</div>
-    <label class="toggle-row">
-      <span>Grid</span>
-      <input type="checkbox" checked />
-    </label>
-    <label class="toggle-row">
-      <span>Connection Points</span>
-      <input type="checkbox" checked />
-    </label>
-    <label class="toggle-row">
-      <span>Guides</span>
-      <input type="checkbox" checked />
-    </label>
+    <div class="section-title">Diagrama</div>
+    <div class="diag-info">
+      <small>Atajos: <b>Supr/Backspace</b> para borrar, <b>Ctrl+Z</b> deshacer, <b>Ctrl+Y</b> rehacer.</small>
+    </div>
   </div>
 </aside>
 
 <style>
-  .inspector { display: flex; flex-direction: column; height: 100%; font-size: var(--text-sm); }
+  .inspector {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    font-size: var(--text-base);
+  }
 
   .tab-bar {
     display: flex;
     border-bottom: var(--border-w) solid var(--border);
+    background: var(--bg-secondary);
   }
+
   .tab-btn {
     flex: 1;
-    background: none; border: none;
-    color: var(--text-secondary);
-    font-family: var(--font);
-    font-size: var(--text-sm);
-    padding: var(--space-2) 0;
-    cursor: pointer;
+    padding: var(--space-2) var(--space-3);
+    background: none;
+    border: none;
     border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
     transition: all var(--t-fast);
   }
   .tab-btn:hover  { color: var(--text-primary); }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--bg-primary);
+  }
 
-  .tab-content { flex: 1; padding: var(--space-4); overflow-y: auto; }
+  .tab-content {
+    flex: 1;
+    padding: var(--space-4);
+    overflow-y: auto;
+  }
 
   .no-selection {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: var(--space-4); color: var(--text-disabled);
-    padding: var(--space-10) var(--space-4);
-    text-align: center; font-style: italic;
+    text-align: center;
+    color: var(--text-disabled);
+    padding: var(--space-8) 0;
   }
-  .no-sel-icon { font-size: 32px; opacity: 0.3; }
+  .no-sel-icon { font-size: 28px; display: block; margin-bottom: var(--space-2); opacity: 0.4; }
 
-  .prop-group { margin-bottom: var(--space-6); }
-  .prop-label { color: var(--text-secondary); margin-bottom: var(--space-2); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.5px; }
-  .color-preview {
-    display: flex; align-items: center; padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md); border: var(--border-w) solid var(--border);
-    cursor: pointer; gap: var(--space-2);
+  .prop-group { margin-bottom: var(--space-4); }
+  .prop-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
-  .color-preview span { font-size: var(--text-xs); color: var(--text-secondary); }
 
-  .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-  .prop-row { display: flex; align-items: center; gap: var(--space-2); }
+  .color-palette {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .color-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  .color-btn:hover {
+    transform: scale(1.15);
+  }
+
+  .prop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+  .prop-row { display: flex; flex-direction: column; }
+
   .prop-input {
-    flex: 1; background: var(--bg-elevated); border: var(--border-w) solid var(--border);
-    border-radius: var(--radius-sm); color: var(--text-primary);
-    font-family: var(--font); font-size: var(--text-sm);
-    padding: var(--space-1) var(--space-2); outline: none;
+    background: var(--bg-primary);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    width: 100%;
   }
-  .prop-input:focus { border-color: var(--accent); }
+  .prop-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
 
   .diagram-section {
-    padding: var(--space-4);
     border-top: var(--border-w) solid var(--border);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
   }
   .section-title {
-    color: var(--text-secondary); font-size: var(--text-xs);
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin-bottom: var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-2);
   }
-  .toggle-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: var(--space-2) 0; cursor: pointer;
+
+  .diag-info small {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.4;
   }
 </style>

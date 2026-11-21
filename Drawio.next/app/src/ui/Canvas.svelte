@@ -87,6 +87,8 @@
     position: relative;
     outline: none;
     cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
     /* Cuadrícula sutil de fondo */
     background-image:
       linear-gradient(var(--border) 1px, transparent 1px),
