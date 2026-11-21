@@ -13,19 +13,60 @@
     </script>
     <script src="/mxgraph/mxClient.js"></script>
     <script>
-      // Polyfill para métodos de draw.io esperados por el renderer de mxClient
-      if (window.mxGraph && !window.mxGraph.prototype.isSpecialColor) {
-        window.mxGraph.prototype.isSpecialColor = function(color) {
-          if (!color) return false;
-          var special = [
-            (window.mxConstants && window.mxConstants.STYLE_STROKECOLOR) || 'strokeColor',
-            (window.mxConstants && window.mxConstants.STYLE_FILLCOLOR) || 'fillColor',
-            'inherit',
-            'swimlane',
-            'indicated'
-          ];
-          return special.indexOf(color) >= 0;
-        };
+      // Polyfill para métodos de draw.io esperados por el renderer y handlers de mxClient
+      if (window.mxGraph) {
+        if (!window.mxGraph.prototype.isSpecialColor) {
+          window.mxGraph.prototype.isSpecialColor = function(color) {
+            if (!color) return false;
+            var special = [
+              (window.mxConstants && window.mxConstants.STYLE_STROKECOLOR) || 'strokeColor',
+              (window.mxConstants && window.mxConstants.STYLE_FILLCOLOR) || 'fillColor',
+              'inherit',
+              'swimlane',
+              'indicated'
+            ];
+            return special.indexOf(color) >= 0;
+          };
+        }
+
+        if (!window.mxGraph.prototype.isPart) {
+          window.mxGraph.prototype.isPart = function(cell) {
+            if (cell == null) return false;
+            var state = (this.view != null && typeof this.view.getState === 'function') ? this.view.getState(cell) : null;
+            var style = (state != null) ? state.style : (typeof this.getCellStyle === 'function' ? this.getCellStyle(cell) : null);
+            return (style && style['part'] == '1') || false;
+          };
+        }
+
+        if (!window.mxGraph.prototype.getCompositeParent) {
+          window.mxGraph.prototype.getCompositeParent = function(cell) {
+            while (cell != null && typeof this.isPart === 'function' && this.isPart(cell)) {
+              var model = typeof this.getModel === 'function' ? this.getModel() : this.model;
+              var temp = model != null ? model.getParent(cell) : null;
+              if (!model || typeof model.isVertex !== 'function' || !model.isVertex(temp)) {
+                break;
+              }
+              cell = temp;
+            }
+            return cell;
+          };
+        }
+
+        if (!window.mxGraph.prototype.getCompositeParents) {
+          window.mxGraph.prototype.getCompositeParents = function(cells) {
+            if (cells == null) return [];
+            var lookup = {};
+            var newCells = [];
+            for (var i = 0; i < cells.length; i++) {
+              var cell = this.getCompositeParent(cells[i]);
+              if (cell != null && !lookup[cell.id]) {
+                lookup[cell.id] = true;
+                newCells.push(cell);
+              }
+            }
+            return newCells;
+          };
+        }
       }
     </script>
   </head>

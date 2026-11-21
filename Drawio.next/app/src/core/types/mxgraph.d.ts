@@ -139,6 +139,9 @@ export declare class mxGraph {
   enabled: boolean
 
   isSpecialColor?(color?: string): boolean
+  isPart?(cell: mxCell): boolean
+  getCompositeParent?(cell: mxCell): mxCell
+  getCompositeParents?(cells: mxCell[]): mxCell[]
   getDefaultParent(): mxCell
   insertVertex(
     parent: mxCell | null,

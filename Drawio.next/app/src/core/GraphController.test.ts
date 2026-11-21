@@ -207,6 +207,11 @@ describe('GraphController', () => {
     expect(g.panningHandler.ignoreCell).toBe(false)
     expect(g.graphHandler.setSelectEnabled).toHaveBeenCalledWith(true)
     expect(g.graphHandler.setMoveEnabled).toHaveBeenCalledWith(true)
+
+    // Verifica que los polyfills de draw.io requeridos por mxGraphHandler estén presentes
+    expect(typeof g.getCompositeParent).toBe('function')
+    const v = controller.addVertex({ label: 'V', x: 0, y: 0 })
+    expect(g.getCompositeParent(v)).toBe(v)
   })
 
   it('addVertex crea un vértice en el grafo', () => {

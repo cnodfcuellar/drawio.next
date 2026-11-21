@@ -39,7 +39,7 @@ export class GraphController {
       throw new Error('mxGraph no está disponible en el entorno global (window.mxGraph).')
     }
 
-    // Parche de compatibilidad: draw.io mxClient espera isSpecialColor en mxGraph.prototype
+    // Parche de compatibilidad: draw.io mxClient espera isSpecialColor, getCompositeParent, etc.
     const proto = window.mxGraph.prototype as any
     if (!proto.isSpecialColor) {
       proto.isSpecialColor = function (color: string) {
@@ -55,9 +55,49 @@ export class GraphController {
       }
     }
 
+    if (!proto.isPart) {
+      proto.isPart = function (cell: any) {
+        if (!cell) return false
+        const state = (this.view != null && typeof this.view.getState === 'function') ? this.view.getState(cell) : null
+        const style = state != null ? state.style : (typeof this.getCellStyle === 'function' ? this.getCellStyle(cell) : null)
+        return (style && style['part'] == '1') || false
+      }
+    }
+
+    if (!proto.getCompositeParent) {
+      proto.getCompositeParent = function (cell: any) {
+        while (cell != null && typeof this.isPart === 'function' && this.isPart(cell)) {
+          const model = typeof this.getModel === 'function' ? this.getModel() : this.model
+          const temp = model != null ? model.getParent(cell) : null
+          if (!model || typeof model.isVertex !== 'function' || !model.isVertex(temp)) break
+          cell = temp
+        }
+        return cell
+      }
+    }
+
+    if (!proto.getCompositeParents) {
+      proto.getCompositeParents = function (cells: any[]) {
+        if (!cells) return []
+        const lookup: Record<string, boolean> = {}
+        const newCells: any[] = []
+        for (let i = 0; i < cells.length; i++) {
+          const cell = this.getCompositeParent(cells[i])
+          if (cell != null && !lookup[cell.id]) {
+            lookup[cell.id] = true
+            newCells.push(cell)
+          }
+        }
+        return newCells
+      }
+    }
+
     // Instanciar motor mxGraph sobre el contenedor DOM
     this.graph = new window.mxGraph(container)
     ;(this.graph as any).isSpecialColor = proto.isSpecialColor
+    ;(this.graph as any).isPart = proto.isPart
+    ;(this.graph as any).getCompositeParent = proto.getCompositeParent
+    ;(this.graph as any).getCompositeParents = proto.getCompositeParents
 
     this.setupDefaults(options)
     this.setupUndoManager()
