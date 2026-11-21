@@ -1,23 +1,40 @@
 <script lang="ts">
   import { hasSelection, selectedIds } from '../stores/selection'
-  import { activeGraph } from '../stores/graph'
+  import { activeGraph, graphRevision } from '../stores/graph'
 
   const tabs = ['Style', 'Arrange', 'Text'] as const
   let activeTab: typeof tabs[number] = $state('Style')
 
   // Obtener celda seleccionada actual
   let firstSelectedId = $derived(Array.from($selectedIds)[0] ?? null)
+  let _rev = $derived($graphRevision)
   let selectedCell = $derived.by(() => {
+    void _rev
     if (!firstSelectedId || !$activeGraph) return null
     return $activeGraph.getRawGraph().getModel().getCell(firstSelectedId)
   })
 
   // Propiedades geométricas
-  let posX = $derived(selectedCell?.geometry?.x ?? 0)
-  let posY = $derived(selectedCell?.geometry?.y ?? 0)
-  let posW = $derived(selectedCell?.geometry?.width ?? 120)
-  let posH = $derived(selectedCell?.geometry?.height ?? 60)
-  let cellText = $derived(selectedCell?.value ?? '')
+  let posX = $derived.by(() => {
+    void _rev
+    return selectedCell?.geometry?.x ?? 0
+  })
+  let posY = $derived.by(() => {
+    void _rev
+    return selectedCell?.geometry?.y ?? 0
+  })
+  let posW = $derived.by(() => {
+    void _rev
+    return selectedCell?.geometry?.width ?? 120
+  })
+  let posH = $derived.by(() => {
+    void _rev
+    return selectedCell?.geometry?.height ?? 60
+  })
+  let cellText = $derived.by(() => {
+    void _rev
+    return selectedCell?.value ?? ''
+  })
 
   function updateX(val: number) {
     if (firstSelectedId && $activeGraph) {

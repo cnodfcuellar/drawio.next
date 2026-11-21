@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { GraphController } from '../core/GraphController'
-  import { activeGraph, zoomLevel } from '../stores/graph'
+  import { activeGraph, zoomLevel, graphRevision } from '../stores/graph'
   import { selectMany, clearSelection } from '../stores/selection'
 
   let canvasEl: HTMLDivElement | null = null
@@ -22,6 +22,11 @@
         } else {
           selectMany(ids)
         }
+      })
+
+      // Sincronizar cambios en el modelo (mover, redimensionar, editar) con la UI
+      controller.onModelChange(() => {
+        graphRevision.update(n => n + 1)
       })
 
       // Nodos iniciales de bienvenida para verificar interactividad de inmediato

@@ -175,9 +175,13 @@ export declare class mxGraph {
   fit(border?: number, doCentering?: boolean, maxScale?: number): void
 
   setConnectable(connectable: boolean): void
+  setCellsSelectable(selectable: boolean): void
   setCellsMovable(movable: boolean): void
   setCellsResizable(resizable: boolean): void
   setCellsEditable(editable: boolean): void
+  setCellsDeletable(deletable: boolean): void
+  setCellsCloneable(cloneable: boolean): void
+  setCellsDisconnectable(disconnectable: boolean): void
   setDropEnabled(dropEnabled: boolean): void
   setPanning(panning: boolean): void
   setTooltips(tooltips: boolean): void

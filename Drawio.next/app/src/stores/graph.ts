@@ -10,3 +10,8 @@ export const activeGraph = writable<GraphController | null>(null)
  * Nivel de zoom actual en porcentaje (ej: 100)
  */
 export const zoomLevel = writable<number>(100)
+
+/**
+ * Contador de revisiones del modelo gráfico para sincronizar UI (Inspector, etc.)
+ */
+export const graphRevision = writable<number>(0)

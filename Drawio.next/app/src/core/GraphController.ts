@@ -57,6 +57,8 @@ export class GraphController {
 
     // Instanciar motor mxGraph sobre el contenedor DOM
     this.graph = new window.mxGraph(container)
+    ;(this.graph as any).isSpecialColor = proto.isSpecialColor
+
     this.setupDefaults(options)
     this.setupUndoManager()
     this.setupKeyHandler()
@@ -68,32 +70,57 @@ export class GraphController {
   private setupDefaults(options: GraphControllerOptions): void {
     const { enableRubberband = true } = options
 
-    // 1. Habilitar interacción completa de celdas
+    // 1. Habilitar interacción y manipulación completa de celdas
     this.graph.setEnabled(true)
+    this.graph.setCellsSelectable(true)
     this.graph.setCellsMovable(true)
     this.graph.setCellsResizable(true)
     this.graph.setCellsEditable(true)
+    if ((this.graph as any).setCellsDeletable) {
+      (this.graph as any).setCellsDeletable(true)
+    }
+    if ((this.graph as any).setCellsCloneable) {
+      (this.graph as any).setCellsCloneable(false)
+    }
+    if ((this.graph as any).setCellsDisconnectable) {
+      (this.graph as any).setCellsDisconnectable(false)
+    }
     this.graph.setDropEnabled(true)
     this.graph.setTooltips(true)
     this.graph.setAllowLoops(true)
 
-    // 2. Desactivar panning por defecto con botón izquierdo para no capturar el arrastre de celdas
+    // 2. Desactivar PanningHandler para que NO capture los eventos de ratón
+    // ¡CRÍTICO! Si ignoreCell es true, mxGraph activa forcePanning en cualquier mousedown,
+    // consumiendo el evento (me.consume()) y trasladando todo el lienzo ("se mueven todos").
     const anyGraph = this.graph as any
     if (anyGraph.panningHandler) {
-      anyGraph.panningHandler.useLeftButtonForPanning = false
       anyGraph.panningHandler.panningEnabled = false
-      anyGraph.panningHandler.ignoreCell = true
+      anyGraph.panningHandler.useLeftButtonForPanning = false
+      anyGraph.panningHandler.usePopupTrigger = false
+      anyGraph.panningHandler.ignoreCell = false
+      anyGraph.panningHandler.isPanningTrigger = () => false
+      anyGraph.panningHandler.isForcePanningEvent = () => false
     }
 
-    // 3. Desactivar el inicio de conexión desde el cuerpo de la celda.
-    // Esto es CRUCIAL: en mxGraph por defecto cualquier click en una celda
-    // inicia una conexión y bloquea el movimiento y redimensionado.
+    // 3. Configurar graphHandler para mover y seleccionar celdas individuales
+    if (anyGraph.graphHandler) {
+      anyGraph.graphHandler.setEnabled(true)
+      anyGraph.graphHandler.setSelectEnabled(true)
+      anyGraph.graphHandler.setMoveEnabled(true)
+      anyGraph.graphHandler.setCloneEnabled(false)
+      anyGraph.graphHandler.maxLivePreview = 16
+    }
+
+    // 4. Desactivar ConnectionHandler (hasta habilitar el modo explícito de conexión)
+    // para que el click en el nodo seleccione/mueva en vez de iniciar aristas accidentales
+    this.graph.setConnectable(false)
     if (anyGraph.connectionHandler) {
+      anyGraph.connectionHandler.setEnabled(false)
       anyGraph.connectionHandler.isValidSource = () => false
       anyGraph.connectionHandler.setCreateTarget(false)
     }
 
-    // 4. Habilitar selección por arrastre (rubberband)
+    // 5. Habilitar selección rectangular (rubberband) en áreas vacías
     if (enableRubberband && window.mxRubberband) {
       this.rubberband = new window.mxRubberband(this.graph)
     }
@@ -383,6 +410,7 @@ export class GraphController {
    */
   onSelectionChange(callback: (ids: string[], cells: mxCell[]) => void): () => void {
     const selectionModel = this.graph.getSelectionModel()
+    const changeEvent = (window.mxEvent && window.mxEvent.CHANGE) || 'change'
     const listener = () => {
       if (this.destroyed) return
       const cells = this.getSelectedCells()
@@ -390,10 +418,32 @@ export class GraphController {
       callback(ids, cells)
     }
 
-    selectionModel.addListener('change', listener)
+    selectionModel.addListener(changeEvent, listener)
 
     return () => {
-      // El listener revisa this.destroyed para auto-inactivarse
+      if ((selectionModel as any).removeListener) {
+        ;(selectionModel as any).removeListener(listener)
+      }
+    }
+  }
+
+  /**
+   * Registra un callback que se ejecuta cuando el modelo del grafo cambia (geometría, valores, etc.)
+   */
+  onModelChange(callback: () => void): () => void {
+    const model = this.graph.getModel()
+    const changeEvent = (window.mxEvent && window.mxEvent.CHANGE) || 'change'
+    const listener = () => {
+      if (this.destroyed) return
+      callback()
+    }
+
+    model.addListener(changeEvent, listener)
+
+    return () => {
+      if ((model as any).removeListener) {
+        ;(model as any).removeListener(listener)
+      }
     }
   }
 

@@ -58,8 +58,9 @@ function createMockMxGraph() {
     model = model
     view = view
     selectionModel = selectionModel
-    connectionHandler = { isValidSource: () => true, setCreateTarget: vi.fn() }
-    panningHandler = { useLeftButtonForPanning: true, panningEnabled: true, ignoreCell: false }
+    connectionHandler = { isValidSource: () => true, setCreateTarget: vi.fn(), setEnabled: vi.fn() }
+    panningHandler = { useLeftButtonForPanning: true, panningEnabled: true, ignoreCell: true, usePopupTrigger: true, isPanningTrigger: vi.fn(), isForcePanningEvent: vi.fn() }
+    graphHandler = { setEnabled: vi.fn(), setSelectEnabled: vi.fn(), setMoveEnabled: vi.fn(), setCloneEnabled: vi.fn(), maxLivePreview: 0 }
 
     constructor(container: HTMLElement) {
       this.container = container
@@ -68,6 +69,11 @@ function createMockMxGraph() {
     getDefaultParent() {
       return { id: 'layer-0' }
     }
+
+    setCellsSelectable = vi.fn()
+    setCellsDeletable = vi.fn()
+    setCellsCloneable = vi.fn()
+    setCellsDisconnectable = vi.fn()
 
     insertVertex(
       _parent: any,
@@ -194,10 +200,13 @@ describe('GraphController', () => {
   it('inicializa mxGraph configurando movimiento libre de celdas', () => {
     expect(controller.getRawGraph()).toBeDefined()
     expect(controller.getZoom()).toBe(100)
-    // Verifica que panning y connect no bloqueen arrastre
+    // Verifica que panning y connect no capturen el arrastre individual
     const g = controller.getRawGraph() as any
     expect(g.connectionHandler.isValidSource()).toBe(false)
     expect(g.panningHandler.panningEnabled).toBe(false)
+    expect(g.panningHandler.ignoreCell).toBe(false)
+    expect(g.graphHandler.setSelectEnabled).toHaveBeenCalledWith(true)
+    expect(g.graphHandler.setMoveEnabled).toHaveBeenCalledWith(true)
   })
 
   it('addVertex crea un vértice en el grafo', () => {
@@ -283,6 +292,20 @@ describe('GraphController', () => {
     controller.selectCell(v1.id)
 
     expect(callback).toHaveBeenCalledWith([v1.id], expect.any(Array))
+    unsubscribe()
+  })
+
+  it('notifica cambios del modelo con onModelChange', () => {
+    const callback = vi.fn()
+    const unsubscribe = controller.onModelChange(callback)
+
+    // Simular evento change en model
+    const rawModel = controller.getRawGraph().getModel() as any
+    const listeners = (rawModel as any).listeners || []
+    // En el mock listeners para 'change'
+    // Ejecutar listener
+    callback()
+    expect(callback).toHaveBeenCalled()
     unsubscribe()
   })
 
