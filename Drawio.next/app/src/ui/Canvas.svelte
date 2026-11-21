@@ -6,6 +6,40 @@
 
   let canvasEl: HTMLDivElement | null = null
   let controller: GraphController | null = null
+  let isDragOver = $state(false)
+
+  function handleDragOver(e: DragEvent) {
+    e.preventDefault()
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy'
+    }
+  }
+
+  function handleDragEnter(e: DragEvent) {
+    e.preventDefault()
+    isDragOver = true
+  }
+
+  function handleDragLeave(e: DragEvent) {
+    if (!canvasEl?.contains(e.relatedTarget as Node)) {
+      isDragOver = false
+    }
+  }
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault()
+    isDragOver = false
+    if (!e.dataTransfer || !controller) return
+
+    try {
+      const rawData = e.dataTransfer.getData('application/json')
+      if (!rawData) return
+      const shape = JSON.parse(rawData)
+      controller.insertShapeAtEvent(e, shape)
+    } catch (err) {
+      console.error('Error al insertar forma soltada:', err)
+    }
+  }
 
   onMount(() => {
     if (!canvasEl) return
@@ -74,7 +108,17 @@
 </script>
 
 <div class="canvas-wrapper" data-testid="canvas">
-  <div class="canvas-container" bind:this={canvasEl}></div>
+  <div
+    class="canvas-container"
+    class:drag-active={isDragOver}
+    role="region"
+    aria-label="Lienzo de dibujo"
+    bind:this={canvasEl}
+    ondragover={handleDragOver}
+    ondragenter={handleDragEnter}
+    ondragleave={handleDragLeave}
+    ondrop={handleDrop}
+  ></div>
 </div>
 
 <style>
@@ -99,5 +143,11 @@
       linear-gradient(var(--border) 1px, transparent 1px),
       linear-gradient(90deg, var(--border) 1px, transparent 1px);
     background-size: 20px 20px;
+    transition: outline var(--t-fast);
+  }
+
+  .canvas-container.drag-active {
+    outline: 2px dashed var(--accent);
+    outline-offset: -2px;
   }
 </style>

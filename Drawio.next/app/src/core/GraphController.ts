@@ -265,6 +265,74 @@ export class GraphController {
   }
 
   /**
+   * Inserta una forma centrada en las coordenadas de un evento de ratón / drop
+   */
+  insertShapeAtEvent(
+    evt: MouseEvent,
+    shape: { title?: string; label?: string; width: number; height: number; style: string }
+  ): mxCell {
+    const anyGraph = this.graph as any
+    let x = 100
+    let y = 100
+
+    if (typeof anyGraph.getPointForEvent === 'function') {
+      const pt = anyGraph.getPointForEvent(evt, false)
+      x = Math.max(0, Math.round(pt.x - shape.width / 2))
+      y = Math.max(0, Math.round(pt.y - shape.height / 2))
+    } else {
+      const container = this.graph.container
+      const rect = container?.getBoundingClientRect?.() ?? { left: 0, top: 0 }
+      const scale = this.graph.getView().getScale() || 1
+      const tr = (this.graph.getView() as any).translate || { x: 0, y: 0 }
+      x = Math.max(0, Math.round((evt.clientX - rect.left) / scale - tr.x - shape.width / 2))
+      y = Math.max(0, Math.round((evt.clientY - rect.top) / scale - tr.y - shape.height / 2))
+    }
+
+    const cell = this.addVertex({
+      label: shape.label ?? '',
+      x,
+      y,
+      width: shape.width,
+      height: shape.height,
+      style: shape.style
+    })
+    this.graph.setSelectionCell(cell)
+    return cell
+  }
+
+  /**
+   * Inserta una forma en el centro visible del viewport del canvas
+   */
+  insertShapeInCenter(
+    shape: { title?: string; label?: string; width: number; height: number; style: string }
+  ): mxCell {
+    const container = this.graph.container
+    const width = container?.clientWidth || 800
+    const height = container?.clientHeight || 600
+    const scale = this.graph.getView().getScale() || 1
+    const tr = (this.graph.getView() as any).translate || { x: 0, y: 0 }
+
+    // Pequeño desplazamiento aleatorio para evitar que formas consecutivas se apilen exactamente
+    const offset = Math.floor(Math.random() * 30) - 15
+    const centerX = width / 2 / scale - tr.x + offset
+    const centerY = height / 2 / scale - tr.y + offset
+
+    const x = Math.max(20, Math.round(centerX - shape.width / 2))
+    const y = Math.max(20, Math.round(centerY - shape.height / 2))
+
+    const cell = this.addVertex({
+      label: shape.label ?? '',
+      x,
+      y,
+      width: shape.width,
+      height: shape.height,
+      style: shape.style
+    })
+    this.graph.setSelectionCell(cell)
+    return cell
+  }
+
+  /**
    * Conecta dos nodos existentes con una arista (edge / conector)
    */
   addEdge(sourceId: string, targetId: string, label = '', style = ''): mxCell | null {

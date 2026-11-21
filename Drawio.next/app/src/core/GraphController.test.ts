@@ -230,6 +230,40 @@ describe('GraphController', () => {
     expect(node.geometry?.y).toBe(150)
   })
 
+  it('insertShapeAtEvent inserta una forma centrada en las coordenadas del cursor', () => {
+    const fakeEvent = { clientX: 200, clientY: 200 } as MouseEvent
+    const cell = controller.insertShapeAtEvent(fakeEvent, {
+      title: 'Cilindro',
+      label: 'BD',
+      width: 80,
+      height: 90,
+      style: 'shape=cylinder3'
+    })
+
+    expect(cell).toBeDefined()
+    expect(cell.value).toBe('BD')
+    expect(cell.geometry?.width).toBe(80)
+    expect(cell.geometry?.height).toBe(90)
+    expect(cell.style).toBe('shape=cylinder3')
+    expect(controller.getSelectedCellIds()).toContain(cell.id)
+  })
+
+  it('insertShapeInCenter inserta una forma en el centro del viewport y la selecciona', () => {
+    const cell = controller.insertShapeInCenter({
+      title: 'Nube',
+      label: 'Cloud',
+      width: 120,
+      height: 80,
+      style: 'ellipse;shape=cloud'
+    })
+
+    expect(cell).toBeDefined()
+    expect(cell.value).toBe('Cloud')
+    expect(cell.geometry?.width).toBe(120)
+    expect(cell.geometry?.height).toBe(80)
+    expect(controller.getSelectedCellIds()).toContain(cell.id)
+  })
+
   it('addEdge conecta dos vértices existentes', () => {
     const v1 = controller.addVertex({ label: 'Origen', x: 50, y: 50 })
     const v2 = controller.addVertex({ label: 'Destino', x: 250, y: 50 })
