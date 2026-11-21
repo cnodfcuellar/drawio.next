@@ -1,17 +1,50 @@
 <script lang="ts">
-  let zoom = $state(100)
+  import { zoomLevel, activeGraph } from '../stores/graph'
+
+  let pages = $state([{ id: 1, name: 'Page-1' }])
+  let activePageId = $state(1)
+
+  function addPage() {
+    const nextId = pages.length + 1
+    pages.push({ id: nextId, name: `Page-${nextId}` })
+    activePageId = nextId
+  }
 </script>
 
 <div class="statusbar" data-testid="statusbar">
-  <div class="pages">
-    <button class="page-tab active">Page-1</button>
-    <button class="page-add" title="Add page">+</button>
+  <!-- Tabs de páginas -->
+  <div class="pages-tabs">
+    {#each pages as page}
+      <button
+        class="page-tab"
+        class:active={page.id === activePageId}
+        onclick={() => (activePageId = page.id)}
+      >
+        {page.name}
+      </button>
+    {/each}
+    <button class="add-page-btn" title="Add page" onclick={addPage}>+</button>
   </div>
-  <div class="spacer"></div>
-  <div class="zoom-ctrl">
-    <button onclick={() => zoom = Math.max(10, zoom - 10)}>−</button>
-    <span class="zoom-pct">{zoom}%</span>
-    <button onclick={() => zoom = Math.min(400, zoom + 10)}>+</button>
+
+  <!-- Controles de zoom reactivos al GraphController -->
+  <div class="zoom-controls">
+    <button
+      class="zoom-btn"
+      title="Zoom out"
+      onclick={() => {
+        $activeGraph?.zoomOut()
+        if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
+      }}>−</button
+    >
+    <span class="zoom-value">{$zoomLevel}%</span>
+    <button
+      class="zoom-btn"
+      title="Zoom in"
+      onclick={() => {
+        $activeGraph?.zoomIn()
+        if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
+      }}>+</button
+    >
   </div>
 </div>
 
@@ -19,36 +52,55 @@
   .statusbar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
     height: 100%;
-    padding: 0 var(--space-2);
-    gap: var(--space-2);
-    font-size: var(--text-xs);
-    background: var(--bg-elevated);
-    border-top: var(--border-w) solid var(--border);
-    color: var(--text-secondary);
   }
 
-  .pages { display: flex; align-items: center; gap: var(--space-1); }
+  .pages-tabs { display: flex; align-items: center; gap: 2px; height: 100%; }
+
   .page-tab {
-    background: var(--bg-secondary); border: var(--border-w) solid var(--border);
-    border-bottom: none; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    color: var(--text-secondary); font-family: var(--font); font-size: var(--text-xs);
-    padding: 2px var(--space-4); cursor: pointer;
+    height: 100%;
+    padding: 0 var(--space-4);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    border-top: 2px solid transparent;
   }
-  .page-tab.active { color: var(--text-primary); background: var(--bg-active); }
-  .page-add {
-    background: none; border: none; color: var(--text-secondary);
-    cursor: pointer; font-size: var(--text-md); padding: 0 var(--space-2);
-  }
-  .page-add:hover { color: var(--text-primary); }
+  .page-tab:hover  { background: rgba(255, 255, 255, 0.1); color: white; }
+  .page-tab.active { background: rgba(255, 255, 255, 0.2); color: white; font-weight: var(--font-medium); }
 
-  .spacer { flex: 1; }
-
-  .zoom-ctrl { display: flex; align-items: center; gap: var(--space-2); }
-  .zoom-ctrl button {
-    background: none; border: none; color: var(--text-secondary);
-    cursor: pointer; font-size: var(--text-md); width: 20px; text-align: center;
+  .add-page-btn {
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: var(--text-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
   }
-  .zoom-ctrl button:hover { color: var(--text-primary); }
-  .zoom-pct { min-width: 36px; text-align: center; }
+  .add-page-btn:hover { opacity: 1; }
+
+  .zoom-controls { display: flex; align-items: center; gap: var(--space-2); }
+  .zoom-value { min-width: 40px; text-align: center; }
+  .zoom-btn {
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: var(--text-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+  .zoom-btn:hover { background: rgba(255, 255, 255, 0.15); }
 </style>

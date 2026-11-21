@@ -1,5 +1,6 @@
 <script lang="ts">
   import { hasSelection } from '../stores/selection'
+  import { activeGraph, zoomLevel } from '../stores/graph'
 
   interface ToolGroup {
     tools: Tool[]
@@ -10,28 +11,96 @@
     label: string
     shortcut?: string
     action: () => void
-    disabled?: boolean
   }
 
   const groups: ToolGroup[] = [
     {
       tools: [
-        { id: 'undo',     icon: '↩', label: 'Undo',     shortcut: 'Ctrl+Z',  action: () => {} },
-        { id: 'redo',     icon: '↪', label: 'Redo',     shortcut: 'Ctrl+Y',  action: () => {} },
+        {
+          id: 'undo',
+          icon: '↩',
+          label: 'Undo',
+          shortcut: 'Ctrl+Z',
+          action: () => $activeGraph?.undo()
+        },
+        {
+          id: 'redo',
+          icon: '↪',
+          label: 'Redo',
+          shortcut: 'Ctrl+Y',
+          action: () => $activeGraph?.redo()
+        },
       ]
     },
     {
       tools: [
-        { id: 'delete',   icon: '🗑', label: 'Delete',   shortcut: 'Del',     action: () => {} },
-        { id: 'copy',     icon: '⧉',  label: 'Copy',     shortcut: 'Ctrl+C',  action: () => {} },
-        { id: 'paste',    icon: '📋', label: 'Paste',    shortcut: 'Ctrl+V',  action: () => {} },
+        {
+          id: 'delete',
+          icon: '🗑',
+          label: 'Delete',
+          shortcut: 'Del',
+          action: () => $activeGraph?.removeSelected()
+        },
+        {
+          id: 'addNode',
+          icon: '✚',
+          label: 'Nuevo Nodo',
+          shortcut: 'N',
+          action: () => {
+            if ($activeGraph) {
+              $activeGraph.addVertex({
+                label: 'Nuevo Bloque',
+                x: 200 + Math.floor(Math.random() * 200),
+                y: 220 + Math.floor(Math.random() * 100),
+                width: 120,
+                height: 60
+              })
+            }
+          }
+        }
       ]
     },
     {
       tools: [
-        { id: 'zoomIn',   icon: '+',  label: 'Zoom In',  shortcut: 'Ctrl+=',  action: () => {} },
-        { id: 'zoomOut',  icon: '−',  label: 'Zoom Out', shortcut: 'Ctrl+-',  action: () => {} },
-        { id: 'fit',      icon: '⊡',  label: 'Fit Page', shortcut: 'Ctrl+Shift+H', action: () => {} },
+        {
+          id: 'zoomIn',
+          icon: '+',
+          label: 'Zoom In',
+          shortcut: 'Ctrl+=',
+          action: () => {
+            $activeGraph?.zoomIn()
+            if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
+          }
+        },
+        {
+          id: 'zoomOut',
+          icon: '−',
+          label: 'Zoom Out',
+          shortcut: 'Ctrl+-',
+          action: () => {
+            $activeGraph?.zoomOut()
+            if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
+          }
+        },
+        {
+          id: 'resetZoom',
+          icon: '1:1',
+          label: 'Reset Zoom (100%)',
+          action: () => {
+            $activeGraph?.resetZoom()
+            if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
+          }
+        },
+        {
+          id: 'fit',
+          icon: '⊡',
+          label: 'Ajustar a Pantalla',
+          shortcut: 'Ctrl+Shift+H',
+          action: () => {
+            $activeGraph?.fit()
+            if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
+          }
+        },
       ]
     },
   ]
@@ -46,6 +115,7 @@
           class="tool-btn"
           title="{tool.label}{tool.shortcut ? ` (${tool.shortcut})` : ''}"
           onclick={tool.action}
+          disabled={tool.id === 'delete' ? !$hasSelection : false}
           data-testid="tool-{tool.id}"
         >
           <span class="tool-icon">{tool.icon}</span>
@@ -77,8 +147,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
+    min-width: 28px;
     height: 28px;
+    padding: 0 var(--space-2);
     background: none;
     border: none;
     border-radius: var(--radius-sm);
@@ -89,7 +160,7 @@
   }
   .tool-btn:hover    { background: var(--bg-hover); }
   .tool-btn:active   { background: var(--bg-active); }
-  .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  .tool-icon { line-height: 1; }
+  .tool-icon { line-height: 1; font-size: 13px; }
 </style>

@@ -1,26 +1,75 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
+  import { GraphController } from '../core/GraphController'
+  import { activeGraph, zoomLevel } from '../stores/graph'
+  import { selectMany, clearSelection } from '../stores/selection'
 
-  let canvasEl: HTMLDivElement
+  let canvasEl: HTMLDivElement | null = null
+  let controller: GraphController | null = null
 
   onMount(() => {
-    // El GraphController (Mes 2) tomará control de este div
-    // Por ahora mostramos el canvas vacío con cuadrícula
+    if (!canvasEl) return
+
+    // Inicializar GraphController si mxGraph está cargado
+    if (typeof window !== 'undefined' && window.mxGraph) {
+      controller = new GraphController(canvasEl)
+      activeGraph.set(controller)
+
+      // Sincronizar selección con el store
+      controller.onSelectionChange((ids) => {
+        if (ids.length === 0) {
+          clearSelection()
+        } else {
+          selectMany(ids)
+        }
+      })
+
+      // Nodos iniciales de bienvenida para verificar interactividad de inmediato
+      const v1 = controller.addVertex({
+        label: 'Inicio',
+        x: 140,
+        y: 120,
+        width: 130,
+        height: 60,
+        style: 'rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=13;'
+      })
+
+      const v2 = controller.addVertex({
+        label: 'Procesamiento',
+        x: 360,
+        y: 120,
+        width: 140,
+        height: 60,
+        style: 'rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=13;'
+      })
+
+      const v3 = controller.addVertex({
+        label: 'Fin / Resultado',
+        x: 580,
+        y: 120,
+        width: 140,
+        height: 60,
+        style: 'ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
+      })
+
+      controller.addEdge(v1.id, v2.id, 'Paso 1')
+      controller.addEdge(v2.id, v3.id, 'Paso 2')
+
+      zoomLevel.set(controller.getZoom())
+
+      // Exponer globalmente para depuración rápida en consola del navegador
+      window.__graphController = controller
+    }
+  })
+
+  onDestroy(() => {
+    activeGraph.set(null)
+    controller?.destroy()
   })
 </script>
 
 <div class="canvas-wrapper" data-testid="canvas">
-  <div class="canvas-container" bind:this={canvasEl}>
-    <!-- mxGraph se monta aquí en Mes 2 -->
-    <div class="canvas-placeholder">
-      <div class="grid-bg"></div>
-      <div class="canvas-hint">
-        <span class="hint-icon">✦</span>
-        <p>Canvas ready</p>
-        <p class="hint-sub">Graph engine will be initialized here (Month 2)</p>
-      </div>
-    </div>
-  </div>
+  <div class="canvas-container" bind:this={canvasEl}></div>
 </div>
 
 <style>
@@ -29,40 +78,19 @@
     height: 100%;
     position: relative;
     overflow: hidden;
+    background-color: var(--bg-primary);
   }
 
   .canvas-container {
     width: 100%;
     height: 100%;
-  }
-
-  .canvas-placeholder {
-    width: 100%;
-    height: 100%;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Cuadrícula de fondo via CSS */
-  .grid-bg {
-    position: absolute;
-    inset: 0;
+    outline: none;
+    cursor: default;
+    /* Cuadrícula sutil de fondo */
     background-image:
       linear-gradient(var(--border) 1px, transparent 1px),
       linear-gradient(90deg, var(--border) 1px, transparent 1px);
     background-size: 20px 20px;
-    opacity: 0.4;
   }
-
-  .canvas-hint {
-    position: relative;
-    text-align: center;
-    color: var(--text-disabled);
-    pointer-events: none;
-  }
-  .hint-icon { font-size: 32px; display: block; margin-bottom: var(--space-4); opacity: 0.3; }
-  .canvas-hint p { font-size: var(--text-md); margin-bottom: var(--space-2); }
-  .hint-sub { font-size: var(--text-sm); opacity: 0.7; }
 </style>
