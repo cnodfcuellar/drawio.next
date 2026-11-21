@@ -245,7 +245,7 @@
   .shape-grid {
     padding: var(--space-2) var(--space-3);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-2);
     background: var(--bg-primary);
   }

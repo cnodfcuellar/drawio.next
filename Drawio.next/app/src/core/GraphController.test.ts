@@ -153,6 +153,8 @@ function createMockMxGraph() {
     setTooltips = vi.fn()
     setEnabled = vi.fn()
     setAllowLoops = vi.fn()
+    orderCells = vi.fn()
+    setAllowNegativeCoordinates = vi.fn()
     getModel() { return model }
     getView() { return view }
     destroy = vi.fn()
@@ -295,6 +297,56 @@ describe('GraphController', () => {
     const v1 = controller.addVertex({ label: 'Color', x: 0, y: 0 })
     controller.setCellFillColor(v1.id, '#ff0000')
     expect(v1.style).toContain('fillColor=#ff0000')
+  })
+
+  it('setCellStyleProperty y getCellStyleProperty leen y escriben propiedades de estilo', () => {
+    const v1 = controller.addVertex({ label: 'Estilo', x: 0, y: 0 })
+    controller.setCellStyleProperty(v1.id, 'strokeColor', '#00ff00')
+    controller.setCellStyleProperty(v1.id, 'strokeWidth', 3)
+    controller.setCellStyleProperty(v1.id, 'dashed', '1')
+
+    expect(controller.getCellStyleProperty(v1.id, 'strokeColor')).toBe('#00ff00')
+    expect(controller.getCellStyleProperty(v1.id, 'strokeWidth')).toBe('3')
+    expect(controller.getCellStyleProperty(v1.id, 'dashed')).toBe('1')
+
+    // Eliminar propiedad pasando cadena vacía o null
+    controller.setCellStyleProperty(v1.id, 'dashed', null)
+    expect(controller.getCellStyleProperty(v1.id, 'dashed')).toBe('')
+  })
+
+  it('modifica propiedades avanzadas de estilo (borde, opacidad, sombra, fuente, alineación)', () => {
+    const v1 = controller.addVertex({ label: 'Props', x: 0, y: 0 })
+    controller.setCellStrokeColor(v1.id, '#123456')
+    controller.setCellStrokeWidth(v1.id, 2)
+    controller.setCellOpacity(v1.id, 75)
+    controller.setCellDashed(v1.id, true)
+    controller.setCellRounded(v1.id, true)
+    controller.setCellShadow(v1.id, true)
+    controller.setCellRotation(v1.id, 90)
+    controller.setCellFontSize(v1.id, 16)
+    controller.setCellFontColor(v1.id, '#ffffff')
+    controller.setCellAlign(v1.id, 'center')
+
+    expect(v1.style).toContain('strokeColor=#123456')
+    expect(v1.style).toContain('strokeWidth=2')
+    expect(v1.style).toContain('opacity=75')
+    expect(v1.style).toContain('dashed=1')
+    expect(v1.style).toContain('rounded=1')
+    expect(v1.style).toContain('shadow=1')
+    expect(v1.style).toContain('rotation=90')
+    expect(v1.style).toContain('fontSize=16')
+    expect(v1.style).toContain('fontColor=#ffffff')
+    expect(v1.style).toContain('align=center')
+  })
+
+  it('bringToFront y sendToBack ordenan celdas en el z-order', () => {
+    const v1 = controller.addVertex({ label: 'Z', x: 0, y: 0 })
+    controller.bringToFront(v1.id)
+    const rawGraph = controller.getRawGraph() as any
+    expect(rawGraph.orderCells).toHaveBeenCalledWith(false, [v1])
+
+    controller.sendToBack(v1.id)
+    expect(rawGraph.orderCells).toHaveBeenCalledWith(true, [v1])
   })
 
   it('removeSelected elimina las celdas seleccionadas', () => {

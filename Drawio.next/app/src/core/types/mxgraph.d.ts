@@ -190,6 +190,8 @@ export declare class mxGraph {
   setTooltips(tooltips: boolean): void
   setAllowLoops(allow: boolean): void
   setEnabled(enabled: boolean): void
+  orderCells(back?: boolean, cells?: mxCell[]): mxCell[]
+  setAllowNegativeCoordinates(allow: boolean): void
 
   getModel(): mxGraphModel
   getView(): mxGraphView

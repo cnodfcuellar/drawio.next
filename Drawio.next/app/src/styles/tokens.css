@@ -63,8 +63,8 @@
   /* Dimensiones del layout */
   --menubar-h:   36px;
   --toolbar-h:   44px;
-  --sidebar-w:   220px;
-  --inspector-w: 240px;
+  --sidebar-w:   240px;
+  --inspector-w: 260px;
   --statusbar-h: 24px;
 
   /* Sombras */

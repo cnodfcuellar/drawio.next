@@ -128,6 +128,9 @@ export class GraphController {
     this.graph.setDropEnabled(true)
     this.graph.setTooltips(true)
     this.graph.setAllowLoops(true)
+    if ((this.graph as any).setAllowNegativeCoordinates) {
+      (this.graph as any).setAllowNegativeCoordinates(false)
+    }
 
     // 2. Desactivar PanningHandler para que NO capture los eventos de ratón
     // ¡CRÍTICO! Si ignoreCell es true, mxGraph activa forcePanning en cualquier mousedown,
@@ -394,6 +397,13 @@ export class GraphController {
    * Modifica el color de relleno de una celda
    */
   setCellFillColor(cellId: string, color: string): void {
+    this.setCellStyleProperty(cellId, 'fillColor', color)
+  }
+
+  /**
+   * Modifica una propiedad arbitraria en el estilo de una celda
+   */
+  setCellStyleProperty(cellId: string, key: string, value: string | number | null): void {
     const cell = this.graph.getModel().getCell(cellId)
     if (!cell) return
 
@@ -401,14 +411,133 @@ export class GraphController {
     model.beginUpdate()
     try {
       let currentStyle = model.getStyle(cell) || ''
-      if (currentStyle.includes('fillColor=')) {
-        currentStyle = currentStyle.replace(/fillColor=[^;]+/, `fillColor=${color}`)
+      const regex = new RegExp(`(^|;)${key}=[^;]*`, 'g')
+
+      if (value === null || value === undefined || value === '') {
+        currentStyle = currentStyle.replace(regex, '')
+      } else if (currentStyle.includes(`${key}=`)) {
+        currentStyle = currentStyle.replace(new RegExp(`${key}=[^;]+`), `${key}=${value}`)
       } else {
-        currentStyle += `;fillColor=${color}`
+        currentStyle = currentStyle ? `${currentStyle};${key}=${value}` : `${key}=${value}`
       }
+
+      currentStyle = currentStyle.replace(/;;+/g, ';').replace(/^;|;$/g, '')
       model.setStyle(cell, currentStyle)
     } finally {
       model.endUpdate()
+    }
+  }
+
+  /**
+   * Obtiene una propiedad de estilo de una celda
+   */
+  getCellStyleProperty(cellId: string, key: string, defaultValue = ''): string {
+    const cell = this.graph.getModel().getCell(cellId)
+    if (!cell) return defaultValue
+    const style = this.graph.getModel().getStyle(cell) || ''
+    const match = style.match(new RegExp(`(?:^|;)${key}=([^;]*)`))
+    return match ? match[1] : defaultValue
+  }
+
+  /**
+   * Modifica el color de borde de una celda
+   */
+  setCellStrokeColor(cellId: string, color: string): void {
+    this.setCellStyleProperty(cellId, 'strokeColor', color)
+  }
+
+  /**
+   * Modifica el grosor de trazo de una celda
+   */
+  setCellStrokeWidth(cellId: string, width: number): void {
+    this.setCellStyleProperty(cellId, 'strokeWidth', width)
+  }
+
+  /**
+   * Modifica la opacidad de una celda (0 a 100)
+   */
+  setCellOpacity(cellId: string, opacity: number): void {
+    this.setCellStyleProperty(cellId, 'opacity', opacity)
+  }
+
+  /**
+   * Alterna línea discontinua (dashed)
+   */
+  setCellDashed(cellId: string, dashed: boolean): void {
+    this.setCellStyleProperty(cellId, 'dashed', dashed ? '1' : '0')
+  }
+
+  /**
+   * Alterna esquinas redondeadas
+   */
+  setCellRounded(cellId: string, rounded: boolean): void {
+    this.setCellStyleProperty(cellId, 'rounded', rounded ? '1' : '0')
+  }
+
+  /**
+   * Alterna sombra
+   */
+  setCellShadow(cellId: string, shadow: boolean): void {
+    this.setCellStyleProperty(cellId, 'shadow', shadow ? '1' : '0')
+  }
+
+  /**
+   * Modifica la rotación en grados
+   */
+  setCellRotation(cellId: string, rotation: number): void {
+    this.setCellStyleProperty(cellId, 'rotation', rotation)
+  }
+
+  /**
+   * Modifica el tamaño de fuente
+   */
+  setCellFontSize(cellId: string, size: number): void {
+    this.setCellStyleProperty(cellId, 'fontSize', size)
+  }
+
+  /**
+   * Modifica el color de fuente
+   */
+  setCellFontColor(cellId: string, color: string): void {
+    this.setCellStyleProperty(cellId, 'fontColor', color)
+  }
+
+  /**
+   * Modifica la alineación del texto
+   */
+  setCellAlign(cellId: string, align: 'left' | 'center' | 'right'): void {
+    this.setCellStyleProperty(cellId, 'align', align)
+  }
+
+  /**
+   * Mueve una celda (o las celdas seleccionadas) al frente (z-order)
+   */
+  bringToFront(cellId?: string): void {
+    let cells: mxCell[] = []
+    if (cellId) {
+      const c = this.graph.getModel().getCell(cellId)
+      if (c) cells = [c]
+    } else {
+      cells = this.getSelectedCells()
+    }
+    if (cells.length > 0 && typeof (this.graph as any).orderCells === 'function') {
+      ;(this.graph as any).orderCells(false, cells)
+    }
+  }
+
+  /**
+   * Mueve una celda (o las celdas seleccionadas) al fondo (z-order)
+   */
+  sendToBack(cellId?: string): void {
+    let cells: mxCell[] = []
+    if (cellId) {
+      const c = this.graph.getModel().getCell(cellId)
+      if (c) cells = [c]
+    } else {
+      cells = this.getSelectedCells()
+    }
+    if (cells.length > 0 && typeof (this.graph as any).orderCells === 'function') {
+      ;(this.graph as any).orderCells(true, cells)
     }
   }
 
