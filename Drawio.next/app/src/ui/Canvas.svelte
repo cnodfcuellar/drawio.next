@@ -31,6 +31,23 @@
     isDragOver = false
     if (!e.dataTransfer || !controller) return
 
+    // 1. Soporte para arrastrar y soltar archivos .drawio o .xml desde el explorador
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0]
+      if (file.name.endsWith('.drawio') || file.name.endsWith('.xml')) {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          const content = event.target?.result as string
+          if (content && controller) {
+            controller.importXml(content)
+          }
+        }
+        reader.readAsText(file)
+        return
+      }
+    }
+
+    // 2. Soporte para formas de la paleta lateral
     try {
       const rawData = e.dataTransfer.getData('application/json')
       if (!rawData) return

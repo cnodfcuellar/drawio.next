@@ -127,12 +127,12 @@ function createMockMxGraph() {
       return selectionModel
     }
 
-    removeCells(cells: any[]) {
+    removeCells = vi.fn((cells: any[]) => {
       cells.forEach(c => delete cellsMap[c.id])
       currentSelection = []
       selectionListeners.forEach(fn => fn())
       return cells
-    }
+    })
 
     selectAll() {
       currentSelection = Object.values(cellsMap)
@@ -155,6 +155,8 @@ function createMockMxGraph() {
     setAllowLoops = vi.fn()
     orderCells = vi.fn()
     setAllowNegativeCoordinates = vi.fn()
+    getChildCells = vi.fn((_p: any) => Object.values(cellsMap))
+    getGraphBounds = vi.fn(() => ({ x: 20, y: 30, width: 300, height: 200 }))
     getModel() { return model }
     getView() { return view }
     destroy = vi.fn()
@@ -175,10 +177,38 @@ function createMockMxGraph() {
     destroy = vi.fn()
   }
 
+  class MockCodec {
+    document: any
+    constructor(doc?: any) { this.document = doc }
+    encode(obj: any) {
+      return { nodeName: 'mxGraphModel' }
+    }
+    decode(node: any, into: any) {
+      return into
+    }
+  }
+
+  const mockUtils = {
+    clone: (obj: any) => (obj ? { ...obj } : obj),
+    getXml: (_node: any) => '<mxGraphModel><root><mxCell id="0"/></root></mxGraphModel>',
+    parseXml: (xml: string) => {
+      return {
+        querySelector: (sel: string) => {
+          if (sel === 'mxGraphModel' || sel === 'diagram') {
+            return { nodeName: 'mxGraphModel', textContent: '<mxGraphModel></mxGraphModel>' }
+          }
+          return null
+        }
+      } as any
+    }
+  }
+
   return {
     MockGraph,
     MockUndoManager,
-    MockRubberband
+    MockRubberband,
+    MockCodec,
+    mockUtils
   }
 }
 
@@ -193,6 +223,8 @@ describe('GraphController', () => {
     ;(globalThis as any).window.mxGraph = mocks.MockGraph
     ;(globalThis as any).window.mxUndoManager = mocks.MockUndoManager
     ;(globalThis as any).window.mxRubberband = mocks.MockRubberband
+    ;(globalThis as any).window.mxCodec = mocks.MockCodec
+    ;(globalThis as any).window.mxUtils = mocks.mockUtils
     ;(globalThis as any).window.mxConstants = { STYLE_STROKECOLOR: 'strokeColor', STYLE_FILLCOLOR: 'fillColor' }
 
     container = { id: 'test-container' } as unknown as HTMLElement
@@ -398,6 +430,35 @@ describe('GraphController', () => {
     callback()
     expect(callback).toHaveBeenCalled()
     unsubscribe()
+  })
+
+  it('exportToXml genera una estructura XML válida compatible con draw.io', () => {
+    controller.addVertex({ label: 'Nodo 1', x: 10, y: 10 })
+    const xml = controller.exportToXml()
+
+    expect(xml).toContain('<mxfile')
+    expect(xml).toContain('<diagram')
+    expect(xml).toContain('<mxGraphModel')
+    expect(xml).toContain('</mxfile>')
+  })
+
+  it('importXml analiza e importa un diagrama en el modelo', () => {
+    const xmlTest = `<mxfile host="drawio.next">
+      <diagram id="d1" name="Page-1">
+        <mxGraphModel><root><mxCell id="0"/></root></mxGraphModel>
+      </diagram>
+    </mxfile>`
+    const success = controller.importXml(xmlTest)
+    expect(success).toBe(true)
+  })
+
+  it('clear elimina todas las celdas hijas del modelo', () => {
+    controller.addVertex({ label: 'V1', x: 0, y: 0 })
+    controller.addVertex({ label: 'V2', x: 100, y: 100 })
+    const rawGraph = controller.getRawGraph()
+
+    controller.clear()
+    expect(rawGraph.removeCells).toHaveBeenCalled()
   })
 
   it('destruye la instancia limpiamente', () => {

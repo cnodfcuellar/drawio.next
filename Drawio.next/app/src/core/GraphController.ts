@@ -32,6 +32,7 @@ export class GraphController {
   private undoManager: mxUndoManager | null = null
   private rubberband: mxRubberband | null = null
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null
+  private cleanupPanning: (() => void) | null = null
   private destroyed = false
 
   constructor(container: HTMLElement, options: GraphControllerOptions = {}) {
@@ -102,6 +103,7 @@ export class GraphController {
     this.setupDefaults(options)
     this.setupUndoManager()
     this.setupKeyHandler()
+    this.setupSmoothPanning()
   }
 
   /**
@@ -685,10 +687,350 @@ export class GraphController {
   }
 
   /**
+   * Configura navegación fluida mediante Panning (Espacio + Arrastre, Clic derecho o Botón central)
+   * y Zoom con la rueda del ratón (Ctrl + Scroll).
+   */
+  private setupSmoothPanning(): void {
+    const container = this.graph.container
+    if (!container || typeof window === 'undefined' || typeof container.addEventListener !== 'function' || typeof window.addEventListener !== 'function') return
+
+    let isPanning = false
+    let startX = 0
+    let startY = 0
+    let initTranslateX = 0
+    let initTranslateY = 0
+    let isSpacePressed = false
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (this.destroyed) return
+      if (e.code === 'Space' && !isSpacePressed) {
+        const target = e.target as HTMLElement | null
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return
+        }
+        isSpacePressed = true
+        if (!isPanning && container) {
+          container.style.cursor = 'grab'
+        }
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (this.destroyed) return
+      if (e.code === 'Space') {
+        isSpacePressed = false
+        if (!isPanning && container) {
+          container.style.cursor = ''
+        }
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanning || this.destroyed) return
+      e.preventDefault()
+
+      const view = this.graph.getView()
+      if (!view) return
+      const scale = view.getScale ? view.getScale() : 1
+      const dx = (e.clientX - startX) / (scale || 1)
+      const dy = (e.clientY - startY) / (scale || 1)
+
+      if (typeof view.setTranslate === 'function') {
+        view.setTranslate(initTranslateX + dx, initTranslateY + dy)
+      }
+    }
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!isPanning) return
+      isPanning = false
+      if (container) {
+        container.style.cursor = isSpacePressed ? 'grab' : ''
+      }
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.style.userSelect = ''
+      }
+
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (this.destroyed) return
+      // Panning con:
+      // 1. Clic derecho (button === 2)
+      // 2. Botón central (button === 1)
+      // 3. Clic izquierdo (button === 0) con barra espaciadora
+      const shouldPan = e.button === 2 || e.button === 1 || (e.button === 0 && isSpacePressed)
+      if (!shouldPan) return
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      isPanning = true
+      startX = e.clientX
+      startY = e.clientY
+
+      const view = this.graph.getView()
+      const trans = view && typeof view.getTranslate === 'function' ? view.getTranslate() : { x: 0, y: 0 }
+      initTranslateX = trans?.x ?? 0
+      initTranslateY = trans?.y ?? 0
+
+      if (container) {
+        container.style.cursor = 'grabbing'
+      }
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.style.userSelect = 'none'
+      }
+
+      window.addEventListener('mousemove', handleMouseMove, { passive: false })
+      window.addEventListener('mouseup', handleMouseUp, { passive: false })
+    }
+
+    const handleContextMenu = (e: MouseEvent) => {
+      // Prevenir el menú contextual predeterminado del navegador en el canvas
+      e.preventDefault()
+    }
+
+    const handleWheel = (e: WheelEvent) => {
+      if (this.destroyed) return
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        if (e.deltaY < 0) {
+          this.zoomIn()
+        } else if (e.deltaY > 0) {
+          this.zoomOut()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    container.addEventListener('mousedown', handleMouseDown)
+    container.addEventListener('contextmenu', handleContextMenu)
+    container.addEventListener('wheel', handleWheel, { passive: false })
+
+    this.cleanupPanning = () => {
+      if (typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
+        window.removeEventListener('keydown', handleKeyDown)
+        window.removeEventListener('keyup', handleKeyUp)
+        window.removeEventListener('mousemove', handleMouseMove)
+        window.removeEventListener('mouseup', handleMouseUp)
+      }
+      if (typeof container.removeEventListener === 'function') {
+        container.removeEventListener('mousedown', handleMouseDown)
+        container.removeEventListener('contextmenu', handleContextMenu)
+        container.removeEventListener('wheel', handleWheel)
+      }
+    }
+  }
+
+  /**
+   * Limpia todas las celdas del diagrama
+   */
+  clear(): void {
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      const parent = this.graph.getDefaultParent()
+      let childCells: mxCell[] = []
+      if (typeof (this.graph as any).getChildCells === 'function') {
+        childCells = (this.graph as any).getChildCells(parent, true, true)
+      } else if (typeof (model as any).getChildCells === 'function') {
+        childCells = (model as any).getChildCells(parent, true, true)
+      } else {
+        const anyModel = model as any
+        if (anyModel.cells) {
+          childCells = Object.values(anyModel.cells).filter((c: any) => c && c.id !== parent?.id && c.id !== '0') as mxCell[]
+        }
+      }
+      if (childCells.length > 0) {
+        this.graph.removeCells(childCells, true)
+      }
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
+   * Exporta el estado del grafo a formato XML (.drawio)
+   */
+  exportToXml(): string {
+    const enc = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec() : null
+    let modelXml = ''
+    if (enc && typeof enc.encode === 'function') {
+      const node = enc.encode(this.graph.getModel())
+      modelXml = (typeof window !== 'undefined' && window.mxUtils && typeof window.mxUtils.getXml === 'function')
+        ? window.mxUtils.getXml(node)
+        : (typeof XMLSerializer !== 'undefined' ? new XMLSerializer().serializeToString(node) : '<mxGraphModel><root></root></mxGraphModel>')
+    } else {
+      modelXml = '<mxGraphModel><root></root></mxGraphModel>'
+    }
+
+    const timestamp = new Date().toISOString()
+    return `<mxfile host="drawio.next" modified="${timestamp}" agent="DrawioNext/1.0" version="24.0.0">
+  <diagram id="diagram_1" name="Page-1">
+    ${modelXml}
+  </diagram>
+</mxfile>`
+  }
+
+  /**
+   * Importa un diagrama desde una cadena XML o archivo .drawio
+   */
+  importXml(xmlString: string): boolean {
+    if (!xmlString || typeof xmlString !== 'string') return false
+    try {
+      let doc: Document
+      if (typeof window !== 'undefined' && window.mxUtils && typeof window.mxUtils.parseXml === 'function') {
+        doc = window.mxUtils.parseXml(xmlString)
+      } else if (typeof DOMParser !== 'undefined') {
+        doc = new DOMParser().parseFromString(xmlString, 'text/xml')
+      } else {
+        return false
+      }
+
+      const parserError = doc.querySelector('parsererror')
+      if (parserError) {
+        console.error('Error al parsear XML:', parserError.textContent)
+        return false
+      }
+
+      // Buscar el nodo mxGraphModel
+      let modelNode: Element | null = doc.querySelector('mxGraphModel')
+      if (!modelNode) {
+        const diagramNode = doc.querySelector('diagram')
+        if (diagramNode && diagramNode.textContent) {
+          const content = diagramNode.textContent.trim()
+          if (content.startsWith('<mxGraphModel') || content.startsWith('<root')) {
+            const innerDoc = new DOMParser().parseFromString(content, 'text/xml')
+            modelNode = innerDoc.querySelector('mxGraphModel')
+          }
+        }
+      }
+
+      if (!modelNode) {
+        const rootNode = doc.querySelector('root')
+        if (rootNode) {
+          modelNode = rootNode.parentElement
+        }
+      }
+
+      if (!modelNode) {
+        console.warn('No se encontró nodo mxGraphModel en el XML proporcionado')
+        return false
+      }
+
+      const dec = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec(doc) : null
+      if (dec && typeof dec.decode === 'function') {
+        const model = this.graph.getModel()
+        model.beginUpdate()
+        try {
+          dec.decode(modelNode, model)
+        } finally {
+          model.endUpdate()
+        }
+        return true
+      }
+      return false
+    } catch (err) {
+      console.error('Error al importar diagrama XML:', err)
+      return false
+    }
+  }
+
+  /**
+   * Exporta el diagrama como gráfico vectorial SVG
+   */
+  exportToSvg(): string {
+    const container = this.graph.container
+    const svg = container ? container.querySelector('svg') : null
+    if (!svg) {
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"></svg>'
+    }
+
+    const clone = svg.cloneNode(true) as SVGSVGElement
+    const bounds = typeof (this.graph as any).getGraphBounds === 'function' ? (this.graph as any).getGraphBounds() : null
+
+    if (bounds && bounds.width > 0 && bounds.height > 0) {
+      const pad = 24
+      const x = Math.max(0, Math.floor(bounds.x - pad))
+      const y = Math.max(0, Math.floor(bounds.y - pad))
+      const w = Math.ceil(bounds.width + pad * 2)
+      const h = Math.ceil(bounds.height + pad * 2)
+
+      clone.setAttribute('viewBox', `${x} ${y} ${w} ${h}`)
+      clone.setAttribute('width', `${w}px`)
+      clone.setAttribute('height', `${h}px`)
+    }
+
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    clone.setAttribute('style', 'background-color: transparent;')
+
+    return typeof XMLSerializer !== 'undefined'
+      ? new XMLSerializer().serializeToString(clone)
+      : clone.outerHTML
+  }
+
+  /**
+   * Exporta el diagrama como imagen rasterizada PNG (Data URL)
+   */
+  exportToPng(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      try {
+        const svgString = this.exportToSvg()
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const img = new Image()
+
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas')
+            const width = img.naturalWidth || img.width || 800
+            const height = img.naturalHeight || img.height || 600
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            if (!ctx) {
+              URL.revokeObjectURL(url)
+              reject(new Error('No se pudo obtener el contexto 2d del canvas'))
+              return
+            }
+
+            // Fondo blanco para PNG exportado legible
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(0, 0, width, height)
+            ctx.drawImage(img, 0, 0)
+            URL.revokeObjectURL(url)
+            const pngDataUrl = canvas.toDataURL('image/png')
+            resolve(pngDataUrl)
+          } catch (e) {
+            URL.revokeObjectURL(url)
+            reject(e)
+          }
+        }
+
+        img.onerror = (err) => {
+          URL.revokeObjectURL(url)
+          reject(err)
+        }
+
+        img.src = url
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  /**
    * Libera recursos y destruye la instancia del grafo
    */
   destroy(): void {
     this.destroyed = true
+    if (this.cleanupPanning) {
+      this.cleanupPanning()
+      this.cleanupPanning = null
+    }
     if (this.keydownHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
       window.removeEventListener('keydown', this.keydownHandler)
       this.keydownHandler = null

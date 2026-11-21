@@ -1,167 +1,179 @@
 <script lang="ts">
-  import { hasSelection, selectedIds } from '../stores/selection'
-  import { activeGraph, graphRevision } from '../stores/graph'
+  import { hasSelection, selectedIds } from "../stores/selection";
+  import { activeGraph, graphRevision } from "../stores/graph";
 
-  const tabs = ['Style', 'Arrange', 'Text'] as const
-  let activeTab: typeof tabs[number] = $state('Style')
+  const tabs = ["Style", "Arrange", "Text"] as const;
+  let activeTab: (typeof tabs)[number] = $state("Style");
 
   // Obtener celda seleccionada actual
-  let firstSelectedId = $derived(Array.from($selectedIds)[0] ?? null)
-  let _rev = $derived($graphRevision)
+  let firstSelectedId = $derived(Array.from($selectedIds)[0] ?? null);
+  let _rev = $derived($graphRevision);
   let selectedCell = $derived.by(() => {
-    void _rev
-    if (!firstSelectedId || !$activeGraph) return null
-    return $activeGraph.getRawGraph().getModel().getCell(firstSelectedId)
-  })
+    void _rev;
+    if (!firstSelectedId || !$activeGraph) return null;
+    return $activeGraph.getRawGraph().getModel().getCell(firstSelectedId);
+  });
 
   // Propiedades geométricas
   let posX = $derived.by(() => {
-    void _rev
-    return selectedCell?.geometry?.x ?? 0
-  })
+    void _rev;
+    return selectedCell?.geometry?.x ?? 0;
+  });
   let posY = $derived.by(() => {
-    void _rev
-    return selectedCell?.geometry?.y ?? 0
-  })
+    void _rev;
+    return selectedCell?.geometry?.y ?? 0;
+  });
   let posW = $derived.by(() => {
-    void _rev
-    return selectedCell?.geometry?.width ?? 120
-  })
+    void _rev;
+    return selectedCell?.geometry?.width ?? 120;
+  });
   let posH = $derived.by(() => {
-    void _rev
-    return selectedCell?.geometry?.height ?? 60
-  })
+    void _rev;
+    return selectedCell?.geometry?.height ?? 60;
+  });
   let cellText = $derived.by(() => {
-    void _rev
-    return selectedCell?.value ?? ''
-  })
+    void _rev;
+    return selectedCell?.value ?? "";
+  });
 
   // Estilos actuales
   let currentStyleStr = $derived.by(() => {
-    void _rev
-    if (!selectedCell || !$activeGraph) return ''
-    return $activeGraph.getRawGraph().getModel().getStyle(selectedCell) || ''
-  })
+    void _rev;
+    if (!selectedCell || !$activeGraph) return "";
+    return $activeGraph.getRawGraph().getModel().getStyle(selectedCell) || "";
+  });
 
-  function getStyle(key: string, def = ''): string {
-    const match = currentStyleStr.match(new RegExp(`(?:^|;)${key}=([^;]*)`))
-    return match ? match[1] : def
+  function getStyle(key: string, def = ""): string {
+    const match = currentStyleStr.match(new RegExp(`(?:^|;)${key}=([^;]*)`));
+    return match ? match[1] : def;
   }
 
-  let strokeColor = $derived(getStyle('strokeColor', '#6c8ebf'))
-  let strokeWidth = $derived(Number(getStyle('strokeWidth', '1')) || 1)
-  let isDashed = $derived(getStyle('dashed') === '1')
-  let isRounded = $derived(getStyle('rounded') === '1')
-  let isShadow = $derived(getStyle('shadow') === '1')
-  let opacity = $derived(Number(getStyle('opacity', '100')) || 100)
-  let fontSize = $derived(Number(getStyle('fontSize', '12')) || 12)
-  let textAlign = $derived(getStyle('align', 'center'))
+  let strokeColor = $derived(getStyle("strokeColor", "#6c8ebf"));
+  let strokeWidth = $derived(Number(getStyle("strokeWidth", "1")) || 1);
+  let isDashed = $derived(getStyle("dashed") === "1");
+  let isRounded = $derived(getStyle("rounded") === "1");
+  let isShadow = $derived(getStyle("shadow") === "1");
+  let opacity = $derived(Number(getStyle("opacity", "100")) || 100);
+  let fontSize = $derived(Number(getStyle("fontSize", "12")) || 12);
+  let textAlign = $derived(getStyle("align", "center"));
 
   function updateX(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellGeometry(firstSelectedId, val, posY, posW, posH)
+      $activeGraph.setCellGeometry(firstSelectedId, val, posY, posW, posH);
     }
   }
 
   function updateY(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellGeometry(firstSelectedId, posX, val, posW, posH)
+      $activeGraph.setCellGeometry(firstSelectedId, posX, val, posW, posH);
     }
   }
 
   function updateW(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellGeometry(firstSelectedId, posX, posY, Math.max(10, val), posH)
+      $activeGraph.setCellGeometry(
+        firstSelectedId,
+        posX,
+        posY,
+        Math.max(10, val),
+        posH,
+      );
     }
   }
 
   function updateH(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellGeometry(firstSelectedId, posX, posY, posW, Math.max(10, val))
+      $activeGraph.setCellGeometry(
+        firstSelectedId,
+        posX,
+        posY,
+        posW,
+        Math.max(10, val),
+      );
     }
   }
 
   function updateText(val: string) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellValue(firstSelectedId, val)
+      $activeGraph.setCellValue(firstSelectedId, val);
     }
   }
 
   function updateFillColor(color: string) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellFillColor(firstSelectedId, color)
+      $activeGraph.setCellFillColor(firstSelectedId, color);
     }
   }
 
   function updateStrokeColor(color: string) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellStrokeColor(firstSelectedId, color)
+      $activeGraph.setCellStrokeColor(firstSelectedId, color);
     }
   }
 
   function updateStrokeWidth(width: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellStrokeWidth(firstSelectedId, width)
+      $activeGraph.setCellStrokeWidth(firstSelectedId, width);
     }
   }
 
   function toggleDashed() {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellDashed(firstSelectedId, !isDashed)
+      $activeGraph.setCellDashed(firstSelectedId, !isDashed);
     }
   }
 
   function toggleRounded() {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellRounded(firstSelectedId, !isRounded)
+      $activeGraph.setCellRounded(firstSelectedId, !isRounded);
     }
   }
 
   function toggleShadow() {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellShadow(firstSelectedId, !isShadow)
+      $activeGraph.setCellShadow(firstSelectedId, !isShadow);
     }
   }
 
   function updateOpacity(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellOpacity(firstSelectedId, val)
+      $activeGraph.setCellOpacity(firstSelectedId, val);
     }
   }
 
   function updateRotation(angle: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellRotation(firstSelectedId, angle)
+      $activeGraph.setCellRotation(firstSelectedId, angle);
     }
   }
 
   function bringToFront() {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.bringToFront(firstSelectedId)
+      $activeGraph.bringToFront(firstSelectedId);
     }
   }
 
   function sendToBack() {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.sendToBack(firstSelectedId)
+      $activeGraph.sendToBack(firstSelectedId);
     }
   }
 
   function updateFontSize(size: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellFontSize(firstSelectedId, size)
+      $activeGraph.setCellFontSize(firstSelectedId, size);
     }
   }
 
   function updateFontColor(color: string) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellFontColor(firstSelectedId, color)
+      $activeGraph.setCellFontColor(firstSelectedId, color);
     }
   }
 
-  function updateAlign(align: 'left' | 'center' | 'right') {
+  function updateAlign(align: "left" | "center" | "right") {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellAlign(firstSelectedId, align)
+      $activeGraph.setCellAlign(firstSelectedId, align);
     }
   }
 </script>
@@ -186,23 +198,27 @@
     {#if !$hasSelection}
       <div class="no-selection">
         <span class="no-sel-icon">⬚</span>
-        <p>Selecciona una forma en el lienzo para ver y editar sus propiedades</p>
+        <p>
+          Selecciona una forma en el lienzo para ver y editar sus propiedades
+        </p>
       </div>
     {:else}
-      {#if activeTab === 'Style'}
+      {#if activeTab === "Style"}
         <!-- Relleno -->
         <div class="prop-group">
           <div class="prop-label">Color de Relleno</div>
           <div class="color-palette">
-            {#each ['#dae8fc', '#d5e8d4', '#ffe6cc', '#f8cecc', '#e1d5e7', '#fff2cc', '#ffffff', 'none'] as color}
+            {#each ["#dae8fc", "#d5e8d4", "#ffe6cc", "#f8cecc", "#e1d5e7", "#fff2cc", "#ffffff", "none"] as color}
               <button
                 class="color-btn"
-                class:none-color={color === 'none'}
-                style="background-color: {color === 'none' ? 'transparent' : color};"
-                title={color === 'none' ? 'Sin relleno' : `Color ${color}`}
+                class:none-color={color === "none"}
+                style="background-color: {color === 'none'
+                  ? 'transparent'
+                  : color};"
+                title={color === "none" ? "Sin relleno" : `Color ${color}`}
                 onclick={() => updateFillColor(color)}
               >
-                {#if color === 'none'}⊘{/if}
+                {#if color === "none"}⊘{/if}
               </button>
             {/each}
           </div>
@@ -212,16 +228,18 @@
         <div class="prop-group">
           <div class="prop-label">Color de Borde</div>
           <div class="color-palette">
-            {#each ['#6c8ebf', '#82b366', '#d79b00', '#b85450', '#9673a6', '#000000', '#ffffff', 'none'] as color}
+            {#each ["#6c8ebf", "#82b366", "#d79b00", "#b85450", "#9673a6", "#000000", "#ffffff", "none"] as color}
               <button
                 class="color-btn"
                 class:active-color={strokeColor === color}
-                class:none-color={color === 'none'}
-                style="background-color: {color === 'none' ? 'transparent' : color};"
-                title={color === 'none' ? 'Sin borde' : `Borde ${color}`}
+                class:none-color={color === "none"}
+                style="background-color: {color === 'none'
+                  ? 'transparent'
+                  : color};"
+                title={color === "none" ? "Sin borde" : `Borde ${color}`}
                 onclick={() => updateStrokeColor(color)}
               >
-                {#if color === 'none'}⊘{/if}
+                {#if color === "none"}⊘{/if}
               </button>
             {/each}
           </div>
@@ -287,8 +305,7 @@
             oninput={(e) => updateOpacity(Number(e.currentTarget.value))}
           />
         </div>
-
-      {:else if activeTab === 'Arrange'}
+      {:else if activeTab === "Arrange"}
         <!-- Posición y Dimensiones -->
         <div class="prop-group">
           <div class="prop-label">Geometría</div>
@@ -340,10 +357,18 @@
         <div class="prop-group">
           <div class="prop-label">Orden de Capas</div>
           <div class="btn-group">
-            <button class="choice-btn" onclick={bringToFront} title="Traer forma al frente">
+            <button
+              class="choice-btn"
+              onclick={bringToFront}
+              title="Traer forma al frente"
+            >
               ▲ Traer al frente
             </button>
-            <button class="choice-btn" onclick={sendToBack} title="Enviar forma al fondo">
+            <button
+              class="choice-btn"
+              onclick={sendToBack}
+              title="Enviar forma al fondo"
+            >
               ▼ Enviar al fondo
             </button>
           </div>
@@ -354,17 +379,13 @@
           <div class="prop-label">Rotación</div>
           <div class="btn-group">
             {#each [0, 90, 180, 270] as angle}
-              <button
-                class="choice-btn"
-                onclick={() => updateRotation(angle)}
-              >
+              <button class="choice-btn" onclick={() => updateRotation(angle)}>
                 {angle}°
               </button>
             {/each}
           </div>
         </div>
-
-      {:else if activeTab === 'Text'}
+      {:else if activeTab === "Text"}
         <!-- Texto de la Forma -->
         <div class="prop-group">
           <label class="prop-label" for="prop-text">Contenido de Texto</label>
@@ -399,22 +420,22 @@
           <div class="btn-group">
             <button
               class="choice-btn"
-              class:active={textAlign === 'left'}
-              onclick={() => updateAlign('left')}
+              class:active={textAlign === "left"}
+              onclick={() => updateAlign("left")}
             >
               ⬅ Izq
             </button>
             <button
               class="choice-btn"
-              class:active={textAlign === 'center'}
-              onclick={() => updateAlign('center')}
+              class:active={textAlign === "center"}
+              onclick={() => updateAlign("center")}
             >
               ⬌ Centro
             </button>
             <button
               class="choice-btn"
-              class:active={textAlign === 'right'}
-              onclick={() => updateAlign('right')}
+              class:active={textAlign === "right"}
+              onclick={() => updateAlign("right")}
             >
               Der ➡
             </button>
@@ -425,7 +446,7 @@
         <div class="prop-group">
           <div class="prop-label">Color de Texto</div>
           <div class="color-palette">
-            {#each ['#000000', '#ffffff', '#333333', '#0078d4', '#d83b01', '#107c41'] as color}
+            {#each ["#000000", "#ffffff", "#333333", "#0078d4", "#d83b01", "#107c41"] as color}
               <button
                 class="color-btn"
                 style="background-color: {color};"
@@ -443,7 +464,10 @@
   <div class="diagram-section">
     <div class="section-title">Diagrama</div>
     <div class="diag-info">
-      <small>Atajos: <b>Supr/Backspace</b> para borrar, <b>Ctrl+Z</b> deshacer, <b>Ctrl+Y</b> rehacer.</small>
+      <small
+        >Atajos: <b>Supr/Backspace</b> para borrar, <b>Ctrl+Z</b> deshacer,
+        <b>Ctrl+Y</b> rehacer.</small
+      >
     </div>
   </div>
 </aside>
@@ -474,7 +498,9 @@
     cursor: pointer;
     transition: all var(--t-fast);
   }
-  .tab-btn:hover  { color: var(--text-primary); }
+  .tab-btn:hover {
+    color: var(--text-primary);
+  }
   .tab-btn.active {
     color: var(--accent);
     border-bottom-color: var(--accent);
@@ -492,9 +518,16 @@
     color: var(--text-disabled);
     padding: var(--space-8) 0;
   }
-  .no-sel-icon { font-size: 28px; display: block; margin-bottom: var(--space-2); opacity: 0.4; }
+  .no-sel-icon {
+    font-size: 28px;
+    display: block;
+    margin-bottom: var(--space-2);
+    opacity: 0.4;
+  }
 
-  .prop-group { margin-bottom: var(--space-4); }
+  .prop-group {
+    margin-bottom: var(--space-4);
+  }
   .prop-label {
     display: block;
     font-size: 11px;
@@ -522,7 +555,9 @@
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     cursor: pointer;
-    transition: transform 0.1s ease, border-color 0.1s ease;
+    transition:
+      transform 0.1s ease,
+      border-color 0.1s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -592,7 +627,10 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--space-2);
   }
-  .prop-row { display: flex; flex-direction: column; }
+  .prop-row {
+    display: flex;
+    flex-direction: column;
+  }
 
   .prop-input {
     background: var(--bg-primary);

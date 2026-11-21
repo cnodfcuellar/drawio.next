@@ -125,6 +125,13 @@ export interface mxRubberband {
   destroy(): void
 }
 
+export declare class mxCodec {
+  constructor(document?: Document)
+  document: Document
+  encode(obj: any): Element
+  decode(node: Element, into?: any): any
+}
+
 export interface mxGraphOptions {
   container?: HTMLElement
   model?: mxGraphModel
@@ -192,6 +199,8 @@ export declare class mxGraph {
   setEnabled(enabled: boolean): void
   orderCells(back?: boolean, cells?: mxCell[]): mxCell[]
   setAllowNegativeCoordinates(allow: boolean): void
+  getGraphBounds?(): { x: number; y: number; width: number; height: number }
+  getChildCells?(parent: mxCell, vertices?: boolean, edges?: boolean): mxCell[]
 
   getModel(): mxGraphModel
   getView(): mxGraphView
@@ -208,6 +217,9 @@ export declare class mxClient {
 export declare class mxUtils {
   static clone(obj: any): any
   static getFormattedDate(): string
+  static getXml(node: Node, linefeed?: string): string
+  static parseXml(xml: string): Document
+  static createXmlDocument(): Document
 }
 
 export declare class mxEvent {
@@ -226,6 +238,7 @@ declare global {
     mxGraphModel: any
     mxUndoManager: { new (size?: number): mxUndoManager }
     mxRubberband: { new (graph: mxGraph): mxRubberband }
+    mxCodec: typeof mxCodec
     mxClient: typeof mxClient
     mxUtils: typeof mxUtils
     mxEvent: typeof mxEvent
