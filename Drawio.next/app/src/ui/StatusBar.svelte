@@ -1,30 +1,98 @@
 <script lang="ts">
   import { zoomLevel, activeGraph } from '../stores/graph'
   import { saveStatus, lastSavedTime } from '../stores/persistence'
+  import {
+    pages,
+    activePageId,
+    addPage,
+    switchPage,
+    renamePage,
+    removePage,
+    type PageItem
+  } from '../stores/pages'
 
-  let pages = $state([{ id: 1, name: 'Page-1' }])
-  let activePageId = $state(1)
+  let editingPageId = $state<string | null>(null)
+  let editingName = $state('')
 
-  function addPage() {
-    const nextId = pages.length + 1
-    pages.push({ id: nextId, name: `Page-${nextId}` })
-    activePageId = nextId
+  function handlePageClick(pageId: string) {
+    if (editingPageId) return
+    switchPage(pageId)
+  }
+
+  function handleAddPage() {
+    addPage()
+  }
+
+  function startEditing(page: PageItem, e: MouseEvent) {
+    e.stopPropagation()
+    editingPageId = page.id
+    editingName = page.name
+  }
+
+  function finishEditing(pageId: string) {
+    if (editingName.trim()) {
+      renamePage(pageId, editingName.trim())
+    }
+    editingPageId = null
+    editingName = ''
+  }
+
+  function cancelEditing() {
+    editingPageId = null
+    editingName = ''
+  }
+
+  function handleRemovePage(pageId: string) {
+    if (confirm('¿Eliminar esta página? Esta acción no se puede deshacer.')) {
+      removePage(pageId)
+    }
   }
 </script>
 
 <div class="statusbar" data-testid="statusbar">
   <!-- Tabs de páginas -->
   <div class="pages-tabs">
-    {#each pages as page}
-      <button
-        class="page-tab"
-        class:active={page.id === activePageId}
-        onclick={() => (activePageId = page.id)}
+    {#each $pages as page}
+      <div
+        class="page-tab-wrapper"
+        class:active={page.id === $activePageId}
       >
-        {page.name}
-      </button>
+        {#if editingPageId === page.id}
+          <input
+            class="page-edit-input"
+            type="text"
+            bind:value={editingName}
+            onkeydown={(e) => {
+              if (e.key === 'Enter') finishEditing(page.id)
+              if (e.key === 'Escape') cancelEditing()
+            }}
+            onblur={() => finishEditing(page.id)}
+          />
+        {:else}
+          <button
+            class="page-tab"
+            onclick={() => handlePageClick(page.id)}
+            ondblclick={(e) => startEditing(page, e)}
+            title="Clic para ver página, doble clic para renombrar"
+          >
+            {page.name}
+          </button>
+          {#if $pages.length > 1}
+            <button
+              class="tab-close-btn"
+              onclick={(e) => {
+                e.stopPropagation()
+                handleRemovePage(page.id)
+              }}
+              title="Eliminar página"
+            >
+              ✕
+            </button>
+          {/if}
+        {/if}
+      </div>
     {/each}
-    <button class="add-page-btn" title="Add page" onclick={addPage}>+</button>
+    <button class="add-page-btn" title="Añadir nueva página" onclick={handleAddPage}>+</button>
   </div>
 
   <!-- Indicador central de auto-guardado -->
@@ -74,18 +142,70 @@
 
   .pages-tabs { display: flex; align-items: center; gap: 2px; height: 100%; }
 
+  .page-tab-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    background: transparent;
+    border-top: 2px solid transparent;
+    transition: background var(--t-fast);
+  }
+  .page-tab-wrapper:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .page-tab-wrapper.active {
+    background: rgba(255, 255, 255, 0.22);
+    border-top-color: white;
+  }
+
   .page-tab {
     height: 100%;
-    padding: 0 var(--space-4);
+    padding: 0 var(--space-3);
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.9);
     font-size: var(--text-xs);
     cursor: pointer;
-    border-top: 2px solid transparent;
+    font-weight: var(--font-normal);
   }
-  .page-tab:hover  { background: rgba(255, 255, 255, 0.1); color: white; }
-  .page-tab.active { background: rgba(255, 255, 255, 0.2); color: white; font-weight: var(--font-medium); }
+  .page-tab-wrapper.active .page-tab {
+    color: white;
+    font-weight: var(--font-medium);
+  }
+
+  .tab-close-btn {
+    width: 16px;
+    height: 16px;
+    margin-right: var(--space-1);
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+  .tab-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+
+  .page-edit-input {
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid white;
+    border-radius: var(--radius-sm);
+    color: white;
+    font-size: var(--text-xs);
+    padding: 0 var(--space-2);
+    margin: 0 var(--space-2);
+    outline: none;
+    width: 90px;
+  }
 
   .add-page-btn {
     width: 20px;

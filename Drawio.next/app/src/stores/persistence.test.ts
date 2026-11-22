@@ -52,7 +52,10 @@ describe('persistence store and autosave', () => {
     const restored = loadSavedDiagram(mockController)
 
     expect(restored).toBe(true)
-    expect(mockController.importXml).toHaveBeenCalledWith('<mxfile>existente</mxfile>')
+    expect(mockController.importXml).toHaveBeenCalledWith(
+      '<mxfile>existente</mxfile>',
+      expect.any(Function)
+    )
   })
 
   it('loadSavedDiagram retorna false si no hay contenido en localStorage', () => {

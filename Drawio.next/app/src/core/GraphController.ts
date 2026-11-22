@@ -1214,9 +1214,9 @@ export class GraphController {
   }
 
   /**
-   * Exporta el estado del grafo a formato XML (.drawio)
+   * Exporta únicamente el fragmento XML del modelo actual (<mxGraphModel>...</mxGraphModel>)
    */
-  exportToXml(): string {
+  exportModelXml(): string {
     const enc = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec() : null
     let modelXml = ''
     if (enc && typeof enc.encode === 'function') {
@@ -1227,19 +1227,89 @@ export class GraphController {
     } else {
       modelXml = '<mxGraphModel><root></root></mxGraphModel>'
     }
+    return modelXml
+  }
 
+  /**
+   * Importa únicamente el fragmento XML de un modelo (<mxGraphModel>...), reemplazando las celdas del lienzo
+   */
+  importModelXml(modelXmlString: string): boolean {
+    if (!modelXmlString || typeof modelXmlString !== 'string') {
+      this.clear()
+      return true
+    }
+    try {
+      let doc: Document
+      if (typeof window !== 'undefined' && window.mxUtils && typeof window.mxUtils.parseXml === 'function') {
+        doc = window.mxUtils.parseXml(modelXmlString)
+      } else if (typeof DOMParser !== 'undefined') {
+        doc = new DOMParser().parseFromString(modelXmlString, 'text/xml')
+      } else {
+        return false
+      }
+
+      let modelNode: Element | null = doc.querySelector('mxGraphModel')
+      if (!modelNode) {
+        const rootNode = doc.querySelector('root')
+        if (rootNode) modelNode = rootNode.parentElement
+      }
+
+      if (!modelNode) {
+        this.clear()
+        return true
+      }
+
+      const dec = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec(doc) : null
+      if (dec && typeof dec.decode === 'function') {
+        const model = this.graph.getModel()
+        model.beginUpdate()
+        try {
+          this.clear()
+          dec.decode(modelNode, model)
+        } finally {
+          model.endUpdate()
+        }
+        return true
+      }
+      return false
+    } catch (err) {
+      console.error('Error al importar modelXml:', err)
+      return false
+    }
+  }
+
+  /**
+   * Exporta el estado del grafo a formato XML (.drawio).
+   * Soporta múltiples páginas opcionales.
+   */
+  exportToXml(pagesList?: Array<{ id: string; name: string; xml: string }>): string {
     const timestamp = new Date().toISOString()
+    const currentModelXml = this.exportModelXml()
+
+    if (pagesList && pagesList.length > 0) {
+      const diagramsXml = pagesList.map(p => {
+        const content = p.xml || currentModelXml
+        return `  <diagram id="${p.id}" name="${p.name}">\n    ${content}\n  </diagram>`
+      }).join('\n')
+
+      return `<mxfile host="drawio.next" modified="${timestamp}" agent="DrawioNext/1.0" version="24.0.0">\n${diagramsXml}\n</mxfile>`
+    }
+
     return `<mxfile host="drawio.next" modified="${timestamp}" agent="DrawioNext/1.0" version="24.0.0">
   <diagram id="diagram_1" name="Page-1">
-    ${modelXml}
+    ${currentModelXml}
   </diagram>
 </mxfile>`
   }
 
   /**
-   * Importa un diagrama desde una cadena XML o archivo .drawio
+   * Importa un diagrama desde una cadena XML o archivo .drawio.
+   * Soporta extracción de múltiples páginas.
    */
-  importXml(xmlString: string): boolean {
+  importXml(
+    xmlString: string,
+    onPagesExtracted?: (pages: Array<{ id: string; name: string; xml: string }>) => void
+  ): boolean {
     if (!xmlString || typeof xmlString !== 'string') return false
     try {
       let doc: Document
@@ -1257,7 +1327,36 @@ export class GraphController {
         return false
       }
 
-      // Buscar el nodo mxGraphModel
+      // Si el archivo contiene nodos <diagram>, extraer las páginas
+      const diagramNodes = (doc && typeof doc.querySelectorAll === 'function')
+        ? Array.from(doc.querySelectorAll('diagram'))
+        : []
+      if (diagramNodes.length > 0) {
+        const extractedPages: Array<{ id: string; name: string; xml: string }> = []
+        diagramNodes.forEach((node, idx) => {
+          const id = (typeof node.getAttribute === 'function' ? node.getAttribute('id') : null) || `page-${idx + 1}`
+          const name = (typeof node.getAttribute === 'function' ? node.getAttribute('name') : null) || `Page-${idx + 1}`
+          let xml = ''
+          const modelEl = (node && typeof node.querySelector === 'function') ? node.querySelector('mxGraphModel') : null
+          if (modelEl) {
+            xml = (typeof window !== 'undefined' && window.mxUtils && typeof window.mxUtils.getXml === 'function')
+              ? window.mxUtils.getXml(modelEl)
+              : (typeof XMLSerializer !== 'undefined' ? new XMLSerializer().serializeToString(modelEl) : '')
+          } else if (node.textContent) {
+            const raw = node.textContent.trim()
+            if (raw.startsWith('<mxGraphModel') || raw.startsWith('<root')) {
+              xml = raw
+            }
+          }
+          extractedPages.push({ id, name, xml })
+        })
+
+        if (typeof onPagesExtracted === 'function' && extractedPages.length > 0) {
+          onPagesExtracted(extractedPages)
+        }
+      }
+
+      // Buscar el nodo mxGraphModel para cargar en el canvas
       let modelNode: Element | null = doc.querySelector('mxGraphModel')
       if (!modelNode) {
         const diagramNode = doc.querySelector('diagram')
@@ -1287,6 +1386,7 @@ export class GraphController {
         const model = this.graph.getModel()
         model.beginUpdate()
         try {
+          this.clear()
           dec.decode(modelNode, model)
         } finally {
           model.endUpdate()

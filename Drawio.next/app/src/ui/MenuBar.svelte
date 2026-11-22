@@ -4,6 +4,7 @@
   import { activeGraph, zoomLevel } from '../stores/graph'
   import { hasSelection } from '../stores/selection'
   import { clearSavedDiagram } from '../stores/persistence'
+  import { getAllPagesWithFreshXml, initPages } from '../stores/pages'
 
   const menus = ['File', 'Edit', 'View', 'Arrange', 'Extras', 'Help'] as const
   type MenuName = typeof menus[number]
@@ -64,7 +65,9 @@
     reader.onload = (event) => {
       const xml = event.target?.result as string
       if (xml && $activeGraph) {
-        const ok = $activeGraph.importXml(xml)
+        const ok = $activeGraph.importXml(xml, (extractedPages) => {
+          initPages(extractedPages)
+        })
         if (!ok) {
           alert('No se pudo abrir el diagrama. Verifique que el archivo sea un XML o .drawio válido.')
         }
@@ -77,7 +80,8 @@
   function handleSaveDrawio() {
     closeMenu()
     if (!$activeGraph) return
-    const xml = $activeGraph.exportToXml()
+    const pagesList = getAllPagesWithFreshXml()
+    const xml = $activeGraph.exportToXml(pagesList)
     downloadBlob(xml, 'diagrama.drawio', 'application/xml;charset=utf-8')
   }
 

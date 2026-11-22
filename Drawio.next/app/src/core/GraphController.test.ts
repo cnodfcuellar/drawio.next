@@ -204,9 +204,26 @@ function createMockMxGraph() {
       return {
         querySelector: (sel: string) => {
           if (sel === 'mxGraphModel' || sel === 'diagram') {
-            return { nodeName: 'mxGraphModel', textContent: '<mxGraphModel></mxGraphModel>' }
+            return {
+              nodeName: 'mxGraphModel',
+              textContent: '<mxGraphModel></mxGraphModel>',
+              getAttribute: (attr: string) => (attr === 'name' ? 'Página 1' : 'p1')
+            }
           }
           return null
+        },
+        querySelectorAll: (sel: string) => {
+          if (sel === 'diagram') {
+            return [
+              {
+                nodeName: 'diagram',
+                getAttribute: (attr: string) => (attr === 'name' ? 'Page-1' : 'd1'),
+                querySelector: () => ({ nodeName: 'mxGraphModel' }),
+                textContent: '<mxGraphModel></mxGraphModel>'
+              }
+            ]
+          }
+          return []
         }
       } as any
     }
@@ -544,6 +561,28 @@ describe('GraphController', () => {
     controller.startInteractiveConnect(v1.id)
     controller.cancelInteractiveConnect()
     expect(controller.getPendingConnectSourceId()).toBeNull()
+  })
+
+  it('exportModelXml e importModelXml manejan el XML del modelo individual', () => {
+    controller.addVertex({ label: 'V1', x: 10, y: 10 })
+    const modelXml = controller.exportModelXml()
+    expect(modelXml).toContain('mxGraphModel')
+
+    const ok = controller.importModelXml(modelXml)
+    expect(ok).toBe(true)
+  })
+
+  it('exportToXml soporta múltiples páginas en formato draw.io estándar', () => {
+    const pages = [
+      { id: 'p1', name: 'Flujo Principal', xml: '<mxGraphModel><root><mxCell id="0"/></root></mxGraphModel>' },
+      { id: 'p2', name: 'Arquitectura', xml: '<mxGraphModel><root><mxCell id="0"/></root></mxGraphModel>' }
+    ]
+    const multiXml = controller.exportToXml(pages)
+    expect(multiXml).toContain('<mxfile')
+    expect(multiXml).toContain('name="Flujo Principal"')
+    expect(multiXml).toContain('name="Arquitectura"')
+    expect(multiXml).toContain('id="p1"')
+    expect(multiXml).toContain('id="p2"')
   })
 
   it('destruye la instancia limpiamente', () => {

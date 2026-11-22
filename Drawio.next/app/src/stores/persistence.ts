@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store'
 import type { GraphController } from '../core/GraphController'
+import { getAllPagesWithFreshXml, initPages } from './pages'
 
 export const AUTOSAVE_STORAGE_KEY = 'drawio_next_autosave_diagram'
 export const LAST_SAVED_KEY = 'drawio_next_last_saved_time'
@@ -12,12 +13,13 @@ export const lastSavedTime = writable<string | null>(null)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 /**
- * Guarda el estado actual del diagrama en localStorage
+ * Guarda el estado actual del documento completo (todas sus páginas) en localStorage
  */
 export function saveDiagram(controller: GraphController): void {
   try {
     saveStatus.set('saving')
-    const xml = controller.exportToXml()
+    const pagesList = getAllPagesWithFreshXml()
+    const xml = controller.exportToXml(pagesList)
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(AUTOSAVE_STORAGE_KEY, xml)
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -46,7 +48,7 @@ export function scheduleAutoSave(controller: GraphController, delayMs = 400): vo
 }
 
 /**
- * Carga el diagrama guardado en localStorage, si existe
+ * Carga el documento guardado en localStorage, restaurando todas sus páginas
  */
 export function loadSavedDiagram(controller: GraphController): boolean {
   try {
@@ -54,7 +56,10 @@ export function loadSavedDiagram(controller: GraphController): boolean {
     const savedXml = localStorage.getItem(AUTOSAVE_STORAGE_KEY)
     if (!savedXml || savedXml.trim().length === 0) return false
 
-    const success = controller.importXml(savedXml)
+    const success = controller.importXml(savedXml, (extractedPages) => {
+      initPages(extractedPages)
+    })
+
     if (success) {
       const savedTime = localStorage.getItem(LAST_SAVED_KEY)
       if (savedTime) lastSavedTime.set(savedTime)
@@ -68,7 +73,7 @@ export function loadSavedDiagram(controller: GraphController): boolean {
 }
 
 /**
- * Borra el autoguardado actual de localStorage
+ * Borra el autoguardado actual de localStorage y resetea las páginas a 1 página vacía
  */
 export function clearSavedDiagram(): void {
   if (typeof localStorage !== 'undefined') {
@@ -76,5 +81,6 @@ export function clearSavedDiagram(): void {
     localStorage.removeItem(LAST_SAVED_KEY)
     lastSavedTime.set(null)
     saveStatus.set('saved')
+    initPages([{ id: 'page-1', name: 'Page-1', xml: '' }])
   }
 }
