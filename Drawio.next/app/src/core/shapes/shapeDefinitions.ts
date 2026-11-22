@@ -19,8 +19,8 @@ export interface ShapeCategory {
 
 export const CATEGORIES: ShapeCategory[] = [
   { id: 'general',   label: 'General',   icon: '▭', open: true },
-  { id: 'basic',     label: 'Básicas',   icon: '◇', open: false },
-  { id: 'flowchart', label: 'Flowchart', icon: '◆', open: false },
+  { id: 'basic',     label: 'Básicas',   icon: '◇', open: true },
+  { id: 'flowchart', label: 'Flowchart', icon: '◆', open: true },
   { id: 'arrows',    label: 'Flechas',   icon: '→', open: false },
   { id: 'uml',       label: 'UML & ER',  icon: '⬢', open: false }
 ]

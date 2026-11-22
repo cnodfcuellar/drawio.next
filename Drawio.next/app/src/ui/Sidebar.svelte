@@ -5,20 +5,32 @@
   let searchQuery = $state('')
   let categories = $state<ShapeCategory[]>(JSON.parse(JSON.stringify(CATEGORIES)))
 
-  // Filtrado reactivo de formas según la búsqueda
-  let trimmedQuery = $derived(searchQuery.trim().toLowerCase())
+  function cleanText(str: string): string {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  }
+
+  // Filtrado reactivo de formas según la búsqueda con soporte de acentos
+  let trimmedQuery = $derived(cleanText(searchQuery.trim()))
   let searchResults = $derived.by(() => {
     if (!trimmedQuery) return []
     return SHAPES.filter(s =>
-      s.title.toLowerCase().includes(trimmedQuery) ||
-      s.category.toLowerCase().includes(trimmedQuery) ||
-      s.tags.some(t => t.toLowerCase().includes(trimmedQuery))
+      cleanText(s.title).includes(trimmedQuery) ||
+      cleanText(s.category).includes(trimmedQuery) ||
+      s.tags.some(t => cleanText(t).includes(trimmedQuery))
     )
   })
 
   function toggleCategory(id: string) {
     const cat = categories.find(c => c.id === id)
     if (cat) cat.open = !cat.open
+  }
+
+  function expandAll() {
+    categories.forEach(c => c.open = true)
+  }
+
+  function collapseAll() {
+    categories.forEach(c => c.open = false)
   }
 
   function getShapesForCategory(catId: string): ShapeDefinition[] {
@@ -40,6 +52,8 @@
   function handleShapeClick(shape: ShapeDefinition) {
     if ($activeGraph) {
       $activeGraph.insertShapeInCenter(shape)
+    } else if (typeof window !== 'undefined' && (window as any).__graphController) {
+      (window as any).__graphController.insertShapeInCenter(shape)
     }
   }
 </script>
@@ -57,6 +71,16 @@
     {#if searchQuery}
       <button class="search-clear" onclick={() => searchQuery = ''} title="Limpiar búsqueda">✕</button>
     {/if}
+  </div>
+
+  <!-- Barra de control rápido de categorías -->
+  <div class="category-controls">
+    <span class="cat-count">{SHAPES.length} formas</span>
+    <div class="cat-btns">
+      <button class="cat-action-btn" onclick={expandAll} title="Abrir todas las categorías">Expandir</button>
+      <span class="sep">•</span>
+      <button class="cat-action-btn" onclick={collapseAll} title="Cerrar todas las categorías">Colapsar</button>
+    </div>
   </div>
 
   <!-- Contenido scrollable -->
@@ -185,6 +209,26 @@
     border-radius: var(--radius-sm);
   }
   .search-clear:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  .category-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+  .cat-count { font-weight: var(--font-medium); }
+  .cat-btns { display: flex; align-items: center; gap: 4px; }
+  .cat-action-btn {
+    background: none; border: none;
+    color: var(--text-secondary); cursor: pointer; font-size: 10px;
+    padding: 1px 4px; border-radius: var(--radius-sm);
+  }
+  .cat-action-btn:hover { background: var(--bg-hover); color: var(--accent); }
+  .sep { color: var(--border); }
 
   .sidebar-scroll {
     flex: 1;

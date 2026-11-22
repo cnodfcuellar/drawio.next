@@ -105,37 +105,10 @@
       // 1. Restaurar diagrama persistido de la sesión anterior si existe
       const restored = loadSavedDiagram(controller)
 
-      // 2. Si no había ningún diagrama guardado, insertar los nodos de bienvenida iniciales
-      if (!restored) {
-        const v1 = controller.addVertex({
-          label: 'Inicio',
-          x: 140,
-          y: 120,
-          width: 130,
-          height: 60,
-          style: 'rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=13;'
-        })
-
-        const v2 = controller.addVertex({
-          label: 'Procesamiento',
-          x: 360,
-          y: 120,
-          width: 140,
-          height: 60,
-          style: 'rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=13;'
-        })
-
-        const v3 = controller.addVertex({
-          label: 'Fin / Resultado',
-          x: 580,
-          y: 120,
-          width: 140,
-          height: 60,
-          style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
-        })
-
-        controller.addEdge(v1.id, v2.id, 'Paso 1')
-        controller.addEdge(v2.id, v3.id, 'Paso 2')
+      // 2. Si no había ningún diagrama guardado o si quedó vacío (0 formas), insertar nodos de bienvenida iniciales
+      const currentCount = controller.getChildCount()
+      if (!restored || currentCount === 0) {
+        controller.insertWelcomeDiagram()
         saveDiagram(controller)
       }
 

@@ -411,7 +411,18 @@ export class GraphController {
    * Añade un nuevo vértice (nodo / forma) al grafo
    */
   addVertex(opts: AddVertexOptions): mxCell {
-    const parent = this.graph.getDefaultParent()
+    let parent = this.graph.getDefaultParent()
+    if (!parent) {
+      if (typeof (this.graph as any).setDefaultParent === 'function') {
+        (this.graph as any).setDefaultParent(null)
+      }
+      parent = this.graph.getDefaultParent()
+    }
+    if (!parent) {
+      const root = this.graph.getModel().getRoot()
+      parent = (this.graph.getModel() as any).getChildAt ? (this.graph.getModel() as any).getChildAt(root, 0) : root
+    }
+
     const width = opts.width ?? 120
     const height = opts.height ?? 60
     const label = opts.label ?? ''
@@ -1187,6 +1198,57 @@ export class GraphController {
   }
 
   /**
+   * Obtiene la cantidad de celdas hijas en el padre por defecto
+   */
+  getChildCount(): number {
+    const parent = this.graph.getDefaultParent()
+    if (!parent) return 0
+    const model = this.graph.getModel()
+    if (typeof (model as any).getChildCount === 'function') {
+      return (model as any).getChildCount(parent) || 0
+    }
+    return 0
+  }
+
+  /**
+   * Inserta un diagrama inicial de bienvenida
+   */
+  insertWelcomeDiagram(): void {
+    const v1 = this.addVertex({
+      label: 'Inicio',
+      x: 140,
+      y: 120,
+      width: 130,
+      height: 60,
+      style: 'rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=13;'
+    })
+
+    const v2 = this.addVertex({
+      label: 'Procesamiento',
+      x: 360,
+      y: 120,
+      width: 140,
+      height: 60,
+      style: 'rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=13;'
+    })
+
+    const v3 = this.addVertex({
+      label: 'Fin / Resultado',
+      x: 580,
+      y: 120,
+      width: 140,
+      height: 60,
+      style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
+    })
+
+    this.addEdge(v1.id, v2.id, 'Paso 1')
+    this.addEdge(v2.id, v3.id, 'Paso 2')
+    if (typeof (this.graph as any).refresh === 'function') {
+      (this.graph as any).refresh()
+    }
+  }
+
+  /**
    * Limpia todas las celdas del diagrama
    */
   clear(): void {
@@ -1210,6 +1272,9 @@ export class GraphController {
       }
     } finally {
       model.endUpdate()
+    }
+    if (typeof (this.graph as any).refresh === 'function') {
+      (this.graph as any).refresh()
     }
   }
 
@@ -1259,15 +1324,26 @@ export class GraphController {
         return true
       }
 
-      const dec = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec(doc) : null
+      const dec = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec(modelNode.ownerDocument || doc) : null
       if (dec && typeof dec.decode === 'function') {
         const model = this.graph.getModel()
         model.beginUpdate()
         try {
-          this.clear()
+          if (typeof (model as any).clear === 'function') {
+            (model as any).clear()
+          } else {
+            this.clear()
+          }
           dec.decode(modelNode, model)
         } finally {
           model.endUpdate()
+        }
+
+        if (typeof (this.graph as any).setDefaultParent === 'function') {
+          (this.graph as any).setDefaultParent(null)
+        }
+        if (typeof (this.graph as any).refresh === 'function') {
+          (this.graph as any).refresh()
         }
         return true
       }
@@ -1381,15 +1457,26 @@ export class GraphController {
         return false
       }
 
-      const dec = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec(doc) : null
+      const dec = typeof window !== 'undefined' && window.mxCodec ? new window.mxCodec(modelNode.ownerDocument || doc) : null
       if (dec && typeof dec.decode === 'function') {
         const model = this.graph.getModel()
         model.beginUpdate()
         try {
-          this.clear()
+          if (typeof (model as any).clear === 'function') {
+            (model as any).clear()
+          } else {
+            this.clear()
+          }
           dec.decode(modelNode, model)
         } finally {
           model.endUpdate()
+        }
+
+        if (typeof (this.graph as any).setDefaultParent === 'function') {
+          (this.graph as any).setDefaultParent(null)
+        }
+        if (typeof (this.graph as any).refresh === 'function') {
+          (this.graph as any).refresh()
         }
         return true
       }
