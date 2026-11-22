@@ -22,6 +22,11 @@ export interface GraphControllerOptions {
 }
 
 /**
+ * Estilo por defecto para aristas / conectores entre formas
+ */
+export const DEFAULT_EDGE_STYLE = 'edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;endFill=1;'
+
+/**
  * GraphController — Capa de abstracción limpia sobre mxGraph
  *
  * Provee una API moderna, tipada en TypeScript y desacoplada de la UI
@@ -31,7 +36,10 @@ export class GraphController {
   private graph: mxGraph
   private undoManager: mxUndoManager | null = null
   private rubberband: mxRubberband | null = null
+  private connectionMode = false
+  private connectionModeListeners: Array<(enabled: boolean) => void> = []
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null
+  private keyupHandler: ((e: KeyboardEvent) => void) | null = null
   private cleanupPanning: (() => void) | null = null
   private destroyed = false
 
@@ -156,14 +164,25 @@ export class GraphController {
       anyGraph.graphHandler.maxLivePreview = 16
     }
 
-    // 4. Desactivar ConnectionHandler (hasta habilitar el modo explícito de conexión)
-    // para que el click en el nodo seleccione/mueva en vez de iniciar aristas accidentales
-    this.graph.setConnectable(false)
+    // 4. Configurar ConnectionHandler
     if (anyGraph.connectionHandler) {
-      anyGraph.connectionHandler.setEnabled(false)
-      anyGraph.connectionHandler.isValidSource = () => false
       anyGraph.connectionHandler.setCreateTarget(false)
+      anyGraph.connectionHandler.insertBeforeSource = true
+
+      // Interceptar inserción de aristas para aplicar estilo consistente por defecto
+      const origInsertEdge = anyGraph.connectionHandler.insertEdge
+      anyGraph.connectionHandler.insertEdge = (parent: any, id: any, value: any, source: any, target: any, style: any) => {
+        const finalStyle = style || DEFAULT_EDGE_STYLE
+        let edge: any
+        if (typeof origInsertEdge === 'function') {
+          edge = origInsertEdge.call(anyGraph.connectionHandler, parent, id, value || '', source, target, finalStyle)
+        } else {
+          edge = this.graph.insertEdge(parent, id, value || '', source, target, finalStyle)
+        }
+        return edge
+      }
     }
+    this.setConnectionMode(false)
 
     // 5. Habilitar selección rectangular (rubberband) en áreas vacías
     if (enableRubberband && window.mxRubberband) {
@@ -204,6 +223,25 @@ export class GraphController {
         return
       }
 
+      // Tecla Alt: activa temporalmente modo conector mientras se mantiene pulsada
+      if (e.key === 'Alt' && !e.repeat && !this.connectionMode) {
+        this.setConnectionMode(true, true)
+      }
+
+      // Tecla C: alternar modo conector
+      if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        this.toggleConnectionMode()
+        return
+      }
+
+      // Tecla V o Escape: salir del modo conector al modo selección
+      if ((e.code === 'KeyV' || e.key === 'Escape') && this.connectionMode) {
+        e.preventDefault()
+        this.setConnectionMode(false)
+        return
+      }
+
       // Borrar celda seleccionada con tecla Supr o Backspace
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (this.getSelectedCells().length > 0) {
@@ -232,7 +270,16 @@ export class GraphController {
       }
     }
 
+    this.keyupHandler = (e: KeyboardEvent) => {
+      if (this.destroyed) return
+      // Al soltar Alt, restaurar puntero si estaba temporal
+      if (e.key === 'Alt') {
+        this.setConnectionMode(false, true)
+      }
+    }
+
     window.addEventListener('keydown', this.keydownHandler)
+    window.addEventListener('keyup', this.keyupHandler)
   }
 
   /**
@@ -350,12 +397,140 @@ export class GraphController {
     }
 
     const parent = this.graph.getDefaultParent()
+    const edgeStyle = style || DEFAULT_EDGE_STYLE
     model.beginUpdate()
     try {
-      return this.graph.insertEdge(parent, null, label, source, target, style)
+      return this.graph.insertEdge(parent, null, label, source, target, edgeStyle)
     } finally {
       model.endUpdate()
     }
+  }
+
+  /**
+   * Activa o desactiva el modo interactivo de conexión de aristas
+   */
+  setConnectionMode(enabled: boolean, temporary = false): void {
+    this.connectionMode = enabled
+    const anyGraph = this.graph as any
+
+    this.graph.setConnectable(enabled)
+    if (anyGraph.connectionHandler) {
+      anyGraph.connectionHandler.setEnabled(enabled)
+      anyGraph.connectionHandler.isValidSource = (cell: any) => cell != null && !cell.edge
+      anyGraph.connectionHandler.isValidTarget = (cell: any) => cell != null && !cell.edge
+    }
+
+    // En modo conexión, desactivar el arrastre de celdas para que el drag trace la conexión
+    if (anyGraph.graphHandler) {
+      anyGraph.graphHandler.setMoveEnabled(!enabled)
+    }
+
+    const container = this.graph.container
+    if (container?.style) {
+      container.style.cursor = enabled ? 'crosshair' : ''
+    }
+
+    if (!temporary) {
+      this.connectionModeListeners.forEach(fn => fn(enabled))
+    }
+  }
+
+  /**
+   * Indica si el modo interactivo de conexión está activo
+   */
+  isConnectionMode(): boolean {
+    return this.connectionMode
+  }
+
+  /**
+   * Alterna el modo interactivo de conexión
+   */
+  toggleConnectionMode(): boolean {
+    const next = !this.connectionMode
+    this.setConnectionMode(next)
+    return next
+  }
+
+  /**
+   * Registra un callback reactivo para cambios de estado en el modo de conexión
+   */
+  onConnectionModeChange(callback: (enabled: boolean) => void): () => void {
+    this.connectionModeListeners.push(callback)
+    return () => {
+      this.connectionModeListeners = this.connectionModeListeners.filter(fn => fn !== callback)
+    }
+  }
+
+  /**
+   * Conecta las dos celdas actualmente seleccionadas con una arista
+   */
+  connectSelected(label = ''): mxCell | null {
+    const selected = this.getSelectedCells().filter(c => !c.edge)
+    if (selected.length < 2) return null
+    const source = selected[0]
+    const target = selected[1]
+    const edge = this.addEdge(source.id, target.id, label, DEFAULT_EDGE_STYLE)
+    if (edge) {
+      this.selectCell(edge.id)
+    }
+    return edge
+  }
+
+  /**
+   * Modifica el tipo de enrutamiento de una arista (recto, ortogonal, curvo, ER)
+   */
+  setEdgeRouting(cellId: string, routing: 'straight' | 'orthogonal' | 'curved' | 'entityRelation'): void {
+    const cell = this.graph.getModel().getCell(cellId)
+    if (!cell) return
+
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      if (routing === 'straight') {
+        this.setCellStyleProperty(cellId, 'edgeStyle', 'none')
+        this.setCellStyleProperty(cellId, 'curved', '0')
+        this.setCellStyleProperty(cellId, 'rounded', '0')
+      } else if (routing === 'orthogonal') {
+        this.setCellStyleProperty(cellId, 'edgeStyle', 'orthogonalEdgeStyle')
+        this.setCellStyleProperty(cellId, 'curved', '0')
+        this.setCellStyleProperty(cellId, 'rounded', '0')
+      } else if (routing === 'curved') {
+        this.setCellStyleProperty(cellId, 'edgeStyle', 'orthogonalEdgeStyle')
+        this.setCellStyleProperty(cellId, 'curved', '1')
+        this.setCellStyleProperty(cellId, 'rounded', '1')
+      } else if (routing === 'entityRelation') {
+        this.setCellStyleProperty(cellId, 'edgeStyle', 'entityRelationEdgeStyle')
+        this.setCellStyleProperty(cellId, 'curved', '0')
+      }
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
+   * Modifica el marcador de punta de una arista (inicio o fin)
+   */
+  setEdgeArrow(cellId: string, position: 'start' | 'end', arrowType: string, fill = true): void {
+    const arrowProp = position === 'start' ? 'startArrow' : 'endArrow'
+    const fillProp = position === 'start' ? 'startFill' : 'endFill'
+
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      this.setCellStyleProperty(cellId, arrowProp, arrowType)
+      this.setCellStyleProperty(cellId, fillProp, fill ? '1' : '0')
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
+   * Comprueba si una celda es un conector / arista
+   */
+  isCellEdge(cellId: string): boolean {
+    const cell = this.graph.getModel().getCell(cellId)
+    if (!cell) return false
+    return Boolean(cell.edge || (this.graph.getModel() as any).isEdge?.(cell))
   }
 
   /**
@@ -709,7 +884,7 @@ export class GraphController {
           return
         }
         isSpacePressed = true
-        if (!isPanning && container) {
+        if (!isPanning && container?.style) {
           container.style.cursor = 'grab'
         }
       }
@@ -719,7 +894,7 @@ export class GraphController {
       if (this.destroyed) return
       if (e.code === 'Space') {
         isSpacePressed = false
-        if (!isPanning && container) {
+        if (!isPanning && container?.style) {
           container.style.cursor = ''
         }
       }
@@ -743,7 +918,7 @@ export class GraphController {
     const handleMouseUp = (e: MouseEvent) => {
       if (!isPanning) return
       isPanning = false
-      if (container) {
+      if (container?.style) {
         container.style.cursor = isSpacePressed ? 'grab' : ''
       }
       if (typeof document !== 'undefined' && document.body) {
@@ -775,7 +950,7 @@ export class GraphController {
       initTranslateX = trans?.x ?? 0
       initTranslateY = trans?.y ?? 0
 
-      if (container) {
+      if (container?.style) {
         container.style.cursor = 'grabbing'
       }
       if (typeof document !== 'undefined' && document.body) {
@@ -1034,6 +1209,10 @@ export class GraphController {
     if (this.keydownHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
       window.removeEventListener('keydown', this.keydownHandler)
       this.keydownHandler = null
+    }
+    if (this.keyupHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
+      window.removeEventListener('keyup', this.keyupHandler)
+      this.keyupHandler = null
     }
     if (this.rubberband) {
       this.rubberband.destroy()

@@ -35,6 +35,8 @@ export interface mxCell {
   edge: boolean
   connectable: boolean
   visible: boolean
+  source?: mxCell | null
+  target?: mxCell | null
   parent: mxCell | null
   children: mxCell[] | null
   getId(): string
@@ -125,6 +127,17 @@ export interface mxRubberband {
   destroy(): void
 }
 
+export interface mxConnectionHandler {
+  enabled: boolean
+  setEnabled(enabled: boolean): void
+  isEnabled(): boolean
+  setCreateTarget(create: boolean): void
+  isValidSource(cell: mxCell, me?: any): boolean
+  isValidTarget(cell: mxCell, me?: any): boolean
+  insertBeforeSource: boolean
+  insertEdge?(parent: any, id: any, value: any, source: any, target: any, style: any): mxCell
+}
+
 export declare class mxCodec {
   constructor(document?: Document)
   document: Document
@@ -143,6 +156,7 @@ export declare class mxGraph {
   model: mxGraphModel
   view: mxGraphView
   selectionModel: mxSelectionModel
+  connectionHandler?: mxConnectionHandler
   enabled: boolean
 
   isSpecialColor?(color?: string): boolean

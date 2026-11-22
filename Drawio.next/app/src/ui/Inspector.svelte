@@ -7,14 +7,23 @@
 
   // Obtener celda seleccionada actual
   let firstSelectedId = $derived(Array.from($selectedIds)[0] ?? null);
+  let selCount = $derived($selectedIds.size);
   let _rev = $derived($graphRevision);
+
   let selectedCell = $derived.by(() => {
     void _rev;
     if (!firstSelectedId || !$activeGraph) return null;
     return $activeGraph.getRawGraph().getModel().getCell(firstSelectedId);
   });
 
-  // Propiedades geométricas
+  // Determinar si es una arista / conector o un vértice / bloque
+  let isEdge = $derived.by(() => {
+    void _rev;
+    if (!selectedCell || !$activeGraph) return false;
+    return Boolean(selectedCell.edge || $activeGraph.isCellEdge(firstSelectedId!));
+  });
+
+  // Propiedades geométricas (para vértices)
   let posX = $derived.by(() => {
     void _rev;
     return selectedCell?.geometry?.x ?? 0;
@@ -48,6 +57,7 @@
     return match ? match[1] : def;
   }
 
+  let fillColor = $derived(getStyle("fillColor", "#dae8fc"));
   let strokeColor = $derived(getStyle("strokeColor", "#6c8ebf"));
   let strokeWidth = $derived(Number(getStyle("strokeWidth", "1")) || 1);
   let isDashed = $derived(getStyle("dashed") === "1");
@@ -56,6 +66,29 @@
   let opacity = $derived(Number(getStyle("opacity", "100")) || 100);
   let fontSize = $derived(Number(getStyle("fontSize", "12")) || 12);
   let textAlign = $derived(getStyle("align", "center"));
+
+  // Estilos específicos de aristas
+  let edgeStyleVal = $derived(getStyle("edgeStyle", "orthogonalEdgeStyle"));
+  let isCurved = $derived(getStyle("curved", "0") === "1");
+  let currentRouting = $derived.by(() => {
+    if (edgeStyleVal === "none") return "straight";
+    if (edgeStyleVal === "entityRelationEdgeStyle") return "entityRelation";
+    if (isCurved) return "curved";
+    return "orthogonal";
+  });
+
+  let startArrow = $derived(getStyle("startArrow", "none"));
+  let endArrow = $derived(getStyle("endArrow", "classic"));
+
+  // Nombres de nodos conectados (si es arista)
+  let sourceNodeLabel = $derived.by(() => {
+    void _rev;
+    return selectedCell?.source?.value || (selectedCell?.source ? `ID ${selectedCell.source.id}` : "Desconectado");
+  });
+  let targetNodeLabel = $derived.by(() => {
+    void _rev;
+    return selectedCell?.target?.value || (selectedCell?.target ? `ID ${selectedCell.target.id}` : "Desconectado");
+  });
 
   function updateX(val: number) {
     if (firstSelectedId && $activeGraph) {
@@ -71,25 +104,13 @@
 
   function updateW(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellGeometry(
-        firstSelectedId,
-        posX,
-        posY,
-        Math.max(10, val),
-        posH,
-      );
+      $activeGraph.setCellGeometry(firstSelectedId, posX, posY, Math.max(10, val), posH);
     }
   }
 
   function updateH(val: number) {
     if (firstSelectedId && $activeGraph) {
-      $activeGraph.setCellGeometry(
-        firstSelectedId,
-        posX,
-        posY,
-        posW,
-        Math.max(10, val),
-      );
+      $activeGraph.setCellGeometry(firstSelectedId, posX, posY, posW, Math.max(10, val));
     }
   }
 
@@ -147,18 +168,6 @@
     }
   }
 
-  function bringToFront() {
-    if (firstSelectedId && $activeGraph) {
-      $activeGraph.bringToFront(firstSelectedId);
-    }
-  }
-
-  function sendToBack() {
-    if (firstSelectedId && $activeGraph) {
-      $activeGraph.sendToBack(firstSelectedId);
-    }
-  }
-
   function updateFontSize(size: number) {
     if (firstSelectedId && $activeGraph) {
       $activeGraph.setCellFontSize(firstSelectedId, size);
@@ -176,67 +185,181 @@
       $activeGraph.setCellAlign(firstSelectedId, align);
     }
   }
+
+  function updateRouting(routing: "straight" | "orthogonal" | "curved" | "entityRelation") {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setEdgeRouting(firstSelectedId, routing);
+    }
+  }
+
+  function updateArrow(pos: "start" | "end", arrow: string) {
+    if (firstSelectedId && $activeGraph) {
+      $activeGraph.setEdgeArrow(firstSelectedId, pos, arrow);
+    }
+  }
+
+  function bringToFront() {
+    if ($activeGraph) $activeGraph.bringToFront();
+  }
+
+  function sendToBack() {
+    if ($activeGraph) $activeGraph.sendToBack();
+  }
+
+  function handleConnectSelected() {
+    if ($activeGraph) {
+      $activeGraph.connectSelected();
+    }
+  }
 </script>
 
 <aside class="inspector" data-testid="inspector">
-  <!-- Tabs -->
-  <div class="tab-bar">
+  <!-- Pestañas Superiores -->
+  <div class="tabs-header">
     {#each tabs as tab}
       <button
         class="tab-btn"
         class:active={activeTab === tab}
         onclick={() => (activeTab = tab)}
-        data-testid="inspector-tab-{tab.toLowerCase()}"
+        data-testid={`tab-${tab.toLowerCase()}`}
       >
         {tab}
       </button>
     {/each}
   </div>
 
-  <!-- Contenido -->
   <div class="tab-content">
+    {#if selCount >= 2}
+      <!-- Botón de acción rápida para selección múltiple -->
+      <div class="multi-select-box">
+        <div class="multi-title">{selCount} elementos seleccionados</div>
+        <button class="action-btn-primary" onclick={handleConnectSelected} title="Crea una arista conectando los dos primeros nodos">
+          🔗 Enlazar Nodos con Flecha
+        </button>
+      </div>
+    {/if}
+
     {#if !$hasSelection}
       <div class="no-selection">
-        <span class="no-sel-icon">⬚</span>
-        <p>
-          Selecciona una forma en el lienzo para ver y editar sus propiedades
-        </p>
+        <span class="no-sel-icon">👆</span>
+        <p>Selecciona una forma o conector para ver y editar sus propiedades.</p>
       </div>
     {:else}
       {#if activeTab === "Style"}
-        <!-- Relleno -->
-        <div class="prop-group">
-          <div class="prop-label">Color de Relleno</div>
-          <div class="color-palette">
-            {#each ["#dae8fc", "#d5e8d4", "#ffe6cc", "#f8cecc", "#e1d5e7", "#fff2cc", "#ffffff", "none"] as color}
+        {#if isEdge}
+          <!-- PROPIEDADES DE CONECTOR / FLECHA -->
+          <div class="prop-group">
+            <div class="prop-label">Enrutamiento de Línea</div>
+            <div class="routing-grid">
               <button
-                class="color-btn"
-                class:none-color={color === "none"}
-                style="background-color: {color === 'none'
-                  ? 'transparent'
-                  : color};"
-                title={color === "none" ? "Sin relleno" : `Color ${color}`}
-                onclick={() => updateFillColor(color)}
+                class="choice-btn"
+                class:active={currentRouting === "orthogonal"}
+                onclick={() => updateRouting("orthogonal")}
+                title="Ángulos rectos"
               >
-                {#if color === "none"}⊘{/if}
+                ⌞⌟ Ortogonal
               </button>
-            {/each}
+              <button
+                class="choice-btn"
+                class:active={currentRouting === "curved"}
+                onclick={() => updateRouting("curved")}
+                title="Curva suave"
+              >
+                ∿ Curvo
+              </button>
+              <button
+                class="choice-btn"
+                class:active={currentRouting === "straight"}
+                onclick={() => updateRouting("straight")}
+                title="Línea recta directa"
+              >
+                ╱ Recto
+              </button>
+              <button
+                class="choice-btn"
+                class:active={currentRouting === "entityRelation"}
+                onclick={() => updateRouting("entityRelation")}
+                title="Relación de entidad"
+              >
+                ⑂ E-R
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Borde / Trazo -->
+          <!-- Puntas de Flecha -->
+          <div class="prop-group">
+            <div class="prop-label">Punta Inicial</div>
+            <div class="btn-group">
+              {#each [
+                { id: "none", label: "— Ninguna" },
+                { id: "classic", label: "◀ Flecha" },
+                { id: "oval", label: "● Círculo" },
+                { id: "diamond", label: "◆ Diamante" }
+              ] as arr}
+                <button
+                  class="choice-btn"
+                  class:active={startArrow === arr.id}
+                  onclick={() => updateArrow("start", arr.id)}
+                >
+                  {arr.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <div class="prop-group">
+            <div class="prop-label">Punta Final</div>
+            <div class="btn-group">
+              {#each [
+                { id: "classic", label: "▶ Flecha" },
+                { id: "block", label: "▶ Bloque" },
+                { id: "open", label: "▷ Abierta" },
+                { id: "oval", label: "● Círculo" },
+                { id: "none", label: "— Ninguna" }
+              ] as arr}
+                <button
+                  class="choice-btn"
+                  class:active={endArrow === arr.id}
+                  onclick={() => updateArrow("end", arr.id)}
+                >
+                  {arr.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+
+        {:else}
+          <!-- PROPIEDADES DE NODO / FORMA: Color de Relleno -->
+          <div class="prop-group">
+            <div class="prop-label">Color de Relleno</div>
+            <div class="color-palette">
+              {#each ["#dae8fc", "#d5e8d4", "#ffe6cc", "#f8cecc", "#e1d5e7", "#ffffff", "none"] as color}
+                <button
+                  class="color-btn"
+                  class:active-color={fillColor === color}
+                  class:none-color={color === "none"}
+                  style="background-color: {color === 'none' ? 'transparent' : color};"
+                  title={color === "none" ? "Sin relleno" : `Relleno ${color}`}
+                  onclick={() => updateFillColor(color)}
+                >
+                  {#if color === "none"}⊘{/if}
+                </button>
+              {/each}
+            </div>
+          </div>
+        {/if}
+
+        <!-- Color de Trazo / Borde (Compartido para Nodos y Aristas) -->
         <div class="prop-group">
-          <div class="prop-label">Color de Borde</div>
+          <div class="prop-label">{isEdge ? "Color del Conector" : "Color de Borde"}</div>
           <div class="color-palette">
-            {#each ["#6c8ebf", "#82b366", "#d79b00", "#b85450", "#9673a6", "#000000", "#ffffff", "none"] as color}
+            {#each ["#6c8ebf", "#82b366", "#d79b00", "#b85450", "#9673a6", "#0078d4", "#000000", "#ffffff", "none"] as color}
               <button
                 class="color-btn"
                 class:active-color={strokeColor === color}
                 class:none-color={color === "none"}
-                style="background-color: {color === 'none'
-                  ? 'transparent'
-                  : color};"
-                title={color === "none" ? "Sin borde" : `Borde ${color}`}
+                style="background-color: {color === 'none' ? 'transparent' : color};"
+                title={color === "none" ? "Sin borde" : `Color ${color}`}
                 onclick={() => updateStrokeColor(color)}
               >
                 {#if color === "none"}⊘{/if}
@@ -245,9 +368,9 @@
           </div>
         </div>
 
-        <!-- Grosor y Estilo de Trazo -->
+        <!-- Grosor de Trazo -->
         <div class="prop-group">
-          <div class="prop-label">Grosor de Trazo</div>
+          <div class="prop-label">Grosor de Línea</div>
           <div class="btn-group">
             {#each [1, 2, 3, 4] as w}
               <button
@@ -261,7 +384,7 @@
           </div>
         </div>
 
-        <!-- Efectos de Borde -->
+        <!-- Efectos de Línea -->
         <div class="prop-group">
           <div class="prop-label">Efectos</div>
           <div class="btn-group">
@@ -272,20 +395,22 @@
             >
               Línea Discontinua
             </button>
-            <button
-              class="choice-btn"
-              class:active={isRounded}
-              onclick={toggleRounded}
-            >
-              Redondeado
-            </button>
-            <button
-              class="choice-btn"
-              class:active={isShadow}
-              onclick={toggleShadow}
-            >
-              Sombra
-            </button>
+            {#if !isEdge}
+              <button
+                class="choice-btn"
+                class:active={isRounded}
+                onclick={toggleRounded}
+              >
+                Redondeado
+              </button>
+              <button
+                class="choice-btn"
+                class:active={isShadow}
+                onclick={toggleShadow}
+              >
+                Sombra
+              </button>
+            {/if}
           </div>
         </div>
 
@@ -305,53 +430,84 @@
             oninput={(e) => updateOpacity(Number(e.currentTarget.value))}
           />
         </div>
+
       {:else if activeTab === "Arrange"}
-        <!-- Posición y Dimensiones -->
-        <div class="prop-group">
-          <div class="prop-label">Geometría</div>
-          <div class="prop-grid">
-            <div class="prop-row">
-              <label class="prop-label-sub" for="prop-x">X</label>
-              <input
-                id="prop-x"
-                class="prop-input"
-                type="number"
-                value={posX}
-                onchange={(e) => updateX(Number(e.currentTarget.value))}
-              />
-            </div>
-            <div class="prop-row">
-              <label class="prop-label-sub" for="prop-y">Y</label>
-              <input
-                id="prop-y"
-                class="prop-input"
-                type="number"
-                value={posY}
-                onchange={(e) => updateY(Number(e.currentTarget.value))}
-              />
-            </div>
-            <div class="prop-row">
-              <label class="prop-label-sub" for="prop-w">Ancho</label>
-              <input
-                id="prop-w"
-                class="prop-input"
-                type="number"
-                value={posW}
-                onchange={(e) => updateW(Number(e.currentTarget.value))}
-              />
-            </div>
-            <div class="prop-row">
-              <label class="prop-label-sub" for="prop-h">Alto</label>
-              <input
-                id="prop-h"
-                class="prop-input"
-                type="number"
-                value={posH}
-                onchange={(e) => updateH(Number(e.currentTarget.value))}
-              />
+        {#if isEdge}
+          <!-- Información del enlace de aristas -->
+          <div class="prop-group">
+            <div class="prop-label">Nodos Vinculados</div>
+            <div class="edge-link-info">
+              <div class="link-item">
+                <span class="link-tag">Origen:</span>
+                <span class="link-label">{sourceNodeLabel}</span>
+              </div>
+              <div class="link-arrow">➔</div>
+              <div class="link-item">
+                <span class="link-tag">Destino:</span>
+                <span class="link-label">{targetNodeLabel}</span>
+              </div>
             </div>
           </div>
-        </div>
+        {:else}
+          <!-- Posición y Dimensiones para formas -->
+          <div class="prop-group">
+            <div class="prop-label">Geometría</div>
+            <div class="prop-grid">
+              <div class="prop-row">
+                <label class="prop-label-sub" for="prop-x">X</label>
+                <input
+                  id="prop-x"
+                  class="prop-input"
+                  type="number"
+                  value={posX}
+                  onchange={(e) => updateX(Number(e.currentTarget.value))}
+                />
+              </div>
+              <div class="prop-row">
+                <label class="prop-label-sub" for="prop-y">Y</label>
+                <input
+                  id="prop-y"
+                  class="prop-input"
+                  type="number"
+                  value={posY}
+                  onchange={(e) => updateY(Number(e.currentTarget.value))}
+                />
+              </div>
+              <div class="prop-row">
+                <label class="prop-label-sub" for="prop-w">Ancho</label>
+                <input
+                  id="prop-w"
+                  class="prop-input"
+                  type="number"
+                  value={posW}
+                  onchange={(e) => updateW(Number(e.currentTarget.value))}
+                />
+              </div>
+              <div class="prop-row">
+                <label class="prop-label-sub" for="prop-h">Alto</label>
+                <input
+                  id="prop-h"
+                  class="prop-input"
+                  type="number"
+                  value={posH}
+                  onchange={(e) => updateH(Number(e.currentTarget.value))}
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Rotación de Forma -->
+          <div class="prop-group">
+            <div class="prop-label">Rotación</div>
+            <div class="btn-group">
+              {#each [0, 90, 180, 270] as angle}
+                <button class="choice-btn" onclick={() => updateRotation(angle)}>
+                  {angle}°
+                </button>
+              {/each}
+            </div>
+          </div>
+        {/if}
 
         <!-- Orden de Capas (Z-Index) -->
         <div class="prop-group">
@@ -360,39 +516,29 @@
             <button
               class="choice-btn"
               onclick={bringToFront}
-              title="Traer forma al frente"
+              title="Traer al frente"
             >
               ▲ Traer al frente
             </button>
             <button
               class="choice-btn"
               onclick={sendToBack}
-              title="Enviar forma al fondo"
+              title="Enviar al fondo"
             >
               ▼ Enviar al fondo
             </button>
           </div>
         </div>
 
-        <!-- Rotación Rápida -->
-        <div class="prop-group">
-          <div class="prop-label">Rotación</div>
-          <div class="btn-group">
-            {#each [0, 90, 180, 270] as angle}
-              <button class="choice-btn" onclick={() => updateRotation(angle)}>
-                {angle}°
-              </button>
-            {/each}
-          </div>
-        </div>
       {:else if activeTab === "Text"}
-        <!-- Texto de la Forma -->
+        <!-- Texto de la Forma o Conector -->
         <div class="prop-group">
-          <label class="prop-label" for="prop-text">Contenido de Texto</label>
+          <label class="prop-label" for="prop-text">{isEdge ? "Etiqueta del Conector" : "Texto de la Forma"}</label>
           <input
             id="prop-text"
-            class="prop-input text-input"
+            class="prop-input"
             type="text"
+            placeholder={isEdge ? "Ej: Paso 1, Sí, No..." : "Escribe una etiqueta..."}
             value={cellText}
             oninput={(e) => updateText(e.currentTarget.value)}
           />
@@ -402,13 +548,13 @@
         <div class="prop-group">
           <div class="prop-label">Tamaño de Fuente</div>
           <div class="btn-group">
-            {#each [11, 12, 14, 16, 20, 24] as sz}
+            {#each [11, 12, 14, 16, 20] as sz}
               <button
                 class="choice-btn"
                 class:active={fontSize === sz}
                 onclick={() => updateFontSize(sz)}
               >
-                {sz}
+                {sz}px
               </button>
             {/each}
           </div>
@@ -416,7 +562,7 @@
 
         <!-- Alineación -->
         <div class="prop-group">
-          <div class="prop-label">Alineación</div>
+          <div class="prop-label">Alineación Horizontal</div>
           <div class="btn-group">
             <button
               class="choice-btn"
@@ -450,7 +596,7 @@
               <button
                 class="color-btn"
                 style="background-color: {color};"
-                title="Color de texto {color}"
+                title={`Color ${color}`}
                 onclick={() => updateFontColor(color)}
               ></button>
             {/each}
@@ -460,14 +606,10 @@
     {/if}
   </div>
 
-  <!-- Diagram props (siempre visible) -->
   <div class="diagram-section">
     <div class="section-title">Diagrama</div>
     <div class="diag-info">
-      <small
-        >Atajos: <b>Supr/Backspace</b> para borrar, <b>Ctrl+Z</b> deshacer,
-        <b>Ctrl+Y</b> rehacer.</small
-      >
+      <small>Atajos: <b>Supr</b> borrar, <b>Ctrl+Z/Y</b> deshacer/rehacer, <b>C</b> conector, <b>Alt+arrastre</b> enlazar.</small>
     </div>
   </div>
 </aside>
@@ -477,13 +619,16 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    font-size: var(--text-base);
+    background: var(--bg-secondary);
+    border-left: var(--border-w) solid var(--border);
+    user-select: none;
+    overflow: hidden;
   }
 
-  .tab-bar {
+  .tabs-header {
     display: flex;
     border-bottom: var(--border-w) solid var(--border);
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
   }
 
   .tab-btn {
@@ -493,23 +638,21 @@
     border: none;
     border-bottom: 2px solid transparent;
     color: var(--text-secondary);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     font-weight: var(--font-medium);
     cursor: pointer;
     transition: all var(--t-fast);
   }
-  .tab-btn:hover {
-    color: var(--text-primary);
-  }
+  .tab-btn:hover { color: var(--text-primary); }
   .tab-btn.active {
     color: var(--accent);
     border-bottom-color: var(--accent);
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
   }
 
   .tab-content {
     flex: 1;
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     overflow-y: auto;
   }
 
@@ -525,86 +668,115 @@
     opacity: 0.4;
   }
 
+  .multi-select-box {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .multi-title {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+    font-weight: var(--font-bold);
+  }
+  .action-btn-primary {
+    width: 100%;
+    padding: var(--space-2);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #ffffff;
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background var(--t-fast);
+  }
+  .action-btn-primary:hover {
+    background: var(--accent-hover);
+  }
+
   .prop-group {
     margin-bottom: var(--space-4);
   }
   .prop-label {
     display: block;
     font-size: 11px;
+    font-weight: var(--font-bold);
     color: var(--text-secondary);
     margin-bottom: var(--space-2);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-weight: var(--font-medium);
   }
   .prop-label-sub {
     font-size: 10px;
-    color: var(--text-disabled);
+    color: var(--text-secondary);
     margin-bottom: 2px;
   }
 
+  /* Paleta de Colores */
   .color-palette {
     display: flex;
-    gap: var(--space-2);
     flex-wrap: wrap;
+    gap: var(--space-2);
   }
-
   .color-btn {
     width: 24px;
     height: 24px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     cursor: pointer;
-    transition:
-      transform 0.1s ease,
-      border-color 0.1s ease;
+    transition: transform 0.1s ease, border-color 0.1s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-secondary);
   }
   .color-btn:hover {
     transform: scale(1.15);
-    border-color: var(--text-primary);
+    border-color: var(--accent);
   }
   .color-btn.active-color {
     border: 2px solid var(--accent);
-    transform: scale(1.1);
-  }
-  .color-btn.none-color {
-    border: 1px dashed var(--border-light);
+    box-shadow: 0 0 4px var(--accent);
   }
 
+  /* Botones de opción / Choice */
   .btn-group {
     display: flex;
-    gap: var(--space-1);
     flex-wrap: wrap;
+    gap: var(--space-1);
   }
-
+  .routing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
   .choice-btn {
     flex: 1;
-    min-width: 44px;
+    min-width: 50px;
     padding: var(--space-1) var(--space-2);
     background: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    font-size: 11px;
+    color: var(--text-primary);
+    font-size: var(--text-xs);
     cursor: pointer;
-    transition: all var(--t-fast);
     text-align: center;
+    transition: all var(--t-fast);
   }
   .choice-btn:hover {
     background: var(--bg-hover);
-    color: var(--text-primary);
   }
   .choice-btn.active {
     background: var(--accent);
-    color: white;
+    color: #ffffff;
     border-color: var(--accent);
   }
 
+  /* Sliders y Rangos */
   .slider-row {
     display: flex;
     justify-content: space-between;
@@ -612,9 +784,9 @@
     margin-bottom: var(--space-1);
   }
   .slider-val {
-    font-size: 11px;
-    color: var(--text-primary);
+    font-size: var(--text-xs);
     font-family: var(--font-mono);
+    color: var(--text-primary);
   }
   .prop-range {
     width: 100%;
@@ -622,6 +794,7 @@
     cursor: pointer;
   }
 
+  /* Cuadrícula de Geometría */
   .prop-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -634,35 +807,69 @@
 
   .prop-input {
     background: var(--bg-primary);
-    border: var(--border-w) solid var(--border);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     padding: var(--space-1) var(--space-2);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     width: 100%;
   }
   .prop-input:focus {
-    outline: none;
+    outline: 1px solid var(--accent);
     border-color: var(--accent);
   }
 
+  /* Info de enlaces de arista */
+  .edge-link-info {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: center;
+  }
+  .link-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    width: 100%;
+  }
+  .link-tag {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    font-weight: var(--font-bold);
+    min-width: 55px;
+  }
+  .link-label {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .link-arrow {
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  /* Sección Inferior */
   .diagram-section {
-    border-top: var(--border-w) solid var(--border);
     padding: var(--space-3) var(--space-4);
-    background: var(--bg-secondary);
+    border-top: var(--border-w) solid var(--border);
+    background: var(--bg-primary);
   }
   .section-title {
     font-size: var(--text-xs);
-    font-weight: var(--font-medium);
+    font-weight: var(--font-bold);
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
   }
-
-  .diag-info small {
-    color: var(--text-secondary);
-    font-size: 11px;
+  .diag-info {
+    font-size: var(--text-xs);
+    color: var(--text-disabled);
     line-height: 1.4;
   }
 </style>

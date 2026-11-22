@@ -12,6 +12,11 @@ export const activeGraph = writable<GraphController | null>(null)
 export const zoomLevel = writable<number>(100)
 
 /**
+ * Modo interactivo de creación de conexiones/flechas activo
+ */
+export const connectionMode = writable<boolean>(false)
+
+/**
  * Contador de revisiones del modelo gráfico para sincronizar UI (Inspector, etc.)
  */
 export const graphRevision = writable<number>(0)

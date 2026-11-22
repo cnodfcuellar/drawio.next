@@ -58,7 +58,7 @@ function createMockMxGraph() {
     model = model
     view = view
     selectionModel = selectionModel
-    connectionHandler = { isValidSource: () => true, setCreateTarget: vi.fn(), setEnabled: vi.fn() }
+    connectionHandler = { isValidSource: () => true, isValidTarget: () => true, setCreateTarget: vi.fn(), setEnabled: vi.fn(), insertBeforeSource: true, insertEdge: vi.fn() }
     panningHandler = { useLeftButtonForPanning: true, panningEnabled: true, ignoreCell: true, usePopupTrigger: true, isPanningTrigger: vi.fn(), isForcePanningEvent: vi.fn() }
     graphHandler = { setEnabled: vi.fn(), setSelectEnabled: vi.fn(), setMoveEnabled: vi.fn(), setCloneEnabled: vi.fn(), maxLivePreview: 0 }
 
@@ -115,6 +115,11 @@ function createMockMxGraph() {
 
     setSelectionCell(cell: any) {
       currentSelection = [cell]
+      selectionListeners.forEach(fn => fn())
+    }
+
+    setSelectionCells(cells: any[]) {
+      currentSelection = cells
       selectionListeners.forEach(fn => fn())
     }
 
@@ -227,7 +232,7 @@ describe('GraphController', () => {
     ;(globalThis as any).window.mxUtils = mocks.mockUtils
     ;(globalThis as any).window.mxConstants = { STYLE_STROKECOLOR: 'strokeColor', STYLE_FILLCOLOR: 'fillColor' }
 
-    container = { id: 'test-container' } as unknown as HTMLElement
+    container = { id: 'test-container', style: {} } as unknown as HTMLElement
     controller = new GraphController(container)
   })
 
@@ -459,6 +464,48 @@ describe('GraphController', () => {
 
     controller.clear()
     expect(rawGraph.removeCells).toHaveBeenCalled()
+  })
+
+  it('setConnectionMode y toggleConnectionMode alternan el modo interactivo de conexión', () => {
+    expect(controller.isConnectionMode()).toBe(false)
+
+    controller.setConnectionMode(true)
+    expect(controller.isConnectionMode()).toBe(true)
+
+    controller.toggleConnectionMode()
+    expect(controller.isConnectionMode()).toBe(false)
+  })
+
+  it('connectSelected enlaza dos celdas seleccionadas con una arista', () => {
+    const v1 = controller.addVertex({ label: 'Origen', x: 0, y: 0 })
+    const v2 = controller.addVertex({ label: 'Destino', x: 100, y: 100 })
+    const rawGraph = controller.getRawGraph() as any
+    rawGraph.setSelectionCells([v1, v2])
+
+    const edge = controller.connectSelected('Paso A-B')
+    expect(edge).toBeDefined()
+    expect(edge?.value).toBe('Paso A-B')
+    expect(edge?.edge).toBe(true)
+  })
+
+  it('setEdgeRouting y setEdgeArrow modifican propiedades de aristas', () => {
+    const v1 = controller.addVertex({ label: 'A', x: 0, y: 0 })
+    const v2 = controller.addVertex({ label: 'B', x: 100, y: 0 })
+    const edge = controller.addEdge(v1.id, v2.id, 'Relacion')!
+
+    controller.setEdgeRouting(edge.id, 'curved')
+    expect(edge.style).toContain('curved=1')
+
+    controller.setEdgeRouting(edge.id, 'orthogonal')
+    expect(edge.style).toContain('edgeStyle=orthogonalEdgeStyle')
+
+    controller.setEdgeArrow(edge.id, 'start', 'diamond')
+    controller.setEdgeArrow(edge.id, 'end', 'classic')
+    expect(edge.style).toContain('startArrow=diamond')
+    expect(edge.style).toContain('endArrow=classic')
+
+    expect(controller.isCellEdge(edge.id)).toBe(true)
+    expect(controller.isCellEdge(v1.id)).toBe(false)
   })
 
   it('destruye la instancia limpiamente', () => {

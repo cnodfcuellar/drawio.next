@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { GraphController } from '../core/GraphController'
-  import { activeGraph, zoomLevel, graphRevision } from '../stores/graph'
+  import { activeGraph, zoomLevel, graphRevision, connectionMode } from '../stores/graph'
   import { selectMany, clearSelection } from '../stores/selection'
 
   let canvasEl: HTMLDivElement | null = null
@@ -78,6 +78,11 @@
       // Sincronizar cambios en el modelo (mover, redimensionar, editar) con la UI
       controller.onModelChange(() => {
         graphRevision.update(n => n + 1)
+      })
+
+      // Sincronizar estado del modo conector con la barra de herramientas
+      controller.onConnectionModeChange((enabled) => {
+        connectionMode.set(enabled)
       })
 
       // Nodos iniciales de bienvenida para verificar interactividad de inmediato

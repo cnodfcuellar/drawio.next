@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { hasSelection } from '../stores/selection'
-  import { activeGraph, zoomLevel } from '../stores/graph'
+  import { hasSelection, selectedIds } from '../stores/selection'
+  import { activeGraph, zoomLevel, connectionMode } from '../stores/graph'
 
   interface ToolGroup {
     tools: Tool[]
@@ -10,10 +10,43 @@
     icon: string
     label: string
     shortcut?: string
+    active?: boolean
+    disabled?: boolean
     action: () => void
   }
 
-  const groups: ToolGroup[] = [
+  let isConnect = $derived($connectionMode)
+  let selCount = $derived($selectedIds.size)
+
+  let groups: ToolGroup[] = $derived([
+    {
+      tools: [
+        {
+          id: 'selectMode',
+          icon: '↖',
+          label: 'Puntero / Selección',
+          shortcut: 'V',
+          active: !isConnect,
+          action: () => $activeGraph?.setConnectionMode(false)
+        },
+        {
+          id: 'connectMode',
+          icon: '⤹',
+          label: 'Modo Conector (o mantén Alt y arrastra)',
+          shortcut: 'C',
+          active: isConnect,
+          action: () => $activeGraph?.toggleConnectionMode()
+        },
+        {
+          id: 'quickConnect',
+          icon: '🔗',
+          label: 'Enlazar 2 nodos seleccionados',
+          shortcut: 'L',
+          disabled: selCount < 2,
+          action: () => $activeGraph?.connectSelected()
+        }
+      ]
+    },
     {
       tools: [
         {
@@ -39,6 +72,7 @@
           icon: '🗑',
           label: 'Delete',
           shortcut: 'Del',
+          disabled: !$hasSelection,
           action: () => $activeGraph?.removeSelected()
         },
         {
@@ -103,7 +137,7 @@
         },
       ]
     },
-  ]
+  ])
 </script>
 
 <div class="toolbar" data-testid="toolbar">
@@ -113,9 +147,10 @@
       {#each group.tools as tool}
         <button
           class="tool-btn"
+          class:active={tool.active}
           title="{tool.label}{tool.shortcut ? ` (${tool.shortcut})` : ''}"
           onclick={tool.action}
-          disabled={tool.id === 'delete' ? !$hasSelection : false}
+          disabled={tool.disabled}
           data-testid="tool-{tool.id}"
         >
           <span class="tool-icon">{tool.icon}</span>
@@ -160,6 +195,7 @@
   }
   .tool-btn:hover    { background: var(--bg-hover); }
   .tool-btn:active   { background: var(--bg-active); }
+  .tool-btn.active   { background: var(--accent); color: #ffffff; }
   .tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   .tool-icon { line-height: 1; font-size: 13px; }
