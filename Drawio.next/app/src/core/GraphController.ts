@@ -263,6 +263,21 @@ export class GraphController {
     if (enableRubberband && window.mxRubberband) {
       this.rubberband = new window.mxRubberband(this.graph)
     }
+
+    // 6. Registrar estilos estándar de formas en la Stylesheet para compatibilidad nativa con draw.io
+    const anyGraphInstance = this.graph as any
+    const ss = typeof anyGraphInstance.getStylesheet === 'function' ? anyGraphInstance.getStylesheet() : null
+    if (ss && typeof ss.putCellStyle === 'function') {
+      const p = (window as any).mxPerimeter || {}
+      ss.putCellStyle('ellipse', { shape: 'ellipse', perimeter: p.EllipsePerimeter || 'ellipsePerimeter' })
+      ss.putCellStyle('rhombus', { shape: 'rhombus', perimeter: p.RhombusPerimeter || 'rhombusPerimeter' })
+      ss.putCellStyle('triangle', { shape: 'triangle', perimeter: p.TrianglePerimeter || 'trianglePerimeter' })
+      ss.putCellStyle('cylinder', { shape: 'cylinder', perimeter: p.CylinderPerimeter || 'cylinderPerimeter' })
+      ss.putCellStyle('cylinder3', { shape: 'cylinder3', perimeter: p.CylinderPerimeter || 'cylinderPerimeter' })
+      ss.putCellStyle('cloud', { shape: 'cloud', perimeter: p.EllipsePerimeter || 'ellipsePerimeter' })
+      ss.putCellStyle('actor', { shape: 'actor', perimeter: p.ActorPerimeter || 'actorPerimeter' })
+      ss.putCellStyle('hexagon', { shape: 'hexagon', perimeter: p.HexagonPerimeter || 'hexagonPerimeter' })
+    }
   }
 
   /**

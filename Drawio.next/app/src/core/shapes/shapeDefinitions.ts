@@ -55,7 +55,7 @@ export const SHAPES: ShapeDefinition[] = [
     category: 'general',
     width: 90,
     height: 90,
-    style: 'ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;',
+    style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;',
     label: 'Círculo',
     tags: ['circle', 'circulo', 'ellipse', 'elipse', 'oval', 'redondo'],
     svgIcon: '<circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="1.8"/>'
@@ -66,7 +66,7 @@ export const SHAPES: ShapeDefinition[] = [
     category: 'general',
     width: 90,
     height: 90,
-    style: 'rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;',
+    style: 'shape=rhombus;perimeter=rhombusPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;',
     label: '¿Decisión?',
     tags: ['diamond', 'rhombus', 'rombo', 'decision', 'if', 'condicion'],
     svgIcon: '<polygon points="16,3 29,16 16,29 3,16" fill="none" stroke="currentColor" stroke-width="1.8"/>'
@@ -88,7 +88,7 @@ export const SHAPES: ShapeDefinition[] = [
     category: 'general',
     width: 120,
     height: 80,
-    style: 'ellipse;shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;',
+    style: 'shape=cloud;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;',
     label: 'Nube / Cloud',
     tags: ['cloud', 'nube', 'network', 'red', 'internet'],
     svgIcon: '<path d="M9,22 C5,22 4,17 7,15 C6,11 11,8 14,10 C16,6 23,7 24,11 C28,12 28,17 25,20 C24,22 21,22 19,22 Z" fill="none" stroke="currentColor" stroke-width="1.8"/>'
@@ -123,7 +123,7 @@ export const SHAPES: ShapeDefinition[] = [
     category: 'basic',
     width: 80,
     height: 90,
-    style: 'triangle;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;',
+    style: 'shape=triangle;perimeter=trianglePerimeter;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;',
     label: 'Triángulo',
     tags: ['triangle', 'triangulo', 'delta'],
     svgIcon: '<polygon points="16,4 29,27 3,27" fill="none" stroke="currentColor" stroke-width="1.8"/>'
@@ -283,7 +283,7 @@ export const SHAPES: ShapeDefinition[] = [
     category: 'uml',
     width: 120,
     height: 70,
-    style: 'ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;',
+    style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;',
     label: 'Caso de Uso',
     tags: ['usecase', 'caso de uso', 'uml'],
     svgIcon: '<ellipse cx="16" cy="16" rx="13" ry="8" fill="none" stroke="currentColor" stroke-width="1.8"/>'

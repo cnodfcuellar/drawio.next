@@ -218,6 +218,7 @@ export declare class mxGraph {
 
   getModel(): mxGraphModel
   getView(): mxGraphView
+  getStylesheet?(): any
   destroy(): void
 }
 
@@ -257,6 +258,9 @@ declare global {
     mxUtils: typeof mxUtils
     mxEvent: typeof mxEvent
     mxConstants: any
+    mxPerimeter?: any
+    Editor?: any
+    Graph?: any
     __graphController?: any
   }
 }

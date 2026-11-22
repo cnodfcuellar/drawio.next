@@ -123,7 +123,7 @@
         y: 120,
         width: 140,
         height: 60,
-        style: 'ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
+        style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
       })
 
       controller.addEdge(v1.id, v2.id, 'Paso 1')

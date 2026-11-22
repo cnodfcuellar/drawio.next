@@ -167,6 +167,7 @@ function createMockMxGraph() {
     getGraphBounds = vi.fn(() => ({ x: 20, y: 30, width: 300, height: 200 }))
     getModel() { return model }
     getView() { return view }
+    getStylesheet = vi.fn(() => ({ putCellStyle: vi.fn() }))
     destroy = vi.fn()
   }
 
