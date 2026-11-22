@@ -25,7 +25,7 @@ El proyecto draw.io está organizado en una arquitectura de **cuatro capas conc�
 ```
 
 ### Diagrama Arquitectónico Detallado:
-![Arquitectura en 4 Capas Concéntricas](img/arquitectura_4_capas.svg)
+![Arquitectura en 4 Capas Concéntricas](img_l/arquitectura_4_capas.svg)
 
 ---
 
@@ -73,10 +73,10 @@ sequenceDiagram
    - Configura temas visuales: `kennedy` (predeterminado), `atlas`, `dark`, `min`, `sketch`.
 
 ### Diagrama de Flujo Circular / Orbital del Arranque:
-![Diagrama de Flujo Orbital del Arranque](img/flujo_arranque_orbital.svg)
+![Diagrama de Flujo Orbital del Arranque](img_l/flujo_arranque_orbital.svg)
 
 ### Diagrama de Secuencia Técnico Real de Llamadas:
-![Diagrama de Secuencia de Llamadas](img/flujo_inicializacion_secuencia.svg)
+![Diagrama de Secuencia de Llamadas](img_l/flujo_inicializacion_secuencia.svg)
 
 ---
 
@@ -213,7 +213,7 @@ classDiagram
 ```
 
 ### Mapa de Doble Árbol Genealógico y Cooperación:
-![Árbol de Herencia y Jerarquía de Clases](img/jerarquia_clases_arbol.svg)
+![Árbol de Herencia y Jerarquía de Clases](img_l/jerarquia_clases_arbol.svg)
 
 ---
 
@@ -245,7 +245,7 @@ classDiagram
 - **`vsdx/importer.js`**: Parser completo de archivos de Microsoft Visio (`.vsdx`). Descomprime el paquete OOXML ZIP, lee documentos de formas, maestros y hojas de estilo, traduciéndolos nativamente a celdas de `mxGraph`.
 
 ### Matriz de Procesamiento y Métodos a Nivel de Código:
-![Matriz de Procesamiento y Funcionamiento Modular](img/funcionamiento_modulos_matriz.svg)
+![Matriz de Procesamiento y Funcionamiento Modular](img_l/funcionamiento_modulos_matriz.svg)
 
 ---
 
@@ -301,7 +301,7 @@ flowchart TD
    - Transforma formatos externos o de compresión hacia formatos entendibles por el motor JS.
 
 ### Pasarela y Enrutamiento Seguro de Servlets:
-![Pasarela y Enrutamiento del Backend Java](img/backend_java_pasarela.svg)
+![Pasarela y Enrutamiento del Backend Java](img_l/backend_java_pasarela.svg)
 
 ---
 
@@ -343,7 +343,7 @@ sequenceDiagram
 ```
 
 ### Árbol de Decisión y Motor 3-Way Merge de Autoguardado:
-![Árbol de Decisión y Motor de Sincronización](img/guardado_sincronizacion_arbol.svg)
+![Árbol de Decisión y Motor de Sincronización](img_l/guardado_sincronizacion_arbol.svg)
 
 ---
 
@@ -364,7 +364,7 @@ sequenceDiagram
 | **`com/mxgraph/online/ProxyServlet.java`**| `Utils.java` | Solicitudes `/proxy` del frontend | Pasarela HTTP para eludir restricciones de CORS |
 
 ### Topología de Red y Malla de Dependencias Cruzadas:
-![Malla de Dependencias Cruzadas](img/mapa_dependencias_red.svg)
+![Malla de Dependencias Cruzadas](img_l/mapa_dependencias_red.svg)
 
 ---
 
@@ -376,5 +376,5 @@ sequenceDiagram
 4. **Backend ligero y sin estado**: Los servlets Java solo asisten en tareas que el navegador no puede realizar de forma independiente (seguridad de secretos OAuth y bypass de CORS).
 
 ### Torre de los 4 Pilares Maestros de Ingeniería:
-![Los 4 Pilares Maestros de Ejecución](img/resumen_ejecucion_pilares.svg)
+![Los 4 Pilares Maestros de Ejecución](img_l/resumen_ejecucion_pilares.svg)
 

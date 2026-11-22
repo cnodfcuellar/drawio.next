@@ -76,5 +76,5 @@ Diseñado con arquitectura **Stateless** (sin base de datos, sin retención de s
 
 ## 4. Estructura de Documentación Existente (`Drawio.next/doc/`)
 En pasos anteriores ya estructuramos la documentación completa en Markdown y sus 10 diagramas SVG vectoriales asociados en:
-- `Drawio.next/doc/arquitectura_drawio.md`
-- `Drawio.next/doc/img/*.svg` (los 4 pilares, secuencia de arranque, 3-way merge, jerarquía de clases, matriz de métodos y pasarela backend).
+- `docs/local/arquitectura_drawio.md`
+- `docs/local/img_l/*.svg` (los 4 pilares, secuencia de arranque, 3-way merge, jerarquía de clases, matriz de métodos y pasarela backend).
