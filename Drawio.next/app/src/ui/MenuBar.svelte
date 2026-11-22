@@ -3,6 +3,7 @@
   import { theme } from '../stores/theme'
   import { activeGraph, zoomLevel } from '../stores/graph'
   import { hasSelection } from '../stores/selection'
+  import { clearSavedDiagram } from '../stores/persistence'
 
   const menus = ['File', 'Edit', 'View', 'Arrange', 'Extras', 'Help'] as const
   type MenuName = typeof menus[number]
@@ -43,8 +44,9 @@
   // Acciones de Archivo
   function handleNew() {
     closeMenu()
-    if (confirm('¿Desea crear un nuevo diagrama? Los cambios no guardados se perderán.')) {
+    if (confirm('¿Desea crear un nuevo diagrama? El diagrama actual se reiniciará.')) {
       $activeGraph?.clear()
+      clearSavedDiagram()
     }
   }
 

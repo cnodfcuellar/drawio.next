@@ -1,5 +1,6 @@
 <script lang="ts">
   import { zoomLevel, activeGraph } from '../stores/graph'
+  import { saveStatus, lastSavedTime } from '../stores/persistence'
 
   let pages = $state([{ id: 1, name: 'Page-1' }])
   let activePageId = $state(1)
@@ -24,6 +25,20 @@
       </button>
     {/each}
     <button class="add-page-btn" title="Add page" onclick={addPage}>+</button>
+  </div>
+
+  <!-- Indicador central de auto-guardado -->
+  <div class="autosave-badge" title="Tus cambios se guardan automáticamente en tu navegador">
+    {#if $saveStatus === 'saving'}
+      <span class="save-icon spin">⏳</span>
+      <span class="save-text">Guardando...</span>
+    {:else if $saveStatus === 'saved'}
+      <span class="save-icon">✓</span>
+      <span class="save-text">Guardado {$lastSavedTime ? `(${$lastSavedTime})` : ''}</span>
+    {:else}
+      <span class="save-icon">⚠️</span>
+      <span class="save-text">Error al guardar</span>
+    {/if}
   </div>
 
   <!-- Controles de zoom reactivos al GraphController -->
@@ -103,4 +118,28 @@
     border-radius: var(--radius-sm);
   }
   .zoom-btn:hover { background: rgba(255, 255, 255, 0.15); }
+
+  /* Indicador central de auto-guardado */
+  .autosave-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.18);
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    user-select: none;
+  }
+  .save-icon {
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .save-icon.spin {
+    animation: spin 1.2s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 </style>

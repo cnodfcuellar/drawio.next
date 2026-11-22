@@ -3,6 +3,7 @@
   import { GraphController } from '../core/GraphController'
   import { activeGraph, zoomLevel, graphRevision, connectionMode, pendingConnectSource } from '../stores/graph'
   import { selectMany, clearSelection } from '../stores/selection'
+  import { scheduleAutoSave, loadSavedDiagram, saveDiagram } from '../stores/persistence'
 
   let canvasEl: HTMLDivElement | null = null
   let controller: GraphController | null = null
@@ -83,9 +84,12 @@
         }
       })
 
-      // Sincronizar cambios en el modelo (mover, redimensionar, editar) con la UI
+      // Sincronizar cambios en el modelo (mover, redimensionar, editar) con la UI y autoguardar
       controller.onModelChange(() => {
         graphRevision.update(n => n + 1)
+        if (controller) {
+          scheduleAutoSave(controller)
+        }
       })
 
       // Sincronizar estado del modo conector con la barra de herramientas
@@ -98,36 +102,42 @@
         pendingConnectSource.set(srcId)
       })
 
-      // Nodos iniciales de bienvenida para verificar interactividad de inmediato
-      const v1 = controller.addVertex({
-        label: 'Inicio',
-        x: 140,
-        y: 120,
-        width: 130,
-        height: 60,
-        style: 'rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=13;'
-      })
+      // 1. Restaurar diagrama persistido de la sesión anterior si existe
+      const restored = loadSavedDiagram(controller)
 
-      const v2 = controller.addVertex({
-        label: 'Procesamiento',
-        x: 360,
-        y: 120,
-        width: 140,
-        height: 60,
-        style: 'rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=13;'
-      })
+      // 2. Si no había ningún diagrama guardado, insertar los nodos de bienvenida iniciales
+      if (!restored) {
+        const v1 = controller.addVertex({
+          label: 'Inicio',
+          x: 140,
+          y: 120,
+          width: 130,
+          height: 60,
+          style: 'rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=13;'
+        })
 
-      const v3 = controller.addVertex({
-        label: 'Fin / Resultado',
-        x: 580,
-        y: 120,
-        width: 140,
-        height: 60,
-        style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
-      })
+        const v2 = controller.addVertex({
+          label: 'Procesamiento',
+          x: 360,
+          y: 120,
+          width: 140,
+          height: 60,
+          style: 'rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=13;'
+        })
 
-      controller.addEdge(v1.id, v2.id, 'Paso 1')
-      controller.addEdge(v2.id, v3.id, 'Paso 2')
+        const v3 = controller.addVertex({
+          label: 'Fin / Resultado',
+          x: 580,
+          y: 120,
+          width: 140,
+          height: 60,
+          style: 'shape=ellipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;fontSize=13;'
+        })
+
+        controller.addEdge(v1.id, v2.id, 'Paso 1')
+        controller.addEdge(v2.id, v3.id, 'Paso 2')
+        saveDiagram(controller)
+      }
 
       zoomLevel.set(controller.getZoom())
 
