@@ -38,6 +38,8 @@ export class GraphController {
   private rubberband: mxRubberband | null = null
   private connectionMode = false
   private connectionModeListeners: Array<(enabled: boolean) => void> = []
+  private pendingConnectSourceId: string | null = null
+  private pendingConnectListeners: Array<(sourceId: string | null) => void> = []
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null
   private keyupHandler: ((e: KeyboardEvent) => void) | null = null
   private cleanupPanning: (() => void) | null = null
@@ -166,16 +168,68 @@ export class GraphController {
 
     // 4. Configurar ConnectionHandler
     if (anyGraph.connectionHandler) {
-      anyGraph.connectionHandler.setCreateTarget(false)
-      anyGraph.connectionHandler.insertBeforeSource = true
+      const ch = anyGraph.connectionHandler
+      ch.setCreateTarget(false)
+      ch.insertBeforeSource = true
+      ch.outlineConnect = true
+
+      // Interceptar isStartEvent para garantizar que el clic/arrastre sobre cualquier forma inicie la arista
+      ch.isStartEvent = function (me: any) {
+        if (!this.isEnabled()) return false
+
+        let state = me.getState ? me.getState() : null
+        if (!state && me.getGraphX && this.graph?.getCellAt) {
+          const cell = this.graph.getCellAt(me.getGraphX(), me.getGraphY())
+          if (cell && this.graph.getModel().isVertex(cell)) {
+            state = this.graph.getView().getState(cell)
+          }
+        }
+
+        if (state && this.graph.getModel().isVertex(state.cell)) {
+          this.previous = state
+          this.error = null
+          return true
+        }
+        return false
+      }
+
+      // Interceptar mouseDown para inicializar la línea elástica de conexión de inmediato
+      const origMouseDown = ch.mouseDown
+      ch.mouseDown = function (sender: any, me: any) {
+        if (typeof origMouseDown === 'function') {
+          origMouseDown.apply(this, arguments)
+        }
+        if (this.first && !this.shape && typeof this.createShape === 'function') {
+          this.shape = this.createShape()
+          if (this.edgeState && this.shape.apply) {
+            this.shape.apply(this.edgeState)
+          }
+        }
+      }
+
+      // Interceptar mouseUp para garantizar que conecte con la forma destino bajo el cursor
+      const origMouseUp = ch.mouseUp
+      ch.mouseUp = function (sender: any, me: any) {
+        if (this.isConnecting && this.isConnecting()) {
+          if (!this.currentState && me.getGraphX && this.graph?.getCellAt) {
+            const cell = this.graph.getCellAt(me.getGraphX(), me.getGraphY())
+            if (cell && this.graph.getModel().isVertex(cell)) {
+              this.currentState = this.graph.getView().getState(cell)
+            }
+          }
+        }
+        if (typeof origMouseUp === 'function') {
+          origMouseUp.apply(this, arguments)
+        }
+      }
 
       // Interceptar inserción de aristas para aplicar estilo consistente por defecto
-      const origInsertEdge = anyGraph.connectionHandler.insertEdge
-      anyGraph.connectionHandler.insertEdge = (parent: any, id: any, value: any, source: any, target: any, style: any) => {
+      const origInsertEdge = ch.insertEdge
+      ch.insertEdge = (parent: any, id: any, value: any, source: any, target: any, style: any) => {
         const finalStyle = style || DEFAULT_EDGE_STYLE
         let edge: any
         if (typeof origInsertEdge === 'function') {
-          edge = origInsertEdge.call(anyGraph.connectionHandler, parent, id, value || '', source, target, finalStyle)
+          edge = origInsertEdge.call(ch, parent, id, value || '', source, target, finalStyle)
         } else {
           edge = this.graph.insertEdge(parent, id, value || '', source, target, finalStyle)
         }
@@ -183,6 +237,27 @@ export class GraphController {
       }
     }
     this.setConnectionMode(false)
+
+    // Listener del modelo de selección para enlaces interactivos (clic origen -> clic destino)
+    const selModel = this.graph.getSelectionModel()
+    const changeEvt = (window.mxEvent && window.mxEvent.CHANGE) || 'change'
+    selModel.addListener(changeEvt, () => {
+      if (this.destroyed) return
+      if (this.pendingConnectSourceId) {
+        const selected = this.getSelectedCells()
+        if (selected.length > 0) {
+          const target = selected[0]
+          if (target && !target.edge && target.id !== this.pendingConnectSourceId) {
+            const srcId = this.pendingConnectSourceId
+            this.cancelInteractiveConnect()
+            const edge = this.addEdge(srcId, target.id, '')
+            if (edge) {
+              this.selectCell(edge.id)
+            }
+          }
+        }
+      }
+    })
 
     // 5. Habilitar selección rectangular (rubberband) en áreas vacías
     if (enableRubberband && window.mxRubberband) {
@@ -235,8 +310,36 @@ export class GraphController {
         return
       }
 
-      // Tecla V o Escape: salir del modo conector al modo selección
-      if ((e.code === 'KeyV' || e.key === 'Escape') && this.connectionMode) {
+      // Tecla L: enlace rápido de celdas
+      if (e.code === 'KeyL' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const sel = this.getSelectedCells().filter(c => !c.edge)
+        if (sel.length >= 2) {
+          e.preventDefault()
+          this.connectSelected()
+          return
+        } else if (sel.length === 1) {
+          e.preventDefault()
+          this.startInteractiveConnect(sel[0].id)
+          return
+        }
+      }
+
+      // Tecla Escape: cancelar modo de conexión pendiente o interactivo
+      if (e.key === 'Escape') {
+        if (this.pendingConnectSourceId) {
+          e.preventDefault()
+          this.cancelInteractiveConnect()
+          return
+        }
+        if (this.connectionMode) {
+          e.preventDefault()
+          this.setConnectionMode(false)
+          return
+        }
+      }
+
+      // Tecla V: salir del modo conector al modo selección
+      if (e.code === 'KeyV' && this.connectionMode) {
         e.preventDefault()
         this.setConnectionMode(false)
         return
@@ -474,6 +577,75 @@ export class GraphController {
       this.selectCell(edge.id)
     }
     return edge
+  }
+
+  /**
+   * Inicia el modo de enlace interactivo con un nodo de origen específico.
+   * El usuario solo tiene que hacer clic en el nodo destino en el lienzo para crear la conexión.
+   */
+  startInteractiveConnect(sourceId: string): void {
+    this.pendingConnectSourceId = sourceId
+    this.setConnectionMode(true, true)
+    this.notifyPendingConnectListeners(sourceId)
+    const container = this.graph.container
+    if (container?.style) {
+      container.style.cursor = 'crosshair'
+    }
+  }
+
+  /**
+   * Cancela la conexión interactiva pendiente
+   */
+  cancelInteractiveConnect(): void {
+    this.pendingConnectSourceId = null
+    this.setConnectionMode(false)
+    this.notifyPendingConnectListeners(null)
+  }
+
+  /**
+   * Devuelve el ID del nodo origen pendiente de conectar, si existe
+   */
+  getPendingConnectSourceId(): string | null {
+    return this.pendingConnectSourceId
+  }
+
+  /**
+   * Registra un callback reactivo para cambios en la conexión pendiente
+   */
+  onPendingConnectChange(callback: (sourceId: string | null) => void): () => void {
+    this.pendingConnectListeners.push(callback)
+    return () => {
+      this.pendingConnectListeners = this.pendingConnectListeners.filter(fn => fn !== callback)
+    }
+  }
+
+  private notifyPendingConnectListeners(sourceId: string | null): void {
+    this.pendingConnectListeners.forEach(fn => fn(sourceId))
+  }
+
+  /**
+   * Devuelve todos los vértices / formas disponibles en el modelo
+   */
+  getAllVertices(): Array<{ id: string; label: string }> {
+    const model = this.graph.getModel()
+    const parent = this.graph.getDefaultParent()
+    const childCount = (model as any).getChildCount ? (model as any).getChildCount(parent) : 0
+    const vertices: Array<{ id: string; label: string }> = []
+
+    for (let i = 0; i < childCount; i++) {
+      const child = (model as any).getChildAt ? (model as any).getChildAt(parent, i) : null
+      if (child && !child.edge && (model as any).isVertex && (model as any).isVertex(child)) {
+        let label = ''
+        if (child.value) {
+          label = typeof child.value === 'string' ? child.value : (child.value.toString?.() || '')
+        }
+        vertices.push({
+          id: child.id,
+          label: label || `Forma ${child.id}`
+        })
+      }
+    }
+    return vertices
   }
 
   /**

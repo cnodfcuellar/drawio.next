@@ -17,6 +17,11 @@ export const zoomLevel = writable<number>(100)
 export const connectionMode = writable<boolean>(false)
 
 /**
+ * ID del nodo origen pendiente de conectar interactivamente (al hacer clic en el destino)
+ */
+export const pendingConnectSource = writable<string | null>(null)
+
+/**
  * Contador de revisiones del modelo gráfico para sincronizar UI (Inspector, etc.)
  */
 export const graphRevision = writable<number>(0)

@@ -35,6 +35,9 @@ function createMockMxGraph() {
     setValue: (cell: any, val: any) => { cell.value = val },
     getStyle: (cell: any) => cell.style,
     setStyle: (cell: any, s: string) => { cell.style = s },
+    getChildCount: (_parent: any) => Object.values(cellsMap).length,
+    getChildAt: (_parent: any, idx: number) => Object.values(cellsMap)[idx] ?? null,
+    isVertex: (cell: any) => Boolean(cell?.vertex),
     addListener: (name: string, fn: any) => {
       if (!modelListeners[name]) modelListeners[name] = []
       modelListeners[name].push(fn)
@@ -506,6 +509,40 @@ describe('GraphController', () => {
 
     expect(controller.isCellEdge(edge.id)).toBe(true)
     expect(controller.isCellEdge(v1.id)).toBe(false)
+  })
+
+  it('getAllVertices retorna la lista completa de formas del diagrama', () => {
+    controller.addVertex({ label: 'Inicio', x: 0, y: 0 })
+    controller.addVertex({ label: 'Proceso', x: 50, y: 50 })
+    const vertices = controller.getAllVertices()
+    expect(vertices.length).toBe(2)
+    expect(vertices[0].label).toBe('Inicio')
+    expect(vertices[1].label).toBe('Proceso')
+  })
+
+  it('startInteractiveConnect y cancelInteractiveConnect gestionan el modo de conexión pendiente', () => {
+    const v1 = controller.addVertex({ label: 'A', x: 0, y: 0 })
+    const v2 = controller.addVertex({ label: 'B', x: 100, y: 100 })
+
+    const listener = vi.fn()
+    controller.onPendingConnectChange(listener)
+
+    controller.startInteractiveConnect(v1.id)
+    expect(controller.getPendingConnectSourceId()).toBe(v1.id)
+    expect(controller.isConnectionMode()).toBe(true)
+    expect(listener).toHaveBeenCalledWith(v1.id)
+
+    // Seleccionar destino conecta automáticamente y limpia el estado pendiente
+    const rawGraph = controller.getRawGraph() as any
+    rawGraph.setSelectionCell(v2)
+
+    expect(controller.getPendingConnectSourceId()).toBeNull()
+    expect(controller.isConnectionMode()).toBe(false)
+
+    // Probar cancelación manual
+    controller.startInteractiveConnect(v1.id)
+    controller.cancelInteractiveConnect()
+    expect(controller.getPendingConnectSourceId()).toBeNull()
   })
 
   it('destruye la instancia limpiamente', () => {

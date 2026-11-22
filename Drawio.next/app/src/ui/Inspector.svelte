@@ -1,6 +1,6 @@
 <script lang="ts">
   import { hasSelection, selectedIds } from "../stores/selection";
-  import { activeGraph, graphRevision } from "../stores/graph";
+  import { activeGraph, graphRevision, pendingConnectSource } from "../stores/graph";
 
   const tabs = ["Style", "Arrange", "Text"] as const;
   let activeTab: (typeof tabs)[number] = $state("Style");
@@ -211,6 +211,32 @@
       $activeGraph.connectSelected();
     }
   }
+
+  // Estado y lógica para enlazar nodo seleccionado con otro nodo
+  let isPendingThisNode = $derived(
+    Boolean(firstSelectedId && $pendingConnectSource === firstSelectedId)
+  );
+
+  let otherVertices = $derived.by(() => {
+    void _rev;
+    if (!$activeGraph || !firstSelectedId) return [];
+    return $activeGraph.getAllVertices().filter((v) => v.id !== firstSelectedId);
+  });
+
+  function handleStartConnect() {
+    if (!firstSelectedId || !$activeGraph) return;
+    if (isPendingThisNode) {
+      $activeGraph.cancelInteractiveConnect();
+    } else {
+      $activeGraph.startInteractiveConnect(firstSelectedId);
+    }
+  }
+
+  function handleDirectConnect(targetId: string) {
+    if (!firstSelectedId || !targetId || !$activeGraph) return;
+    $activeGraph.addEdge(firstSelectedId, targetId);
+    $activeGraph.cancelInteractiveConnect();
+  }
 </script>
 
 <aside class="inspector" data-testid="inspector">
@@ -329,6 +355,39 @@
           </div>
 
         {:else}
+          <!-- ENLACES Y CONEXIÓN RÁPIDA DE FORMA A FORMA -->
+          <div class="prop-group connect-card">
+            <div class="prop-label">⚡ Enlazar con otra Forma</div>
+            <button
+              class="choice-btn connect-btn"
+              class:active={isPendingThisNode}
+              onclick={handleStartConnect}
+              title="Haz clic para seleccionar el nodo destino en el canvas (o pulsa Esc)"
+            >
+              {#if isPendingThisNode}
+                🎯 Haz clic en el bloque destino en el lienzo...
+              {:else}
+                🔗 Conectar a otra forma...
+              {/if}
+            </button>
+
+            {#if otherVertices.length > 0}
+              <div class="quick-connect-row">
+                <span class="prop-label-sub">O enlazar directamente con:</span>
+                <select
+                  class="prop-select"
+                  value=""
+                  onchange={(e) => handleDirectConnect(e.currentTarget.value)}
+                >
+                  <option value="" disabled selected>Selecciona bloque destino...</option>
+                  {#each otherVertices as v}
+                    <option value={v.id}>{v.label}</option>
+                  {/each}
+                </select>
+              </div>
+            {/if}
+          </div>
+
           <!-- PROPIEDADES DE NODO / FORMA: Color de Relleno -->
           <div class="prop-group">
             <div class="prop-label">Color de Relleno</div>
@@ -867,6 +926,56 @@
     text-transform: uppercase;
     margin-bottom: var(--space-1);
   }
+  /* Tarjeta de enlace y conexión de formas */
+  .connect-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .connect-btn {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-weight: var(--font-medium);
+    justify-content: center;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .connect-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .quick-connect-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+  }
+  .prop-select {
+    width: 100%;
+    height: 30px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--text-xs);
+    padding: 0 var(--space-2);
+    outline: none;
+    cursor: pointer;
+  }
+  .prop-select:focus {
+    border-color: var(--accent);
+  }
+
   .diag-info {
     font-size: var(--text-xs);
     color: var(--text-disabled);

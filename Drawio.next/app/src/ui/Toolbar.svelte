@@ -32,7 +32,7 @@
         {
           id: 'connectMode',
           icon: '⤹',
-          label: 'Modo Conector (o mantén Alt y arrastra)',
+          label: 'Modo Conector (arrastra entre formas o mantén Alt)',
           shortcut: 'C',
           active: isConnect,
           action: () => $activeGraph?.toggleConnectionMode()
@@ -40,10 +40,20 @@
         {
           id: 'quickConnect',
           icon: '🔗',
-          label: 'Enlazar 2 nodos seleccionados',
+          label: selCount >= 2 ? 'Enlazar 2 nodos seleccionados' : 'Enlazar nodo con otro...',
           shortcut: 'L',
-          disabled: selCount < 2,
-          action: () => $activeGraph?.connectSelected()
+          disabled: selCount === 0,
+          action: () => {
+            if (!$activeGraph) return
+            if (selCount >= 2) {
+              $activeGraph.connectSelected()
+            } else if (selCount === 1) {
+              const sel = $activeGraph.getSelectedCells().filter(c => !c.edge)
+              if (sel.length > 0) {
+                $activeGraph.startInteractiveConnect(sel[0].id)
+              }
+            }
+          }
         }
       ]
     },
