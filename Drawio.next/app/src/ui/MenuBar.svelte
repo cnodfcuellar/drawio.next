@@ -4,7 +4,7 @@
   import { activeGraph, zoomLevel } from '../stores/graph'
   import { hasSelection } from '../stores/selection'
   import { clearSavedDiagram } from '../stores/persistence'
-  import { getAllPagesWithFreshXml, initPages } from '../stores/pages'
+  import { getAllPagesWithFreshXml, initPages, duplicatePage, addPage, activePageId } from '../stores/pages'
 
   const menus = ['File', 'Edit', 'View', 'Arrange', 'Extras', 'Help'] as const
   type MenuName = typeof menus[number]
@@ -123,6 +123,18 @@
   function handleDelete() {
     closeMenu()
     $activeGraph?.removeSelected()
+  }
+
+  function handleNewPage() {
+    closeMenu()
+    addPage()
+  }
+
+  function handleDuplicateCurrentPage() {
+    closeMenu()
+    if ($activePageId) {
+      duplicatePage($activePageId)
+    }
   }
 
   // Acciones de Vista
@@ -252,6 +264,15 @@
                 <span class="item-icon">🗑️</span>
                 <span class="item-label">Borrar seleccionado</span>
                 <span class="item-shortcut">Supr</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="dropdown-item" onclick={handleNewPage} role="menuitem">
+                <span class="item-icon">➕</span>
+                <span class="item-label">Nueva página</span>
+              </button>
+              <button class="dropdown-item" onclick={handleDuplicateCurrentPage} role="menuitem">
+                <span class="item-icon">⧉</span>
+                <span class="item-label">Duplicar página actual</span>
               </button>
 
             {:else if name === 'View'}
