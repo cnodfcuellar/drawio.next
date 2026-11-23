@@ -145,9 +145,18 @@
   <div
     class="canvas-container"
     class:drag-active={isDragOver}
-    role="region"
+    role="application"
     aria-label="Lienzo de dibujo"
+    tabindex="-1"
     bind:this={canvasEl}
+    onmousedown={() => {
+      if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement && document.activeElement !== canvasEl) {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.isContentEditable) {
+          document.activeElement.blur()
+        }
+      }
+      canvasEl?.focus()
+    }}
     ondragover={handleDragOver}
     ondragenter={handleDragEnter}
     ondragleave={handleDragLeave}

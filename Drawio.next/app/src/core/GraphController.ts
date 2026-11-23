@@ -134,7 +134,7 @@ export class GraphController {
       (this.graph as any).setCellsDeletable(true)
     }
     if ((this.graph as any).setCellsCloneable) {
-      (this.graph as any).setCellsCloneable(false)
+      (this.graph as any).setCellsCloneable(true)
     }
     if ((this.graph as any).setCellsDisconnectable) {
       (this.graph as any).setCellsDisconnectable(false)
@@ -301,7 +301,7 @@ export class GraphController {
   }
 
   /**
-   * Configura atajos de teclado globales (Delete, Backspace, Ctrl+Z, Ctrl+Y, Ctrl+A)
+   * Configura atajos de teclado globales (Delete, Backspace, Ctrl+Z, Ctrl+Y, Ctrl+A, Ctrl+D, Ctrl+C/X/V, Ctrl+G)
    */
   private setupKeyHandler(): void {
     if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return
@@ -309,9 +309,15 @@ export class GraphController {
     this.keydownHandler = (e: KeyboardEvent) => {
       if (this.destroyed) return
 
-      // Si el foco está en un input o textarea editable, no interceptar
-      const target = e.target as HTMLElement
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      // Si el foco está en un input o textarea editable, no interceptar atajos
+      const target = e.target as HTMLElement | null
+      const isInput = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        (typeof (target as any).closest === 'function' && (target as any).closest('input, textarea, [contenteditable="true"]'))
+      )
+      if (isInput) {
         return
       }
 
@@ -320,107 +326,139 @@ export class GraphController {
         this.setConnectionMode(true, true)
       }
 
-      // Tecla C: alternar modo conector
-      if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const isCtrl = Boolean(e.ctrlKey || e.metaKey)
+      const key = (e.key || '').toLowerCase()
+      const code = e.code || ''
+
+      // Tecla C (sin modificadores): alternar modo conector
+      if (!isCtrl && !e.shiftKey && !e.altKey && (key === 'c' || code === 'KeyC')) {
         e.preventDefault()
+        e.stopPropagation()
         this.toggleConnectionMode()
         return
       }
 
-      // Tecla L: enlace rápido de celdas
-      if (e.code === 'KeyL' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      // Tecla L (sin modificadores): enlace rápido de celdas
+      if (!isCtrl && !e.shiftKey && !e.altKey && (key === 'l' || code === 'KeyL')) {
         const sel = this.getSelectedCells().filter(c => !c.edge)
         if (sel.length >= 2) {
           e.preventDefault()
+          e.stopPropagation()
           this.connectSelected()
           return
         } else if (sel.length === 1) {
           e.preventDefault()
+          e.stopPropagation()
           this.startInteractiveConnect(sel[0].id)
           return
         }
       }
 
       // Tecla Escape: cancelar modo de conexión pendiente o interactivo
-      if (e.key === 'Escape') {
+      if (key === 'escape' || code === 'Escape') {
         if (this.pendingConnectSourceId) {
           e.preventDefault()
+          e.stopPropagation()
           this.cancelInteractiveConnect()
           return
         }
         if (this.connectionMode) {
           e.preventDefault()
+          e.stopPropagation()
           this.setConnectionMode(false)
           return
         }
       }
 
-      // Tecla V: salir del modo conector al modo selección
-      if (e.code === 'KeyV' && this.connectionMode) {
+      // Tecla V (sin modificadores): salir del modo conector al modo selección
+      if (!isCtrl && !e.shiftKey && !e.altKey && (key === 'v' || code === 'KeyV') && this.connectionMode) {
         e.preventDefault()
+        e.stopPropagation()
         this.setConnectionMode(false)
         return
       }
 
       // Borrar celda seleccionada con tecla Supr o Backspace
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (key === 'delete' || key === 'backspace' || code === 'Delete' || code === 'Backspace') {
         if (this.getSelectedCells().length > 0) {
           e.preventDefault()
+          e.stopPropagation()
           this.removeSelected()
+          return
         }
       }
-      // Ctrl+Z / Cmd+Z (Undo) y Ctrl+Shift+Z (Redo)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-        e.preventDefault()
-        if (e.shiftKey) {
-          this.redo()
-        } else {
-          this.undo()
-        }
-      }
-      // Ctrl+Y / Cmd+Y (Redo)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
-        e.preventDefault()
-        this.redo()
-      }
-      // Ctrl+A / Cmd+A (Seleccionar todo)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
-        e.preventDefault()
-        this.selectAll()
-      }
+
       // Ctrl+D / Cmd+D (Duplicar seleccionado)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'd' || code === 'KeyD')) {
         e.preventDefault()
+        e.stopPropagation()
         this.duplicateSelected()
+        return
       }
+
       // Ctrl+C / Cmd+C (Copiar)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'c' || code === 'KeyC')) {
         e.preventDefault()
+        e.stopPropagation()
         this.copy()
+        return
       }
+
       // Ctrl+X / Cmd+X (Cortar)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'x') {
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'x' || code === 'KeyX')) {
         e.preventDefault()
+        e.stopPropagation()
         this.cut()
+        return
       }
+
       // Ctrl+V / Cmd+V (Pegar)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'v' || code === 'KeyV')) {
         e.preventDefault()
+        e.stopPropagation()
         this.paste()
+        return
       }
-      // Ctrl+G / Cmd+G (Agrupar o Desagrupar con Shift)
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
+
+      // Ctrl+A / Cmd+A (Seleccionar todo)
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'a' || code === 'KeyA')) {
         e.preventDefault()
-        if (e.shiftKey) {
-          this.ungroupSelected()
-        } else {
-          this.groupSelected()
-        }
+        e.stopPropagation()
+        this.selectAll()
+        return
       }
-      // Ctrl+Shift+U (Desagrupar alternativo estándar)
-      else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'u') {
+
+      // Ctrl+Z / Cmd+Z (Undo)
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'z' || code === 'KeyZ')) {
         e.preventDefault()
+        e.stopPropagation()
+        this.undo()
+        return
+      }
+
+      // Ctrl+Y / Cmd+Y o Ctrl+Shift+Z (Redo)
+      if ((isCtrl && !e.shiftKey && !e.altKey && (key === 'y' || code === 'KeyY')) ||
+          (isCtrl && e.shiftKey && !e.altKey && (key === 'z' || code === 'KeyZ'))) {
+        e.preventDefault()
+        e.stopPropagation()
+        this.redo()
+        return
+      }
+
+      // Ctrl+G / Cmd+G (Agrupar sin Shift)
+      if (isCtrl && !e.shiftKey && !e.altKey && (key === 'g' || code === 'KeyG')) {
+        e.preventDefault()
+        e.stopPropagation()
+        this.groupSelected()
+        return
+      }
+
+      // Ctrl+Shift+G o Ctrl+Shift+U (Desagrupar)
+      if (isCtrl && e.shiftKey && !e.altKey && (key === 'g' || code === 'KeyG' || key === 'u' || code === 'KeyU')) {
+        e.preventDefault()
+        e.stopPropagation()
         this.ungroupSelected()
+        return
       }
     }
 
@@ -432,8 +470,8 @@ export class GraphController {
       }
     }
 
-    window.addEventListener('keydown', this.keydownHandler)
-    window.addEventListener('keyup', this.keyupHandler)
+    window.addEventListener('keydown', this.keydownHandler, { capture: true })
+    window.addEventListener('keyup', this.keyupHandler, { capture: true })
   }
 
   /**
@@ -992,23 +1030,27 @@ export class GraphController {
     try {
       if (typeof anyGraph.importCells === 'function') {
         clones = anyGraph.importCells(cells, offset, offset, parent) || []
-      } else if (typeof anyGraph.cloneCells === 'function') {
+      }
+      if ((!clones || clones.length === 0) && typeof anyGraph.cloneCells === 'function') {
         const cloned = anyGraph.cloneCells(cells) || []
         for (const cell of cloned) {
-          if (cell.geometry) {
+          if (cell && cell.geometry) {
             const g = cell.geometry.clone ? cell.geometry.clone() : { ...cell.geometry }
             g.x = (g.x || 0) + offset
             g.y = (g.y || 0) + offset
             cell.geometry = g
           }
-          if (typeof anyGraph.addCell === 'function') {
+          if (cell && typeof anyGraph.addCell === 'function') {
             anyGraph.addCell(cell, parent)
+            clones.push(cell)
           }
         }
-        clones = cloned
       }
       if (clones && clones.length > 0) {
         this.graph.setSelectionCells(clones)
+        if (typeof this.graph.refresh === 'function') {
+          this.graph.refresh()
+        }
       }
     } finally {
       this.graph.getModel().endUpdate()
@@ -1057,25 +1099,29 @@ export class GraphController {
 
     this.graph.getModel().beginUpdate()
     try {
+      const toPaste = anyGraph.cloneCells ? anyGraph.cloneCells(this.clipboard) : this.clipboard
       if (typeof anyGraph.importCells === 'function') {
-        clones = anyGraph.importCells(this.clipboard, offset, offset, parent) || []
-      } else if (typeof anyGraph.cloneCells === 'function') {
-        const cloned = anyGraph.cloneCells(this.clipboard) || []
-        for (const cell of cloned) {
-          if (cell.geometry) {
+        clones = anyGraph.importCells(toPaste, offset, offset, parent) || []
+      }
+      if ((!clones || clones.length === 0) && toPaste && toPaste.length > 0) {
+        for (const cell of toPaste) {
+          if (cell && cell.geometry) {
             const g = cell.geometry.clone ? cell.geometry.clone() : { ...cell.geometry }
             g.x = (g.x || 0) + offset
             g.y = (g.y || 0) + offset
             cell.geometry = g
           }
-          if (typeof anyGraph.addCell === 'function') {
+          if (cell && typeof anyGraph.addCell === 'function') {
             anyGraph.addCell(cell, parent)
+            clones.push(cell)
           }
         }
-        clones = cloned
       }
       if (clones && clones.length > 0) {
         this.graph.setSelectionCells(clones)
+        if (typeof this.graph.refresh === 'function') {
+          this.graph.refresh()
+        }
       }
     } finally {
       this.graph.getModel().endUpdate()
@@ -1104,6 +1150,9 @@ export class GraphController {
         const group = anyGraph.groupCells(null, border, cells)
         if (group) {
           this.graph.setSelectionCell(group)
+          if (typeof this.graph.refresh === 'function') {
+            this.graph.refresh()
+          }
         }
         return group
       } finally {
@@ -1127,6 +1176,9 @@ export class GraphController {
         const result = anyGraph.ungroupCells(cells) || []
         if (result.length > 0) {
           this.graph.setSelectionCells(result)
+          if (typeof this.graph.refresh === 'function') {
+            this.graph.refresh()
+          }
         }
         return result
       } finally {
@@ -1901,11 +1953,11 @@ export class GraphController {
       this.cleanupPanning = null
     }
     if (this.keydownHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
-      window.removeEventListener('keydown', this.keydownHandler)
+      window.removeEventListener('keydown', this.keydownHandler, { capture: true })
       this.keydownHandler = null
     }
     if (this.keyupHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
-      window.removeEventListener('keyup', this.keyupHandler)
+      window.removeEventListener('keyup', this.keyupHandler, { capture: true })
       this.keyupHandler = null
     }
     if (this.rubberband) {
