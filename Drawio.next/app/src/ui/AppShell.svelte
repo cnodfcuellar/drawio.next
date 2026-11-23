@@ -10,6 +10,8 @@
   import Inspector from './Inspector.svelte'
   import StatusBar from './StatusBar.svelte'
   import PluginModal from './PluginModal.svelte'
+  import LayersPanel from './LayersPanel.svelte'
+  import { toggleLayersPanel } from '../stores/layers'
 
   let showPluginManager = $state(false)
 
@@ -48,6 +50,11 @@
       e.preventDefault()
       layout.toggleInspector()
     }
+    // F4: Alternar Panel de Capas
+    else if (e.key === 'F4') {
+      e.preventDefault()
+      toggleLayersPanel()
+    }
   }
 </script>
 
@@ -71,6 +78,7 @@
   </div>
   <div class="area-canvas">
     <Canvas />
+    <LayersPanel />
     {#if $zenMode}
       <button
         class="zen-floating-pill"

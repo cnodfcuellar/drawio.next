@@ -21,6 +21,14 @@ export interface GraphControllerOptions {
   enableConnect?: boolean
 }
 
+export interface LayerInfo {
+  id: string
+  name: string
+  visible: boolean
+  locked: boolean
+  cellCount: number
+}
+
 /**
  * Estilo por defecto para aristas / conectores entre formas
  */
@@ -46,6 +54,8 @@ export class GraphController {
   private clipboard: mxCell[] = []
   private pasteCount = 0
   private destroyed = false
+  private lockedLayerIds = new Set<string>()
+  private layersListeners: Array<(layers: LayerInfo[]) => void> = []
 
   constructor(container: HTMLElement, options: GraphControllerOptions = {}) {
     if (typeof window === 'undefined' || !window.mxGraph) {
@@ -334,6 +344,18 @@ export class GraphController {
       ss.putCellStyle('cloud', { shape: 'cloud', perimeter: p.EllipsePerimeter || 'ellipsePerimeter' })
       ss.putCellStyle('actor', { shape: 'actor', perimeter: p.ActorPerimeter || 'actorPerimeter' })
       ss.putCellStyle('hexagon', { shape: 'hexagon', perimeter: p.HexagonPerimeter || 'hexagonPerimeter' })
+    }
+
+    // Hook de capas bloqueadas para prevenir manipulación accidental
+    const origIsCellLocked = (this.graph as any).isCellLocked?.bind(this.graph)
+    ;(this.graph as any).isCellLocked = (cell: any) => {
+      if (cell) {
+        const layer = this.getLayerForCell(cell)
+        if (layer && this.lockedLayerIds.has(String(layer.id))) {
+          return true
+        }
+      }
+      return origIsCellLocked ? origIsCellLocked(cell) : false
     }
   }
 
@@ -2120,6 +2142,304 @@ export class GraphController {
         img.src = url
       } catch (err) {
         reject(err)
+      }
+    })
+  }
+
+  /**
+   * Obtiene la capa a la que pertenece una celda dada
+   */
+  getLayerForCell(cell: any): mxCell | null {
+    if (!cell || !this.graph) return null
+    const model = this.graph.getModel() as any
+    if (!model) return null
+    const root = typeof model.getRoot === 'function' ? model.getRoot() : null
+    let curr = cell
+    while (curr) {
+      const parent = typeof model.getParent === 'function' ? model.getParent(curr) : curr.parent
+      if (parent === root || (root && parent?.id === root.id)) {
+        return curr
+      }
+      curr = parent
+    }
+    return null
+  }
+
+  /**
+   * Obtiene la lista completa de capas existentes en el modelo actual
+   */
+  getLayers(): LayerInfo[] {
+    if (this.destroyed || !this.graph) return []
+    const model = this.graph.getModel() as any
+    if (!model) return []
+    const root = typeof model.getRoot === 'function' ? model.getRoot() : null
+    if (!root) return []
+
+    const count = typeof model.getChildCount === 'function' ? model.getChildCount(root) : 0
+    const layers: LayerInfo[] = []
+
+    for (let i = 0; i < count; i++) {
+      const child = typeof model.getChildAt === 'function' ? model.getChildAt(root, i) : null
+      if (child) {
+        const id = String(child.id ?? `layer-${i}`)
+        const rawVal = child.value
+        const name = (typeof rawVal === 'string' && rawVal.trim().length > 0)
+          ? rawVal
+          : (i === 0 ? 'Capa de fondo' : `Capa ${i + 1}`)
+        const visible = child.visible !== false && (typeof model.isVisible === 'function' ? model.isVisible(child) : true)
+        const locked = this.lockedLayerIds.has(id)
+        const cellCount = typeof model.getChildCount === 'function' ? model.getChildCount(child) : 0
+
+        layers.push({
+          id,
+          name,
+          visible,
+          locked,
+          cellCount
+        })
+      }
+    }
+
+    if (layers.length === 0) {
+      layers.push({
+        id: '1',
+        name: 'Capa de fondo',
+        visible: true,
+        locked: false,
+        cellCount: 0
+      })
+    }
+
+    return layers
+  }
+
+  /**
+   * Obtiene el ID de la capa activa donde se insertan los nuevos elementos
+   */
+  getActiveLayerId(): string {
+    if (this.destroyed || !this.graph) return '1'
+    const parent = this.graph.getDefaultParent()
+    return parent?.id ? String(parent.id) : '1'
+  }
+
+  /**
+   * Establece la capa activa de inserción
+   */
+  setActiveLayer(layerId: string): boolean {
+    if (this.destroyed || !this.graph) return false
+    const model = this.graph.getModel() as any
+    if (!model) return false
+    const cell = typeof model.getCell === 'function' ? model.getCell(layerId) : null
+    if (cell && (typeof (this.graph as any).setDefaultParent === 'function')) {
+      (this.graph as any).setDefaultParent(cell)
+      this.emitLayersChanged()
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Añade una nueva capa al diagrama y la establece como activa
+   */
+  addLayer(name?: string): string {
+    if (this.destroyed || !this.graph) return ''
+    const model = this.graph.getModel() as any
+    if (!model) return ''
+    const root = typeof model.getRoot === 'function' ? model.getRoot() : null
+    if (!root) return ''
+
+    const currentLayers = this.getLayers()
+    const nextIdx = currentLayers.length + 1
+    const layerName = name?.trim() || `Capa ${nextIdx}`
+
+    model.beginUpdate?.()
+    try {
+      let layerCell: any = null
+      if (typeof (window as any).mxCell === 'function') {
+        layerCell = new (window as any).mxCell()
+      } else {
+        layerCell = { id: `layer-${Date.now()}-${nextIdx}`, vertex: false, edge: false }
+      }
+      layerCell.value = layerName
+      layerCell.visible = true
+
+      const added = typeof model.add === 'function' ? model.add(root, layerCell) : layerCell
+      const layerId = String(added.id ?? layerCell.id)
+
+      if (typeof (this.graph as any).setDefaultParent === 'function') {
+        (this.graph as any).setDefaultParent(added)
+      }
+
+      this.emitLayersChanged()
+      return layerId
+    } finally {
+      model.endUpdate?.()
+    }
+  }
+
+  /**
+   * Elimina una capa y todos sus elementos (a menos que sea la única capa restante)
+   */
+  removeLayer(layerId: string): boolean {
+    if (this.destroyed || !this.graph) return false
+    const currentLayers = this.getLayers()
+    if (currentLayers.length <= 1) {
+      console.warn('No se puede eliminar la única capa restante.')
+      return false
+    }
+
+    const model = this.graph.getModel() as any
+    if (!model) return false
+    const layerCell = typeof model.getCell === 'function' ? model.getCell(layerId) : null
+    if (!layerCell) return false
+
+    model.beginUpdate?.()
+    try {
+      const activeId = this.getActiveLayerId()
+      if (activeId === layerId) {
+        const remaining = currentLayers.find(l => l.id !== layerId)
+        if (remaining) {
+          const fallbackCell = model.getCell(remaining.id)
+          if (fallbackCell && typeof (this.graph as any).setDefaultParent === 'function') {
+            (this.graph as any).setDefaultParent(fallbackCell)
+          }
+        }
+      }
+
+      if (typeof this.graph.removeCells === 'function') {
+        this.graph.removeCells([layerCell], true)
+      } else if (typeof model.remove === 'function') {
+        model.remove(layerCell)
+      }
+
+      this.lockedLayerIds.delete(layerId)
+      this.emitLayersChanged()
+      return true
+    } finally {
+      model.endUpdate?.()
+    }
+  }
+
+  /**
+   * Alterna o establece la visibilidad de una capa
+   */
+  setLayerVisible(layerId: string, visible: boolean): boolean {
+    if (this.destroyed || !this.graph) return false
+    const model = this.graph.getModel() as any
+    if (!model) return false
+    const layerCell = typeof model.getCell === 'function' ? model.getCell(layerId) : null
+    if (!layerCell) return false
+
+    model.beginUpdate?.()
+    try {
+      if (typeof model.setVisible === 'function') {
+        model.setVisible(layerCell, visible)
+      } else {
+        layerCell.visible = visible
+      }
+      if (typeof this.graph.refresh === 'function') {
+        this.graph.refresh()
+      }
+      this.emitLayersChanged()
+      return true
+    } finally {
+      model.endUpdate?.()
+    }
+  }
+
+  /**
+   * Bloquea o desbloquea una capa frente a edición y movimiento
+   */
+  setLayerLocked(layerId: string, locked: boolean): boolean {
+    if (this.destroyed || !this.graph) return false
+    const model = this.graph.getModel() as any
+    if (!model) return false
+    const layerCell = typeof model.getCell === 'function' ? model.getCell(layerId) : null
+    if (!layerCell) return false
+
+    if (locked) {
+      this.lockedLayerIds.add(layerId)
+    } else {
+      this.lockedLayerIds.delete(layerId)
+    }
+    this.emitLayersChanged()
+    return true
+  }
+
+  /**
+   * Renombra una capa existente
+   */
+  renameLayer(layerId: string, newName: string): boolean {
+    if (this.destroyed || !this.graph || !newName.trim()) return false
+    const model = this.graph.getModel() as any
+    if (!model) return false
+    const layerCell = typeof model.getCell === 'function' ? model.getCell(layerId) : null
+    if (!layerCell) return false
+
+    model.beginUpdate?.()
+    try {
+      if (typeof model.setValue === 'function') {
+        model.setValue(layerCell, newName.trim())
+      } else {
+        layerCell.value = newName.trim()
+      }
+      this.emitLayersChanged()
+      return true
+    } finally {
+      model.endUpdate?.()
+    }
+  }
+
+  /**
+   * Mueve las celdas actualmente seleccionadas a la capa de destino
+   */
+  moveSelectedToLayer(targetLayerId: string): boolean {
+    if (this.destroyed || !this.graph) return false
+    const model = this.graph.getModel() as any
+    if (!model) return false
+    const targetLayer = typeof model.getCell === 'function' ? model.getCell(targetLayerId) : null
+    if (!targetLayer) return false
+
+    const selected = this.getSelectedCells()
+    if (selected.length === 0) return false
+
+    model.beginUpdate?.()
+    try {
+      selected.forEach(cell => {
+        if (typeof model.add === 'function') {
+          model.add(targetLayer, cell)
+        } else if (typeof (this.graph as any).addCell === 'function') {
+          ;(this.graph as any).addCell(cell, targetLayer)
+        }
+      })
+      if (typeof this.graph.refresh === 'function') {
+        this.graph.refresh()
+      }
+      this.emitLayersChanged()
+      return true
+    } finally {
+      model.endUpdate?.()
+    }
+  }
+
+  /**
+   * Registra un listener de cambios en capas
+   */
+  addLayersListener(fn: (layers: LayerInfo[]) => void): () => void {
+    this.layersListeners.push(fn)
+    fn(this.getLayers())
+    return () => {
+      this.layersListeners = this.layersListeners.filter(l => l !== fn)
+    }
+  }
+
+  private emitLayersChanged(): void {
+    const current = this.getLayers()
+    this.layersListeners.forEach(fn => {
+      try {
+        fn(current)
+      } catch (err) {
+        console.error('Error en listener de capas:', err)
       }
     })
   }

@@ -3,6 +3,7 @@
   import { activeGraph, zoomLevel, connectionMode } from '../stores/graph'
   import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
   import { pluginRegistry } from '../plugins/PluginRegistry'
+  import { toggleLayersPanel, showLayersPanel } from '../stores/layers'
 
   const pluginToolbarItems = pluginRegistry.toolbarItemsStore
 
@@ -243,6 +244,15 @@
       data-testid="toggle-zen"
     >
       <span class="tool-icon">🗖</span>
+    </button>
+    <button
+      class="tool-btn"
+      class:active={$showLayersPanel}
+      title="Gestor de Capas (F4)"
+      onclick={() => toggleLayersPanel()}
+      data-testid="toggle-layers"
+    >
+      <span class="tool-icon">📑</span>
     </button>
   </div>
 </div>

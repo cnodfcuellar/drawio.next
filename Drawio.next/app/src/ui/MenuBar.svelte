@@ -7,6 +7,7 @@
   import { getAllPagesWithFreshXml, initPages, duplicatePage, addPage, activePageId } from '../stores/pages'
   import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
   import { pluginRegistry } from '../plugins/PluginRegistry'
+  import { toggleLayersPanel, showLayersPanel } from '../stores/layers'
 
   interface Props {
     onOpenPluginManager?: () => void
@@ -413,6 +414,12 @@
                 <span class="item-icon">🗖</span>
                 <span class="item-label">{$zenMode ? 'Salir del Modo Enfoque' : 'Modo Enfoque (Zen)'}</span>
                 <span class="item-shortcut">F9</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="dropdown-item" onclick={() => { closeMenu(); toggleLayersPanel(); }} role="menuitem">
+                <span class="item-icon">📑</span>
+                <span class="item-label">{$showLayersPanel ? 'Ocultar Panel de Capas' : 'Mostrar Panel de Capas'}</span>
+                <span class="item-shortcut">F4</span>
               </button>
 
             {:else if name === 'Arrange'}
