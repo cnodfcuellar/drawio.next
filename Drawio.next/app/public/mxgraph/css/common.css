@@ -11,7 +11,7 @@ div.mxRubberband {
 	border-color: transparent;
 	border-style: solid;
 	width: fit-content;
-	position: relative;
+	position: absolute;
 	overflow: visible;
 	word-wrap: normal;
 	border-width: 0;

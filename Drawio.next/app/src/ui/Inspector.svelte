@@ -292,6 +292,19 @@
       </div>
     {:else}
       {#if activeTab === "Style"}
+        <!-- Texto de la Forma o Conector (Acceso Rápido) -->
+        <div class="prop-group">
+          <label class="prop-label" for="prop-text-quick">{isEdge ? "Etiqueta del Conector" : "Texto de la Forma"}</label>
+          <input
+            id="prop-text-quick"
+            class="prop-input"
+            type="text"
+            placeholder={isEdge ? "Ej: Paso 1, Sí, No..." : "Escribe una etiqueta..."}
+            value={cellText}
+            oninput={(e) => updateText(e.currentTarget.value)}
+          />
+        </div>
+
         {#if isEdge}
           <!-- PROPIEDADES DE CONECTOR / FLECHA -->
           <div class="prop-group">

@@ -245,4 +245,23 @@
     outline: 2px dashed var(--accent);
     outline-offset: -2px;
   }
+
+  /* Estilos del editor de texto en lienzo (in-place) para que no se desplace ni ocupe espacio extra */
+  :global(.mxCellEditor) {
+    position: absolute !important;
+    z-index: 50 !important;
+    outline: none !important;
+    box-sizing: content-box;
+  }
+
+  :global(.mxCellEditor.mxPlainTextEditor) {
+    background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: var(--radius-sm);
+    padding: 2px 6px !important;
+    box-shadow: var(--shadow-md);
+    min-width: 40px;
+    text-align: center;
+  }
 </style>
