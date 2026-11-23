@@ -11,7 +11,9 @@
   import StatusBar from './StatusBar.svelte'
   import PluginModal from './PluginModal.svelte'
   import LayersPanel from './LayersPanel.svelte'
+  import HelpModal from './HelpModal.svelte'
   import { toggleLayersPanel } from '../stores/layers'
+  import { toggleHelpModal } from '../stores/help'
 
   let showPluginManager = $state(false)
 
@@ -54,6 +56,11 @@
     else if (e.key === 'F4') {
       e.preventDefault()
       toggleLayersPanel()
+    }
+    // ? o F1: Alternar Modal de Ayuda y Atajos
+    else if (e.key === '?' || e.key === 'F1') {
+      e.preventDefault()
+      toggleHelpModal()
     }
   }
 </script>
@@ -98,6 +105,7 @@
 </div>
 
 <PluginModal bind:showManager={showPluginManager} />
+<HelpModal />
 
 <style>
   .app-shell {

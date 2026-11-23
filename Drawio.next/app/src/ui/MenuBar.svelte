@@ -8,6 +8,7 @@
   import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
   import { pluginRegistry } from '../plugins/PluginRegistry'
   import { toggleLayersPanel, showLayersPanel } from '../stores/layers'
+  import { openHelpModal } from '../stores/help'
 
   interface Props {
     onOpenPluginManager?: () => void
@@ -510,17 +511,18 @@
               </button>
 
             {:else if name === 'Help'}
+              <button class="dropdown-item" onclick={() => { closeMenu(); openHelpModal(); }} role="menuitem">
+                <span class="item-icon">⌨️</span>
+                <span class="item-label">Mapa Visual de Atajos...</span>
+                <span class="item-shortcut">? / F1</span>
+              </button>
+              <div class="menu-divider"></div>
               <div class="help-info-panel">
-                <div class="help-title">Atajos y Navegación</div>
-                <div class="help-row"><span class="help-key">Ctrl + D</span><span>Duplicar Selección</span></div>
-                <div class="help-row"><span class="help-key">Ctrl + C / X / V</span><span>Copiar / Cortar / Pegar</span></div>
-                <div class="help-row"><span class="help-key">Ctrl + G / Shift+U</span><span>Agrupar / Desagrupar</span></div>
-                <div class="help-row"><span class="help-key">Espacio + Arrastre</span><span>Navegar / Panning</span></div>
-                <div class="help-row"><span class="help-key">Clic Derecho</span><span>Arrastrar para Panning</span></div>
-                <div class="help-row"><span class="help-key">Ctrl + Rueda</span><span>Zoom Suave</span></div>
-                <div class="help-row"><span class="help-key">Supr / Backspace</span><span>Eliminar Selección</span></div>
-                <div class="help-row"><span class="help-key">Ctrl + Z / Y</span><span>Deshacer / Rehacer</span></div>
-                <div class="help-row"><span class="help-key">Tecla C / Alt</span><span>Modo Conector</span></div>
+                <div class="help-title">Drawio.next v1.0</div>
+                <div class="help-row"><span class="help-key">? / F1</span><span>Guía de Atajos</span></div>
+                <div class="help-row"><span class="help-key">F4</span><span>Panel de Capas</span></div>
+                <div class="help-row"><span class="help-key">F9</span><span>Modo Enfoque</span></div>
+                <div class="help-row"><span class="help-key">Alt + S</span><span>Estadísticas</span></div>
               </div>
             {/if}
           </div>
