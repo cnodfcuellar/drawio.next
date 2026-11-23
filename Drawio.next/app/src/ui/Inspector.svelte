@@ -206,6 +206,22 @@
     if ($activeGraph) $activeGraph.sendToBack();
   }
 
+  function handleGroup() {
+    if ($activeGraph) $activeGraph.groupSelected();
+  }
+
+  function handleUngroup() {
+    if ($activeGraph) $activeGraph.ungroupSelected();
+  }
+
+  function handleAlignSelected(align: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') {
+    if ($activeGraph) $activeGraph.alignSelected(align);
+  }
+
+  function handleDistributeSelected(direction: 'horizontal' | 'vertical') {
+    if ($activeGraph) $activeGraph.distributeSelected(direction);
+  }
+
   function handleConnectSelected() {
     if ($activeGraph) {
       $activeGraph.connectSelected();
@@ -259,6 +275,10 @@
       <!-- Botón de acción rápida para selección múltiple -->
       <div class="multi-select-box">
         <div class="multi-title">{selCount} elementos seleccionados</div>
+        <div class="btn-group" style="margin-bottom: var(--space-2); width: 100%;">
+          <button class="choice-btn" onclick={handleGroup} title="Agrupar formas (Ctrl+G)">⛶ Agrupar</button>
+          <button class="choice-btn" onclick={() => $activeGraph?.duplicateSelected()} title="Duplicar selección (Ctrl+D)">⧉ Duplicar</button>
+        </div>
         <button class="action-btn-primary" onclick={handleConnectSelected} title="Crea una arista conectando los dos primeros nodos">
           🔗 Enlazar Nodos con Flecha
         </button>
@@ -588,6 +608,76 @@
             </button>
           </div>
         </div>
+
+        <!-- Agrupación -->
+        <div class="prop-group">
+          <div class="prop-label">Agrupación</div>
+          <div class="btn-group">
+            <button
+              class="choice-btn"
+              disabled={selCount < 2}
+              onclick={handleGroup}
+              title="Agrupar formas seleccionadas (Ctrl+G)"
+            >
+              ⛶ Agrupar
+            </button>
+            <button
+              class="choice-btn"
+              onclick={handleUngroup}
+              title="Desagrupar contenedor o formas (Ctrl+Shift+U)"
+            >
+              ⛿ Desagrupar
+            </button>
+          </div>
+        </div>
+
+        {#if selCount >= 2}
+          <!-- Alineación de Formas -->
+          <div class="prop-group">
+            <div class="prop-label">Alineación Horizontal</div>
+            <div class="btn-group">
+              <button class="choice-btn" onclick={() => handleAlignSelected('left')} title="Alinear a la izquierda">
+                |⬅ Izq
+              </button>
+              <button class="choice-btn" onclick={() => handleAlignSelected('center')} title="Centrar horizontalmente">
+                ⬌ Centro
+              </button>
+              <button class="choice-btn" onclick={() => handleAlignSelected('right')} title="Alinear a la derecha">
+                Der ➡|
+              </button>
+            </div>
+          </div>
+
+          <div class="prop-group">
+            <div class="prop-label">Alineación Vertical</div>
+            <div class="btn-group">
+              <button class="choice-btn" onclick={() => handleAlignSelected('top')} title="Alinear arriba">
+                ⬆ Arriba
+              </button>
+              <button class="choice-btn" onclick={() => handleAlignSelected('middle')} title="Centrar verticalmente">
+                ↕ Medio
+              </button>
+              <button class="choice-btn" onclick={() => handleAlignSelected('bottom')} title="Alinear abajo">
+                ⬇ Abajo
+              </button>
+            </div>
+          </div>
+        {/if}
+
+        {#if selCount >= 3}
+          <!-- Distribución Uniforme -->
+          <div class="prop-group">
+            <div class="prop-label">Distribución Uniforme</div>
+            <div class="btn-group">
+              <button class="choice-btn" onclick={() => handleDistributeSelected('horizontal')} title="Distribuir horizontalmente con espaciado idéntico">
+                ⇋ Horizontal
+              </button>
+              <button class="choice-btn" onclick={() => handleDistributeSelected('vertical')} title="Distribuir verticalmente con espaciado idéntico">
+                ⇅ Vertical
+              </button>
+            </div>
+          </div>
+        {/if}
 
       {:else if activeTab === "Text"}
         <!-- Texto de la Forma o Conector -->

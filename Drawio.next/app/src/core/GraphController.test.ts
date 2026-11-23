@@ -142,6 +142,57 @@ function createMockMxGraph() {
       return cells
     })
 
+    importCells = vi.fn((cells: any[], dx = 0, dy = 0, _target?: any) => {
+      const clones = cells.map(c => {
+        const cloneId = `clone-${cellCounter++}`
+        const clone = new MockCell(cloneId, c.value, c.vertex, c.edge)
+        clone.geometry = c.geometry ? { ...c.geometry, x: (c.geometry.x || 0) + dx, y: (c.geometry.y || 0) + dy } : null
+        clone.style = c.style
+        cellsMap[cloneId] = clone
+        return clone
+      })
+      currentSelection = clones
+      selectionListeners.forEach(fn => fn())
+      return clones
+    })
+
+    cloneCells = vi.fn((cells: any[]) => {
+      return cells.map(c => {
+        const clone = new MockCell(`cloned-${cellCounter++}`, c.value, c.vertex, c.edge)
+        clone.geometry = c.geometry ? { ...c.geometry } : null
+        clone.style = c.style
+        return clone
+      })
+    })
+
+    groupCells = vi.fn((_group?: any, _border?: number, cells?: any[]) => {
+      const groupId = `group-${cellCounter++}`
+      const group = new MockCell(groupId, '', true, false)
+      group.geometry = { x: 50, y: 50, width: 200, height: 200 }
+      ;(group as any).children = cells || []
+      cellsMap[groupId] = group
+      currentSelection = [group]
+      selectionListeners.forEach(fn => fn())
+      return group
+    })
+
+    ungroupCells = vi.fn((cells?: any[]) => {
+      const result: any[] = []
+      if (cells) {
+        cells.forEach(c => {
+          if ((c as any).children) {
+            result.push(...(c as any).children)
+          }
+          delete cellsMap[c.id]
+        })
+      }
+      currentSelection = result
+      selectionListeners.forEach(fn => fn())
+      return result
+    })
+
+    alignCells = vi.fn()
+
     selectAll() {
       currentSelection = Object.values(cellsMap)
       selectionListeners.forEach(fn => fn())
@@ -245,7 +296,46 @@ describe('GraphController', () => {
   beforeEach(() => {
     const mocks = createMockMxGraph()
     // Configurar globales de window
+    const eventListeners: { [evt: string]: Array<(e: any) => void> } = {}
     ;(globalThis as any).window = globalThis
+    ;(globalThis as any).window.addEventListener = vi.fn((type: string, fn: any) => {
+      if (!eventListeners[type]) eventListeners[type] = []
+      eventListeners[type].push(fn)
+    })
+    ;(globalThis as any).window.removeEventListener = vi.fn((type: string, fn: any) => {
+      if (eventListeners[type]) {
+        eventListeners[type] = eventListeners[type].filter(f => f !== fn)
+      }
+    })
+    ;(globalThis as any).window.dispatchEvent = vi.fn((e: any) => {
+      const list = eventListeners[e.type] || []
+      list.forEach(fn => fn(e))
+      return true
+    })
+
+    if (typeof (globalThis as any).KeyboardEvent === 'undefined') {
+      ;(globalThis as any).KeyboardEvent = class KeyboardEvent {
+        type: string
+        key: string
+        code: string
+        ctrlKey: boolean
+        shiftKey: boolean
+        altKey: boolean
+        metaKey: boolean
+        constructor(type: string, init?: any) {
+          this.type = type
+          this.key = init?.key ?? ''
+          this.code = init?.code ?? ''
+          this.ctrlKey = init?.ctrlKey ?? false
+          this.shiftKey = init?.shiftKey ?? false
+          this.altKey = init?.altKey ?? false
+          this.metaKey = init?.metaKey ?? false
+        }
+        preventDefault() {}
+        stopPropagation() {}
+      }
+    }
+
     ;(globalThis as any).window.mxGraph = mocks.MockGraph
     ;(globalThis as any).window.mxUndoManager = mocks.MockUndoManager
     ;(globalThis as any).window.mxRubberband = mocks.MockRubberband
@@ -583,6 +673,161 @@ describe('GraphController', () => {
     expect(multiXml).toContain('name="Arquitectura"')
     expect(multiXml).toContain('id="p1"')
     expect(multiXml).toContain('id="p2"')
+  })
+
+  it('duplicateSelected clona la celda seleccionada con offset y actualiza la selección', () => {
+    // Sin selección
+    expect(controller.duplicateSelected()).toEqual([])
+
+    // Con una celda seleccionada
+    const v1 = controller.addVertex({ label: 'Original', x: 50, y: 60, width: 100, height: 40 })
+    controller.selectCell(v1.id)
+
+    const duplicates = controller.duplicateSelected(30)
+    expect(duplicates.length).toBe(1)
+    expect(duplicates[0].value).toBe('Original')
+    expect(duplicates[0].geometry.x).toBe(80)
+    expect(duplicates[0].geometry.y).toBe(90)
+    // El clon queda seleccionado
+    expect(controller.getSelectedCells()[0].id).toBe(duplicates[0].id)
+  })
+
+  it('copy, cut, paste y hasClipboard gestionan el portapapeles del canvas', () => {
+    expect(controller.hasClipboard()).toBe(false)
+    expect(controller.paste()).toEqual([])
+
+    const v1 = controller.addVertex({ label: 'Copiar esto', x: 10, y: 20 })
+    controller.selectCell(v1.id)
+
+    controller.copy()
+    expect(controller.hasClipboard()).toBe(true)
+
+    // Primer pegado: offset 20px
+    const pasted1 = controller.paste()
+    expect(pasted1.length).toBe(1)
+    expect(pasted1[0].geometry.x).toBe(30)
+    expect(pasted1[0].geometry.y).toBe(40)
+
+    // Segundo pegado progresivo: offset 40px
+    const pasted2 = controller.paste()
+    expect(pasted2.length).toBe(1)
+    expect(pasted2[0].geometry.x).toBe(50)
+    expect(pasted2[0].geometry.y).toBe(60)
+
+    // Probar corte (cut)
+    controller.selectCell(v1.id)
+    controller.cut()
+    expect(controller.hasClipboard()).toBe(true)
+    expect(controller.getRawGraph().getModel().getCell(v1.id)).toBeNull()
+  })
+
+  it('groupSelected y ungroupSelected agrupan y desagrupan formas', () => {
+    const v1 = controller.addVertex({ label: 'N1', x: 10, y: 10 })
+    const v2 = controller.addVertex({ label: 'N2', x: 100, y: 100 })
+
+    // Menos de 2 celdas seleccionadas -> null
+    controller.selectCell(v1.id)
+    expect(controller.groupSelected()).toBeNull()
+
+    // Con 2 celdas seleccionadas
+    controller.selectCells([v1.id, v2.id])
+    const group = controller.groupSelected(15)
+    expect(group).not.toBeNull()
+    expect(group?.vertex).toBe(true)
+    expect(controller.getSelectedCells()[0].id).toBe(group!.id)
+
+    // Desagrupar
+    const children = controller.ungroupSelected()
+    expect(children.length).toBe(2)
+  })
+
+  it('alignSelected alinea geométricamente las celdas en left, center, right, top, middle, bottom', () => {
+    const v1 = controller.addVertex({ label: 'V1', x: 10, y: 20, width: 100, height: 50 })
+    const v2 = controller.addVertex({ label: 'V2', x: 80, y: 100, width: 60, height: 40 })
+
+    controller.selectCells([v1.id, v2.id])
+
+    // Alinear Izquierda: ambos en x = 10
+    controller.alignSelected('left')
+    expect(v1.geometry.x).toBe(10)
+    expect(v2.geometry.x).toBe(10)
+
+    // Alinear Arriba: ambos en y = 20
+    controller.alignSelected('top')
+    expect(v1.geometry.y).toBe(20)
+    expect(v2.geometry.y).toBe(20)
+
+    // Alinear Derecha: borde derecho máximo = max(10+100, 10+60) = 110
+    controller.alignSelected('right')
+    expect(v1.geometry.x).toBe(10) // 110 - 100 = 10
+    expect(v2.geometry.x).toBe(50) // 110 - 60 = 50
+
+    // Alinear Abajo: borde inferior máximo = max(20+50, 20+40) = 70
+    controller.alignSelected('bottom')
+    expect(v1.geometry.y).toBe(20) // 70 - 50 = 20
+    expect(v2.geometry.y).toBe(30) // 70 - 40 = 30
+  })
+
+  it('distributeSelected distribuye uniformemente 3 o más celdas', () => {
+    // 3 celdas horizontales con anchos 100 cada una
+    // v1: x: 0, w: 100 (borde derecho = 100)
+    // v2: x: 50, w: 100 (desordenada)
+    // v3: x: 400, w: 100 (borde derecho = 500)
+    // totalSpan = 500 - 0 = 500, totalWidth = 300, spacing = (500 - 300)/2 = 100
+    // v2 debe quedar en: 0 + 100 + 100 = 200
+    const v1 = controller.addVertex({ label: 'A', x: 0, y: 0, width: 100, height: 50 })
+    const v2 = controller.addVertex({ label: 'B', x: 50, y: 0, width: 100, height: 50 })
+    const v3 = controller.addVertex({ label: 'C', x: 400, y: 0, width: 100, height: 50 })
+
+    controller.selectCells([v1.id, v2.id, v3.id])
+    controller.distributeSelected('horizontal')
+
+    expect(v1.geometry.x).toBe(0)
+    expect(v2.geometry.x).toBe(200)
+    expect(v3.geometry.x).toBe(400)
+
+    // Vertical:
+    // v1: y: 0, h: 50
+    // v2: y: 80, h: 50
+    // v3: y: 250, h: 50 (maxBottom = 300)
+    // totalSpan = 300 - 0 = 300, totalHeight = 150, spacing = (300 - 150)/2 = 75
+    // v2 debe quedar en: 0 + 50 + 75 = 125
+    v1.geometry.y = 0
+    v2.geometry.y = 80
+    v3.geometry.y = 250
+    controller.distributeSelected('vertical')
+
+    expect(v1.geometry.y).toBe(0)
+    expect(v2.geometry.y).toBe(125)
+    expect(v3.geometry.y).toBe(250)
+  })
+
+  it('responde a atajos de teclado globales Ctrl+D, Ctrl+C, Ctrl+V, Ctrl+G', () => {
+    const v1 = controller.addVertex({ label: 'KBD', x: 10, y: 10 })
+    const v2 = controller.addVertex({ label: 'KBD2', x: 50, y: 50 })
+    controller.selectCell(v1.id)
+
+    const spyDuplicate = vi.spyOn(controller, 'duplicateSelected')
+    const spyCopy = vi.spyOn(controller, 'copy')
+    const spyPaste = vi.spyOn(controller, 'paste')
+    const spyGroup = vi.spyOn(controller, 'groupSelected')
+    const spyUngroup = vi.spyOn(controller, 'ungroupSelected')
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', ctrlKey: true }))
+    expect(spyDuplicate).toHaveBeenCalled()
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', ctrlKey: true }))
+    expect(spyCopy).toHaveBeenCalled()
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'v', ctrlKey: true }))
+    expect(spyPaste).toHaveBeenCalled()
+
+    controller.selectCells([v1.id, v2.id])
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', ctrlKey: true }))
+    expect(spyGroup).toHaveBeenCalled()
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'u', ctrlKey: true, shiftKey: true }))
+    expect(spyUngroup).toHaveBeenCalled()
   })
 
   it('destruye la instancia limpiamente', () => {

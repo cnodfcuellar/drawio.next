@@ -186,6 +186,12 @@ export declare class mxGraph {
   ): mxCell
 
   removeCells(cells?: mxCell[], includeEdges?: boolean): mxCell[]
+  importCells?(cells: mxCell[], dx?: number, dy?: number, target?: mxCell, evt?: any, mapping?: any): mxCell[]
+  cloneCells?(cells: mxCell[], allowInvalidRoots?: boolean, mapping?: any): mxCell[]
+  groupCells?(group?: mxCell | null, border?: number, cells?: mxCell[]): mxCell
+  ungroupCells?(cells?: mxCell[]): mxCell[]
+  alignCells?(align: string, cells?: mxCell[], param?: number): mxCell[]
+  orderCells?(back: boolean, cells?: mxCell[]): mxCell[]
   getSelectionCells(): mxCell[]
   getSelectionCell(): mxCell | null
   setSelectionCell(cell: mxCell): void

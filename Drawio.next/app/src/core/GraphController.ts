@@ -43,6 +43,8 @@ export class GraphController {
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null
   private keyupHandler: ((e: KeyboardEvent) => void) | null = null
   private cleanupPanning: (() => void) | null = null
+  private clipboard: mxCell[] = []
+  private pasteCount = 0
   private destroyed = false
 
   constructor(container: HTMLElement, options: GraphControllerOptions = {}) {
@@ -385,6 +387,40 @@ export class GraphController {
       else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
         e.preventDefault()
         this.selectAll()
+      }
+      // Ctrl+D / Cmd+D (Duplicar seleccionado)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault()
+        this.duplicateSelected()
+      }
+      // Ctrl+C / Cmd+C (Copiar)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+        e.preventDefault()
+        this.copy()
+      }
+      // Ctrl+X / Cmd+X (Cortar)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'x') {
+        e.preventDefault()
+        this.cut()
+      }
+      // Ctrl+V / Cmd+V (Pegar)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+        e.preventDefault()
+        this.paste()
+      }
+      // Ctrl+G / Cmd+G (Agrupar o Desagrupar con Shift)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
+        e.preventDefault()
+        if (e.shiftKey) {
+          this.ungroupSelected()
+        } else {
+          this.groupSelected()
+        }
+      }
+      // Ctrl+Shift+U (Desagrupar alternativo estándar)
+      else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault()
+        this.ungroupSelected()
       }
     }
 
@@ -942,6 +978,283 @@ export class GraphController {
   }
 
   /**
+   * Duplica las celdas actualmente seleccionadas con un desplazamiento (offset)
+   */
+  duplicateSelected(offset = 20): mxCell[] {
+    const cells = this.getSelectedCells()
+    if (!cells || cells.length === 0) return []
+
+    const anyGraph = this.graph as any
+    const parent = this.graph.getDefaultParent()
+    let clones: mxCell[] = []
+
+    this.graph.getModel().beginUpdate()
+    try {
+      if (typeof anyGraph.importCells === 'function') {
+        clones = anyGraph.importCells(cells, offset, offset, parent) || []
+      } else if (typeof anyGraph.cloneCells === 'function') {
+        const cloned = anyGraph.cloneCells(cells) || []
+        for (const cell of cloned) {
+          if (cell.geometry) {
+            const g = cell.geometry.clone ? cell.geometry.clone() : { ...cell.geometry }
+            g.x = (g.x || 0) + offset
+            g.y = (g.y || 0) + offset
+            cell.geometry = g
+          }
+          if (typeof anyGraph.addCell === 'function') {
+            anyGraph.addCell(cell, parent)
+          }
+        }
+        clones = cloned
+      }
+      if (clones && clones.length > 0) {
+        this.graph.setSelectionCells(clones)
+      }
+    } finally {
+      this.graph.getModel().endUpdate()
+    }
+    return clones
+  }
+
+  /**
+   * Copia las celdas seleccionadas al portapapeles interno
+   */
+  copy(): void {
+    const cells = this.getSelectedCells()
+    if (!cells || cells.length === 0) return
+
+    const anyGraph = this.graph as any
+    if (typeof anyGraph.cloneCells === 'function') {
+      this.clipboard = anyGraph.cloneCells(cells) || []
+    } else {
+      this.clipboard = cells.map(c => ({
+        ...c,
+        geometry: c.geometry ? { ...c.geometry } : null
+      }))
+    }
+    this.pasteCount = 0
+  }
+
+  /**
+   * Corta las celdas seleccionadas (las copia y las remueve del canvas)
+   */
+  cut(): void {
+    this.copy()
+    this.removeSelected()
+  }
+
+  /**
+   * Pega las celdas desde el portapapeles con un desplazamiento progresivo
+   */
+  paste(): mxCell[] {
+    if (!this.clipboard || this.clipboard.length === 0) return []
+
+    this.pasteCount += 1
+    const offset = 20 * this.pasteCount
+    const anyGraph = this.graph as any
+    const parent = this.graph.getDefaultParent()
+    let clones: mxCell[] = []
+
+    this.graph.getModel().beginUpdate()
+    try {
+      if (typeof anyGraph.importCells === 'function') {
+        clones = anyGraph.importCells(this.clipboard, offset, offset, parent) || []
+      } else if (typeof anyGraph.cloneCells === 'function') {
+        const cloned = anyGraph.cloneCells(this.clipboard) || []
+        for (const cell of cloned) {
+          if (cell.geometry) {
+            const g = cell.geometry.clone ? cell.geometry.clone() : { ...cell.geometry }
+            g.x = (g.x || 0) + offset
+            g.y = (g.y || 0) + offset
+            cell.geometry = g
+          }
+          if (typeof anyGraph.addCell === 'function') {
+            anyGraph.addCell(cell, parent)
+          }
+        }
+        clones = cloned
+      }
+      if (clones && clones.length > 0) {
+        this.graph.setSelectionCells(clones)
+      }
+    } finally {
+      this.graph.getModel().endUpdate()
+    }
+    return clones
+  }
+
+  /**
+   * Indica si hay elementos guardados en el portapapeles
+   */
+  hasClipboard(): boolean {
+    return this.clipboard.length > 0
+  }
+
+  /**
+   * Agrupa las celdas seleccionadas bajo una celda contenedora (grupo)
+   */
+  groupSelected(border = 20): mxCell | null {
+    const cells = this.getSelectedCells()
+    if (!cells || cells.length < 2) return null
+
+    const anyGraph = this.graph as any
+    if (typeof anyGraph.groupCells === 'function') {
+      this.graph.getModel().beginUpdate()
+      try {
+        const group = anyGraph.groupCells(null, border, cells)
+        if (group) {
+          this.graph.setSelectionCell(group)
+        }
+        return group
+      } finally {
+        this.graph.getModel().endUpdate()
+      }
+    }
+    return null
+  }
+
+  /**
+   * Desagrupa los contenedores seleccionados
+   */
+  ungroupSelected(): mxCell[] {
+    const cells = this.getSelectedCells()
+    if (!cells || cells.length === 0) return []
+
+    const anyGraph = this.graph as any
+    if (typeof anyGraph.ungroupCells === 'function') {
+      this.graph.getModel().beginUpdate()
+      try {
+        const result = anyGraph.ungroupCells(cells) || []
+        if (result.length > 0) {
+          this.graph.setSelectionCells(result)
+        }
+        return result
+      } finally {
+        this.graph.getModel().endUpdate()
+      }
+    }
+    return []
+  }
+
+  /**
+   * Alinea las celdas seleccionadas (left, center, right, top, middle, bottom)
+   */
+  alignSelected(align: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'): void {
+    const cells = this.getSelectedCells().filter(c => !c.edge && c.geometry)
+    if (cells.length < 2) return
+
+    const anyGraph = this.graph as any
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      if (typeof anyGraph.alignCells === 'function') {
+        anyGraph.alignCells(align, cells)
+      }
+
+      // Asegurar cálculo geométrico determinista si alignCells no actualiza las geometrías directamente
+      if (align === 'left') {
+        const minX = Math.min(...cells.map(c => c.geometry!.x))
+        cells.forEach(c => {
+          this.setCellGeometry(c.id, minX, c.geometry!.y, c.geometry!.width, c.geometry!.height)
+        })
+      } else if (align === 'center') {
+        const minX = Math.min(...cells.map(c => c.geometry!.x))
+        const maxX = Math.max(...cells.map(c => c.geometry!.x + c.geometry!.width))
+        const centerX = (minX + maxX) / 2
+        cells.forEach(c => {
+          const newX = Math.round(centerX - c.geometry!.width / 2)
+          this.setCellGeometry(c.id, newX, c.geometry!.y, c.geometry!.width, c.geometry!.height)
+        })
+      } else if (align === 'right') {
+        const maxX = Math.max(...cells.map(c => c.geometry!.x + c.geometry!.width))
+        cells.forEach(c => {
+          const newX = maxX - c.geometry!.width
+          this.setCellGeometry(c.id, newX, c.geometry!.y, c.geometry!.width, c.geometry!.height)
+        })
+      } else if (align === 'top') {
+        const minY = Math.min(...cells.map(c => c.geometry!.y))
+        cells.forEach(c => {
+          this.setCellGeometry(c.id, c.geometry!.x, minY, c.geometry!.width, c.geometry!.height)
+        })
+      } else if (align === 'middle') {
+        const minY = Math.min(...cells.map(c => c.geometry!.y))
+        const maxY = Math.max(...cells.map(c => c.geometry!.y + c.geometry!.height))
+        const centerY = (minY + maxY) / 2
+        cells.forEach(c => {
+          const newY = Math.round(centerY - c.geometry!.height / 2)
+          this.setCellGeometry(c.id, c.geometry!.x, newY, c.geometry!.width, c.geometry!.height)
+        })
+      } else if (align === 'bottom') {
+        const maxY = Math.max(...cells.map(c => c.geometry!.y + c.geometry!.height))
+        cells.forEach(c => {
+          const newY = maxY - c.geometry!.height
+          this.setCellGeometry(c.id, c.geometry!.x, newY, c.geometry!.width, c.geometry!.height)
+        })
+      }
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
+   * Distribuye uniformemente las celdas seleccionadas en el eje horizontal o vertical
+   */
+  distributeSelected(direction: 'horizontal' | 'vertical'): void {
+    const cells = this.getSelectedCells().filter(c => !c.edge && c.geometry)
+    if (cells.length < 3) return
+
+    const model = this.graph.getModel()
+    model.beginUpdate()
+    try {
+      if (direction === 'horizontal') {
+        const sorted = [...cells].sort((a, b) => a.geometry!.x - b.geometry!.x)
+        const first = sorted[0]
+        const last = sorted[sorted.length - 1]
+        const minX = first.geometry!.x
+        const maxRight = last.geometry!.x + last.geometry!.width
+        const totalSpan = maxRight - minX
+        const totalWidth = sorted.reduce((sum, c) => sum + c.geometry!.width, 0)
+        const spacing = (totalSpan - totalWidth) / (sorted.length - 1)
+
+        let currentX = minX + first.geometry!.width + spacing
+        for (let i = 1; i < sorted.length - 1; i++) {
+          this.setCellGeometry(
+            sorted[i].id,
+            Math.round(currentX),
+            sorted[i].geometry!.y,
+            sorted[i].geometry!.width,
+            sorted[i].geometry!.height
+          )
+          currentX += sorted[i].geometry!.width + spacing
+        }
+      } else {
+        const sorted = [...cells].sort((a, b) => a.geometry!.y - b.geometry!.y)
+        const first = sorted[0]
+        const last = sorted[sorted.length - 1]
+        const minY = first.geometry!.y
+        const maxBottom = last.geometry!.y + last.geometry!.height
+        const totalSpan = maxBottom - minY
+        const totalHeight = sorted.reduce((sum, c) => sum + c.geometry!.height, 0)
+        const spacing = (totalSpan - totalHeight) / (sorted.length - 1)
+
+        let currentY = minY + first.geometry!.height + spacing
+        for (let i = 1; i < sorted.length - 1; i++) {
+          this.setCellGeometry(
+            sorted[i].id,
+            sorted[i].geometry!.x,
+            Math.round(currentY),
+            sorted[i].geometry!.width,
+            sorted[i].geometry!.height
+          )
+          currentY += sorted[i].geometry!.height + spacing
+        }
+      }
+    } finally {
+      model.endUpdate()
+    }
+  }
+
+  /**
    * Deshace la última acción
    */
   undo(): boolean {
@@ -1010,6 +1323,13 @@ export class GraphController {
     if (cell) {
       this.graph.setSelectionCell(cell)
     }
+  }
+
+  selectCells(ids: string[]): void {
+    const cells = ids
+      .map(id => this.graph.getModel().getCell(id))
+      .filter((c): c is mxCell => c !== null)
+    this.graph.setSelectionCells(cells)
   }
 
   clearSelection(): void {

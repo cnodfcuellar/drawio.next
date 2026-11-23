@@ -115,6 +115,26 @@
     $activeGraph?.redo()
   }
 
+  function handleCut() {
+    closeMenu()
+    $activeGraph?.cut()
+  }
+
+  function handleCopy() {
+    closeMenu()
+    $activeGraph?.copy()
+  }
+
+  function handlePaste() {
+    closeMenu()
+    $activeGraph?.paste()
+  }
+
+  function handleDuplicateSelected() {
+    closeMenu()
+    $activeGraph?.duplicateSelected()
+  }
+
   function handleSelectAll() {
     closeMenu()
     $activeGraph?.selectAll()
@@ -171,6 +191,26 @@
   function handleSendToBack() {
     closeMenu()
     $activeGraph?.sendToBack()
+  }
+
+  function handleGroup() {
+    closeMenu()
+    $activeGraph?.groupSelected()
+  }
+
+  function handleUngroup() {
+    closeMenu()
+    $activeGraph?.ungroupSelected()
+  }
+
+  function handleAlign(align: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') {
+    closeMenu()
+    $activeGraph?.alignSelected(align)
+  }
+
+  function handleDistribute(dir: 'horizontal' | 'vertical') {
+    closeMenu()
+    $activeGraph?.distributeSelected(dir)
   }
 
   onMount(() => {
@@ -255,6 +295,27 @@
                 <span class="item-shortcut">Ctrl+Y</span>
               </button>
               <div class="menu-divider"></div>
+              <button class="dropdown-item" onclick={handleCut} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">✂️</span>
+                <span class="item-label">Cortar</span>
+                <span class="item-shortcut">Ctrl+X</span>
+              </button>
+              <button class="dropdown-item" onclick={handleCopy} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">📋</span>
+                <span class="item-label">Copiar</span>
+                <span class="item-shortcut">Ctrl+C</span>
+              </button>
+              <button class="dropdown-item" onclick={handlePaste} role="menuitem">
+                <span class="item-icon">📄</span>
+                <span class="item-label">Pegar</span>
+                <span class="item-shortcut">Ctrl+V</span>
+              </button>
+              <button class="dropdown-item" onclick={handleDuplicateSelected} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⧉</span>
+                <span class="item-label">Duplicar</span>
+                <span class="item-shortcut">Ctrl+D</span>
+              </button>
+              <div class="menu-divider"></div>
               <button class="dropdown-item" onclick={handleSelectAll} role="menuitem">
                 <span class="item-icon">⬚</span>
                 <span class="item-label">Seleccionar todo</span>
@@ -304,6 +365,53 @@
                 <span class="item-icon">▼</span>
                 <span class="item-label">Enviar al fondo</span>
               </button>
+              <div class="menu-divider"></div>
+              <button class="dropdown-item" onclick={handleGroup} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⛶</span>
+                <span class="item-label">Agrupar</span>
+                <span class="item-shortcut">Ctrl+G</span>
+              </button>
+              <button class="dropdown-item" onclick={handleUngroup} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⛿</span>
+                <span class="item-label">Desagrupar</span>
+                <span class="item-shortcut">Ctrl+Shift+U</span>
+              </button>
+              <div class="menu-divider"></div>
+              <div class="dropdown-section-title">Alinear</div>
+              <button class="dropdown-item" onclick={() => handleAlign('left')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">|⬅</span>
+                <span class="item-label">Alinear a la Izquierda</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleAlign('center')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⬌</span>
+                <span class="item-label">Centrar Horizontalmente</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleAlign('right')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">➡|</span>
+                <span class="item-label">Alinear a la Derecha</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleAlign('top')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⬆</span>
+                <span class="item-label">Alinear Arriba</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleAlign('middle')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">↕</span>
+                <span class="item-label">Centrar Verticalmente</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleAlign('bottom')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⬇</span>
+                <span class="item-label">Alinear Abajo</span>
+              </button>
+              <div class="menu-divider"></div>
+              <div class="dropdown-section-title">Distribuir</div>
+              <button class="dropdown-item" onclick={() => handleDistribute('horizontal')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⇋</span>
+                <span class="item-label">Distribuir Horizontalmente</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleDistribute('vertical')} disabled={!$hasSelection} role="menuitem">
+                <span class="item-icon">⇅</span>
+                <span class="item-label">Distribuir Verticalmente</span>
+              </button>
 
             {:else if name === 'Extras'}
               <button class="dropdown-item" onclick={handleSaveDrawio} role="menuitem">
@@ -318,12 +426,15 @@
             {:else if name === 'Help'}
               <div class="help-info-panel">
                 <div class="help-title">Atajos y Navegación</div>
+                <div class="help-row"><span class="help-key">Ctrl + D</span><span>Duplicar Selección</span></div>
+                <div class="help-row"><span class="help-key">Ctrl + C / X / V</span><span>Copiar / Cortar / Pegar</span></div>
+                <div class="help-row"><span class="help-key">Ctrl + G / Shift+U</span><span>Agrupar / Desagrupar</span></div>
                 <div class="help-row"><span class="help-key">Espacio + Arrastre</span><span>Navegar / Panning</span></div>
                 <div class="help-row"><span class="help-key">Clic Derecho</span><span>Arrastrar para Panning</span></div>
                 <div class="help-row"><span class="help-key">Ctrl + Rueda</span><span>Zoom Suave</span></div>
                 <div class="help-row"><span class="help-key">Supr / Backspace</span><span>Eliminar Selección</span></div>
                 <div class="help-row"><span class="help-key">Ctrl + Z / Y</span><span>Deshacer / Rehacer</span></div>
-                <div class="help-row"><span class="help-key">Arrastrar Forma</span><span>Soltar en Lienzo</span></div>
+                <div class="help-row"><span class="help-key">Tecla C / Alt</span><span>Modo Conector</span></div>
               </div>
             {/if}
           </div>
@@ -461,6 +572,15 @@
     height: 1px;
     background: var(--border);
     margin: var(--space-1) 0;
+  }
+
+  .dropdown-section-title {
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    padding: var(--space-2) var(--space-4) var(--space-1);
   }
 
   /* Panel de ayuda */

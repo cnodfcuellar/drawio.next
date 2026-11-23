@@ -86,6 +86,30 @@
           action: () => $activeGraph?.removeSelected()
         },
         {
+          id: 'duplicate',
+          icon: '⧉',
+          label: 'Duplicar Selección',
+          shortcut: 'Ctrl+D',
+          disabled: !$hasSelection,
+          action: () => $activeGraph?.duplicateSelected()
+        },
+        {
+          id: 'group',
+          icon: '⛶',
+          label: 'Agrupar Formas',
+          shortcut: 'Ctrl+G',
+          disabled: selCount < 2,
+          action: () => $activeGraph?.groupSelected()
+        },
+        {
+          id: 'ungroup',
+          icon: '⛿',
+          label: 'Desagrupar',
+          shortcut: 'Ctrl+Shift+U',
+          disabled: !$hasSelection,
+          action: () => $activeGraph?.ungroupSelected()
+        },
+        {
           id: 'addNode',
           icon: '✚',
           label: 'Nuevo Nodo',
