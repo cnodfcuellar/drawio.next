@@ -1523,6 +1523,45 @@ export class GraphController {
   }
 
   /**
+   * Retorna todas las celdas del modelo actual (vértices y aristas)
+   */
+  getAllCells(): mxCell[] {
+    if (this.destroyed || !this.graph) return []
+    const model = this.graph.getModel()
+    if (!model) return []
+    const cells: mxCell[] = []
+    const root = typeof model.getRoot === 'function' ? model.getRoot() : null
+    const traverse = (parent: any) => {
+      const childCount = (model as any).getChildCount ? (model as any).getChildCount(parent) : 0
+      for (let i = 0; i < childCount; i++) {
+        const child = (model as any).getChildAt ? (model as any).getChildAt(parent, i) : null
+        if (child) {
+          cells.push(child)
+          traverse(child)
+        }
+      }
+    }
+    if (root) {
+      traverse(root)
+    }
+    return cells
+  }
+
+  /**
+   * Retorna el modelo subyacente de mxGraph
+   */
+  getModel(): mxGraphModel {
+    return this.graph.getModel()
+  }
+
+  /**
+   * Retorna la instancia nativa subyacente de mxGraph (para extensiones avanzadas)
+   */
+  getUnderlyingGraph(): mxGraph {
+    return this.graph
+  }
+
+  /**
    * Registra un callback que se ejecuta cuando cambia la selección en el canvas.
    * Retorna una función para cancelar la suscripción.
    */

@@ -6,10 +6,19 @@
   import { clearSavedDiagram } from '../stores/persistence'
   import { getAllPagesWithFreshXml, initPages, duplicatePage, addPage, activePageId } from '../stores/pages'
   import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
+  import { pluginRegistry } from '../plugins/PluginRegistry'
 
-  const menus = ['File', 'Edit', 'View', 'Arrange', 'Extras', 'Help'] as const
+  interface Props {
+    onOpenPluginManager?: () => void
+  }
+
+  let { onOpenPluginManager }: Props = $props()
+
+  const menus = ['File', 'Edit', 'View', 'Arrange', 'Plugins', 'Extras', 'Help'] as const
   type MenuName = typeof menus[number]
   let activeMenu: MenuName | null = $state(null)
+
+  const pluginMenuItems = pluginRegistry.menuItemsStore
 
   let fileInputEl: HTMLInputElement | null = null
 
@@ -461,6 +470,26 @@
               <button class="dropdown-item" onclick={() => handleDistribute('vertical')} disabled={!$hasSelection} role="menuitem">
                 <span class="item-icon">⇅</span>
                 <span class="item-label">Distribuir Verticalmente</span>
+              </button>
+
+            {:else if name === 'Plugins'}
+              {#if $pluginMenuItems.length === 0}
+                <div class="dropdown-section-title">No hay acciones de plugins</div>
+              {:else}
+                {#each $pluginMenuItems as item}
+                  <button class="dropdown-item" onclick={() => { closeMenu(); item.action(); }} role="menuitem">
+                    <span class="item-icon">{item.icon || '🧩'}</span>
+                    <span class="item-label">{item.label}</span>
+                    {#if item.shortcut}
+                      <span class="item-shortcut">{item.shortcut}</span>
+                    {/if}
+                  </button>
+                {/each}
+              {/if}
+              <div class="menu-divider"></div>
+              <button class="dropdown-item" onclick={() => { closeMenu(); onOpenPluginManager?.(); }} role="menuitem">
+                <span class="item-icon">⚙️</span>
+                <span class="item-label">Gestionar Plugins...</span>
               </button>
 
             {:else if name === 'Extras'}

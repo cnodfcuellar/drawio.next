@@ -2,6 +2,9 @@
   import { hasSelection, selectedIds } from '../stores/selection'
   import { activeGraph, zoomLevel, connectionMode } from '../stores/graph'
   import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
+  import { pluginRegistry } from '../plugins/PluginRegistry'
+
+  const pluginToolbarItems = pluginRegistry.toolbarItemsStore
 
   interface ToolGroup {
     tools: Tool[]
@@ -193,6 +196,22 @@
       {/each}
     </div>
   {/each}
+
+  {#if $pluginToolbarItems.length > 0}
+    <div class="separator"></div>
+    <div class="tool-group plugin-tools">
+      {#each $pluginToolbarItems as item}
+        <button
+          class="tool-btn"
+          title={item.tooltip || item.label}
+          onclick={item.action}
+          data-testid="tool-{item.id}"
+        >
+          <span class="tool-icon">{item.icon}</span>
+        </button>
+      {/each}
+    </div>
+  {/if}
 
   <div class="flex-spacer"></div>
   <div class="separator"></div>

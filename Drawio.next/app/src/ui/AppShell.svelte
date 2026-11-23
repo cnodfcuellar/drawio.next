@@ -1,12 +1,21 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import { theme } from '../stores/theme'
   import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
+  import { initDefaultPlugins } from '../plugins'
   import MenuBar from './MenuBar.svelte'
   import Toolbar from './Toolbar.svelte'
   import Sidebar from './Sidebar.svelte'
   import Canvas from './Canvas.svelte'
   import Inspector from './Inspector.svelte'
   import StatusBar from './StatusBar.svelte'
+  import PluginModal from './PluginModal.svelte'
+
+  let showPluginManager = $state(false)
+
+  onMount(() => {
+    initDefaultPlugins()
+  })
 
   // Sincronizar el data-theme con el <body>
   $effect(() => {
@@ -52,7 +61,7 @@
   data-theme={$theme}
 >
   <div class="area-menubar">
-    <MenuBar />
+    <MenuBar onOpenPluginManager={() => { showPluginManager = true }} />
   </div>
   <div class="area-toolbar">
     <Toolbar />
@@ -79,6 +88,8 @@
     <StatusBar />
   </div>
 </div>
+
+<PluginModal bind:showManager={showPluginManager} />
 
 <style>
   .app-shell {
