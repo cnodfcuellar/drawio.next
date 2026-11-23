@@ -1,0 +1,25 @@
+<mxfile host="drawio.next" version="1.0">
+  <diagram id="d-er" name="Modelo Entidad Relacion">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="er-user" value="Usuario" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="er-order" value="Pedido" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="100" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="er-rel" value="Realiza" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="260" y="95" width="100" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="er-e1" value="1" style="edgeStyle=none;html=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="er-user" target="er-rel">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="er-e2" value="N" style="edgeStyle=none;html=1;strokeColor=#82b366;" edge="1" parent="1" source="er-rel" target="er-order">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

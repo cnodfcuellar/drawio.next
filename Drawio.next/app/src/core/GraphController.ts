@@ -2028,9 +2028,9 @@ export class GraphController {
   }
 
   /**
-   * Exporta el diagrama como imagen rasterizada PNG (Data URL)
+   * Exporta el diagrama como imagen rasterizada PNG (Data URL), con escala configurable (1x, 2x HD)
    */
-  exportToPng(): Promise<string> {
+  exportToPng(scale = 1): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
         const svgString = this.exportToSvg()
@@ -2040,9 +2040,13 @@ export class GraphController {
 
         img.onload = () => {
           try {
+            const baseW = img.naturalWidth || img.width || 800
+            const baseH = img.naturalHeight || img.height || 600
+            const factor = Math.max(1, Math.min(4, scale || 1))
+            const width = Math.round(baseW * factor)
+            const height = Math.round(baseH * factor)
+
             const canvas = document.createElement('canvas')
-            const width = img.naturalWidth || img.width || 800
-            const height = img.naturalHeight || img.height || 600
             canvas.width = width
             canvas.height = height
             const ctx = canvas.getContext('2d')
@@ -2052,10 +2056,14 @@ export class GraphController {
               return
             }
 
+            // Suavizado de imagen para alta calidad
+            ctx.imageSmoothingEnabled = true
+            ctx.imageSmoothingQuality = 'high'
+
             // Fondo blanco para PNG exportado legible
             ctx.fillStyle = '#ffffff'
             ctx.fillRect(0, 0, width, height)
-            ctx.drawImage(img, 0, 0)
+            ctx.drawImage(img, 0, 0, width, height)
             URL.revokeObjectURL(url)
             const pngDataUrl = canvas.toDataURL('image/png')
             resolve(pngDataUrl)

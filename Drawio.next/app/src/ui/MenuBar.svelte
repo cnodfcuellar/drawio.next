@@ -85,6 +85,14 @@
     downloadBlob(xml, 'diagrama.drawio', 'application/xml;charset=utf-8')
   }
 
+  function handleSaveXml() {
+    closeMenu()
+    if (!$activeGraph) return
+    const pagesList = getAllPagesWithFreshXml()
+    const xml = $activeGraph.exportToXml(pagesList)
+    downloadBlob(xml, 'diagrama.xml', 'application/xml;charset=utf-8')
+  }
+
   function handleExportSvg() {
     closeMenu()
     if (!$activeGraph) return
@@ -92,12 +100,13 @@
     downloadBlob(svg, 'diagrama.svg', 'image/svg+xml;charset=utf-8')
   }
 
-  async function handleExportPng() {
+  async function handleExportPng(scale = 1) {
     closeMenu()
     if (!$activeGraph) return
     try {
-      const dataUrl = await $activeGraph.exportToPng()
-      downloadDataUrl(dataUrl, 'diagrama.png')
+      const dataUrl = await $activeGraph.exportToPng(scale)
+      const filename = scale > 1 ? `diagrama-${scale}x.png` : 'diagrama.png'
+      downloadDataUrl(dataUrl, filename)
     } catch (err) {
       console.error('Error al exportar PNG:', err)
       alert('Error al generar la imagen PNG del diagrama.')
@@ -274,13 +283,22 @@
                 <span class="item-icon">💾</span>
                 <span class="item-label">Guardar (.drawio)</span>
               </button>
+              <button class="dropdown-item" onclick={handleSaveXml} role="menuitem">
+                <span class="item-icon">📜</span>
+                <span class="item-label">Guardar como XML (.xml)</span>
+              </button>
+              <div class="menu-divider"></div>
               <button class="dropdown-item" onclick={handleExportSvg} role="menuitem">
                 <span class="item-icon">📐</span>
-                <span class="item-label">Exportar como SVG</span>
+                <span class="item-label">Exportar como SVG (Vectorial)</span>
               </button>
-              <button class="dropdown-item" onclick={handleExportPng} role="menuitem">
+              <button class="dropdown-item" onclick={() => handleExportPng(1)} role="menuitem">
                 <span class="item-icon">🖼️</span>
-                <span class="item-label">Exportar como PNG</span>
+                <span class="item-label">Exportar como PNG (1x Normal)</span>
+              </button>
+              <button class="dropdown-item" onclick={() => handleExportPng(2)} role="menuitem">
+                <span class="item-icon">✨</span>
+                <span class="item-label">Exportar como PNG HD (2x Nítido)</span>
               </button>
 
             {:else if name === 'Edit'}

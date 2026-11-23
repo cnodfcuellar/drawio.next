@@ -1,0 +1,25 @@
+<mxfile host="drawio.next" version="1.0">
+  <diagram id="d-uml" name="Diagrama de Clases UML">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="uml-base" value="«interface»&#xa;Shape" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="140" y="60" width="160" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="uml-m1" value="+ draw(): void&#xa;+ getArea(): number" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="uml-base">
+          <mxGeometry y="26" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="uml-child" value="Circle" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="140" y="210" width="160" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uml-c1" value="- radius: number&#xa;+ draw(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="uml-child">
+          <mxGeometry y="26" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-impl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=block;endFill=0;strokeColor=#9673a6;" edge="1" parent="1" source="uml-child" target="uml-base">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

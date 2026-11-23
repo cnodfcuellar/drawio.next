@@ -1,0 +1,45 @@
+<mxfile host="drawio.next" version="1.0">
+  <diagram id="d-complex-p1" name="Arquitectura Microservicios">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="grp-cloud" value="VPC Cloud" style="group;rounded=1;strokeColor=#0078d4;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="80" y="60" width="460" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="c-gw" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="grp-cloud">
+          <mxGeometry x="30" y="40" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="c-srv" value="Auth Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="grp-cloud">
+          <mxGeometry x="250" y="40" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="c-db" value="Database Cluster" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="grp-cloud">
+          <mxGeometry x="270" y="140" width="90" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="c-e1" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=1;html=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="grp-cloud" source="c-gw" target="c-srv">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c-e2" value="TCP" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;" edge="1" parent="grp-cloud" source="c-srv" target="c-db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d-complex-p2" name="Despliegue Kubernetes">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="k8s-pod1" value="Pod: Frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="k8s-pod2" value="Pod: Backend API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="320" y="100" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="k8s-e" value="Internal DNS" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;" edge="1" parent="1" source="k8s-pod1" target="k8s-pod2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
