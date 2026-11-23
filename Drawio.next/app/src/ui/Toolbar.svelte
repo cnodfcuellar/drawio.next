@@ -1,6 +1,7 @@
 <script lang="ts">
   import { hasSelection, selectedIds } from '../stores/selection'
   import { activeGraph, zoomLevel, connectionMode } from '../stores/graph'
+  import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
 
   interface ToolGroup {
     tools: Tool[]
@@ -192,6 +193,39 @@
       {/each}
     </div>
   {/each}
+
+  <div class="flex-spacer"></div>
+  <div class="separator"></div>
+
+  <div class="tool-group layout-tools">
+    <button
+      class="tool-btn"
+      class:active={$showSidebar}
+      title="Mostrar/Ocultar Paleta Izquierda (F7 o Ctrl+Shift+L)"
+      onclick={() => layout.toggleSidebar()}
+      data-testid="toggle-sidebar"
+    >
+      <span class="tool-icon">◧</span>
+    </button>
+    <button
+      class="tool-btn"
+      class:active={$showInspector}
+      title="Mostrar/Ocultar Inspector de Propiedades (F8 o Ctrl+Shift+R)"
+      onclick={() => layout.toggleInspector()}
+      data-testid="toggle-inspector"
+    >
+      <span class="tool-icon">◨</span>
+    </button>
+    <button
+      class="tool-btn"
+      class:active={$zenMode}
+      title="Modo Enfoque / Zen (F9 o Ctrl+\)"
+      onclick={() => layout.toggleZenMode()}
+      data-testid="toggle-zen"
+    >
+      <span class="tool-icon">🗖</span>
+    </button>
+  </div>
 </div>
 
 <style>
@@ -204,6 +238,8 @@
   }
 
   .tool-group { display: flex; align-items: center; gap: var(--space-1); }
+
+  .flex-spacer { flex: 1; }
 
   .separator {
     width: var(--border-w);

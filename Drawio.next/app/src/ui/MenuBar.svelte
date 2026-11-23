@@ -5,6 +5,7 @@
   import { hasSelection } from '../stores/selection'
   import { clearSavedDiagram } from '../stores/persistence'
   import { getAllPagesWithFreshXml, initPages, duplicatePage, addPage, activePageId } from '../stores/pages'
+  import { layout, showSidebar, showInspector, zenMode } from '../stores/layout'
 
   const menus = ['File', 'Edit', 'View', 'Arrange', 'Extras', 'Help'] as const
   type MenuName = typeof menus[number]
@@ -191,6 +192,21 @@
     if ($activeGraph) zoomLevel.set($activeGraph.getZoom())
   }
 
+  function handleToggleSidebar() {
+    closeMenu()
+    layout.toggleSidebar()
+  }
+
+  function handleToggleInspector() {
+    closeMenu()
+    layout.toggleInspector()
+  }
+
+  function handleToggleZenMode() {
+    closeMenu()
+    layout.toggleZenMode()
+  }
+
   // Acciones de Organización
   function handleBringToFront() {
     closeMenu()
@@ -372,6 +388,22 @@
               <button class="dropdown-item" onclick={handleFit} role="menuitem">
                 <span class="item-icon">⊡</span>
                 <span class="item-label">Ajustar a Ventana</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="dropdown-item" onclick={handleToggleSidebar} role="menuitem">
+                <span class="item-icon">◧</span>
+                <span class="item-label">{$showSidebar ? 'Ocultar Paleta Izquierda' : 'Mostrar Paleta Izquierda'}</span>
+                <span class="item-shortcut">F7</span>
+              </button>
+              <button class="dropdown-item" onclick={handleToggleInspector} role="menuitem">
+                <span class="item-icon">◨</span>
+                <span class="item-label">{$showInspector ? 'Ocultar Inspector' : 'Mostrar Inspector'}</span>
+                <span class="item-shortcut">F8</span>
+              </button>
+              <button class="dropdown-item" onclick={handleToggleZenMode} role="menuitem">
+                <span class="item-icon">🗖</span>
+                <span class="item-label">{$zenMode ? 'Salir del Modo Enfoque' : 'Modo Enfoque (Zen)'}</span>
+                <span class="item-shortcut">F9</span>
               </button>
 
             {:else if name === 'Arrange'}
