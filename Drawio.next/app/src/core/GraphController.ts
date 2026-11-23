@@ -166,6 +166,17 @@ export class GraphController {
       anyGraph.graphHandler.setMoveEnabled(true)
       anyGraph.graphHandler.setCloneEnabled(false)
       anyGraph.graphHandler.maxLivePreview = 16
+      anyGraph.graphHandler.isPropagateSelectionCell = () => false
+    }
+
+    // Parche en el prototipo de mxGraphHandler para evitar que el manejador ascienda
+    // forzosamente al grupo contenedor al hacer clic o Shift-clic en formas hijas
+    const handlerProto = (window as any).mxGraphHandler?.prototype
+    if (handlerProto && !handlerProto.__drawioNextPatched) {
+      handlerProto.__drawioNextPatched = true
+      handlerProto.isPropagateSelectionCell = function () {
+        return false
+      }
     }
 
     // 4. Configurar ConnectionHandler
@@ -264,6 +275,50 @@ export class GraphController {
     // 5. Habilitar selección rectangular (rubberband) en áreas vacías
     if (enableRubberband && window.mxRubberband) {
       this.rubberband = new window.mxRubberband(this.graph)
+    }
+
+    // Sobrescribir selectRegion para permitir que la selección por marco rectangular (rubberband)
+    // capture formas dentro de grupos distintos, filtrando los contenedores cuando se seleccionan sus hijos
+    const origSelectRegion = anyGraph.selectRegion
+    anyGraph.selectRegion = (rect: any, evt: any) => {
+      const isAlt = evt && (window as any).mxEvent?.isAltDown?.(evt)
+      const isect = isAlt ? rect : null
+      const cells = typeof anyGraph.getCells === 'function'
+        ? (anyGraph.getCells(rect.x, rect.y, rect.width, rect.height, null, null, isect, null, true) || [])
+        : []
+
+      if (cells && cells.length > 0) {
+        const model = this.graph.getModel()
+        // Si hay formas hijas seleccionadas, excluir los grupos contenedores de la selección
+        // para mantener únicamente las formas seleccionadas
+        const hasChildInSelection = (parentCell: any) => {
+          return cells.some((c: any) => {
+            if (c === parentCell) return false
+            let p = model.getParent ? model.getParent(c) : (c as any).parent
+            while (p != null) {
+              if (p === parentCell) return true
+              p = model.getParent ? model.getParent(p) : (p as any).parent
+            }
+            return false
+          })
+        }
+
+        const filtered = cells.filter((c: any) => !hasChildInSelection(c))
+
+        if (anyGraph.isToggleEvent && anyGraph.isToggleEvent(evt)) {
+          for (let i = 0; i < filtered.length; i++) {
+            anyGraph.selectCellForEvent(filtered[i], evt)
+          }
+        } else {
+          anyGraph.setSelectionCells(filtered)
+        }
+        return filtered
+      }
+
+      if (typeof origSelectRegion === 'function') {
+        return origSelectRegion.call(anyGraph, rect, evt)
+      }
+      return []
     }
 
     // 6. Registrar estilos estándar de formas en la Stylesheet para compatibilidad nativa con draw.io
@@ -1029,11 +1084,14 @@ export class GraphController {
     this.graph.getModel().beginUpdate()
     try {
       if (typeof anyGraph.importCells === 'function') {
-        clones = anyGraph.importCells(cells, offset, offset, parent) || []
+        clones = anyGraph.importCells(cells, offset, offset, null) || []
       }
       if ((!clones || clones.length === 0) && typeof anyGraph.cloneCells === 'function') {
         const cloned = anyGraph.cloneCells(cells) || []
-        for (const cell of cloned) {
+        for (let i = 0; i < cloned.length; i++) {
+          const cell = cloned[i]
+          const orig = cells[i]
+          const targetParent = (orig && (this.graph.getModel() as any).getParent?.(orig)) || parent
           if (cell && cell.geometry) {
             const g = cell.geometry.clone ? cell.geometry.clone() : { ...cell.geometry }
             g.x = (g.x || 0) + offset
@@ -1041,7 +1099,7 @@ export class GraphController {
             cell.geometry = g
           }
           if (cell && typeof anyGraph.addCell === 'function') {
-            anyGraph.addCell(cell, parent)
+            anyGraph.addCell(cell, targetParent)
             clones.push(cell)
           }
         }
@@ -1137,16 +1195,98 @@ export class GraphController {
   }
 
   /**
-   * Agrupa las celdas seleccionadas bajo una celda contenedora (grupo)
+   * Obtiene las coordenadas absolutas en el lienzo (sumando el offset de todos los grupos ancestros)
+   */
+  getCellAbsoluteBounds(cell: mxCell): { x: number; y: number; width: number; height: number } {
+    const geo = cell.geometry
+    if (!geo) return { x: 0, y: 0, width: 0, height: 0 }
+
+    let x = geo.x || 0
+    let y = geo.y || 0
+    const width = geo.width || 0
+    const height = geo.height || 0
+
+    const model = this.graph.getModel()
+    const defaultParent = this.graph.getDefaultParent()
+    let parent = model.getParent ? model.getParent(cell) : (cell as any).parent
+
+    while (parent && parent !== defaultParent && parent !== (model.getRoot ? model.getRoot() : null)) {
+      if (parent.geometry) {
+        x += parent.geometry.x || 0
+        y += parent.geometry.y || 0
+      }
+      parent = model.getParent ? model.getParent(parent) : (parent as any).parent
+    }
+
+    return { x, y, width, height }
+  }
+
+  /**
+   * Establece la posición de una celda en coordenadas absolutas del lienzo,
+   * calculando automáticamente la compensación respecto a su contenedor padre.
+   */
+  setCellAbsolutePosition(cell: mxCell, absX: number, absY: number): void {
+    const model = this.graph.getModel()
+    const defaultParent = this.graph.getDefaultParent()
+    let parentOffsetX = 0
+    let parentOffsetY = 0
+
+    let parent = model.getParent ? model.getParent(cell) : (cell as any).parent
+    while (parent && parent !== defaultParent && parent !== (model.getRoot ? model.getRoot() : null)) {
+      if (parent.geometry) {
+        parentOffsetX += parent.geometry.x || 0
+        parentOffsetY += parent.geometry.y || 0
+      }
+      parent = model.getParent ? model.getParent(parent) : (parent as any).parent
+    }
+
+    const localX = absX - parentOffsetX
+    const localY = absY - parentOffsetY
+    const width = cell.geometry?.width || 0
+    const height = cell.geometry?.height || 0
+
+    this.setCellGeometry(cell.id, localX, localY, width, height)
+  }
+
+  /**
+   * Agrupa las celdas seleccionadas bajo una celda contenedora (grupo).
+   * Si las celdas provienen de distintas agrupaciones, las promueve al defaultParent
+   * preservando sus posiciones absolutas antes de agruparlas.
    */
   groupSelected(border = 20): mxCell | null {
     const cells = this.getSelectedCells()
     if (!cells || cells.length < 2) return null
 
+    const model = this.graph.getModel()
+    const defaultParent = this.graph.getDefaultParent()
     const anyGraph = this.graph as any
-    if (typeof anyGraph.groupCells === 'function') {
-      this.graph.getModel().beginUpdate()
-      try {
+
+    model.beginUpdate()
+    try {
+      // Verificar si las celdas pertenecen a distintos grupos o capas
+      const firstParent = model.getParent ? model.getParent(cells[0]) : (cells[0] as any).parent
+      const hasDifferentParents = cells.some(c => {
+        const p = model.getParent ? model.getParent(c) : (c as any).parent
+        return p !== firstParent
+      })
+
+      if (hasDifferentParents) {
+        // Promover las celdas al defaultParent conservando su posición absoluta en pantalla
+        for (const cell of cells) {
+          const currentParent = model.getParent ? model.getParent(cell) : (cell as any).parent
+          if (currentParent !== defaultParent) {
+            const abs = this.getCellAbsoluteBounds(cell)
+            if (typeof (model as any).add === 'function') {
+              ;(model as any).add(defaultParent, cell)
+            } else if (typeof anyGraph.addCell === 'function') {
+              anyGraph.addCell(cell, defaultParent)
+            }
+            this.setCellGeometry(cell.id, abs.x, abs.y, abs.width, abs.height)
+          }
+        }
+      }
+
+      if (typeof anyGraph.groupCells === 'function') {
         const group = anyGraph.groupCells(null, border, cells)
         if (group) {
           this.graph.setSelectionCell(group)
@@ -1155,9 +1295,9 @@ export class GraphController {
           }
         }
         return group
-      } finally {
-        this.graph.getModel().endUpdate()
       }
+    } finally {
+      model.endUpdate()
     }
     return null
   }
@@ -1190,57 +1330,53 @@ export class GraphController {
 
   /**
    * Alinea las celdas seleccionadas (left, center, right, top, middle, bottom)
+   * respetando coordenadas absolutas para celdas ubicadas en distintos grupos.
    */
   alignSelected(align: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'): void {
     const cells = this.getSelectedCells().filter(c => !c.edge && c.geometry)
     if (cells.length < 2) return
 
-    const anyGraph = this.graph as any
+    const bounds = cells.map(c => ({ cell: c, rect: this.getCellAbsoluteBounds(c) }))
     const model = this.graph.getModel()
     model.beginUpdate()
     try {
-      if (typeof anyGraph.alignCells === 'function') {
-        anyGraph.alignCells(align, cells)
-      }
-
-      // Asegurar cálculo geométrico determinista si alignCells no actualiza las geometrías directamente
       if (align === 'left') {
-        const minX = Math.min(...cells.map(c => c.geometry!.x))
-        cells.forEach(c => {
-          this.setCellGeometry(c.id, minX, c.geometry!.y, c.geometry!.width, c.geometry!.height)
+        const minX = Math.min(...bounds.map(b => b.rect.x))
+        bounds.forEach(b => {
+          this.setCellAbsolutePosition(b.cell, minX, b.rect.y)
         })
       } else if (align === 'center') {
-        const minX = Math.min(...cells.map(c => c.geometry!.x))
-        const maxX = Math.max(...cells.map(c => c.geometry!.x + c.geometry!.width))
+        const minX = Math.min(...bounds.map(b => b.rect.x))
+        const maxX = Math.max(...bounds.map(b => b.rect.x + b.rect.width))
         const centerX = (minX + maxX) / 2
-        cells.forEach(c => {
-          const newX = Math.round(centerX - c.geometry!.width / 2)
-          this.setCellGeometry(c.id, newX, c.geometry!.y, c.geometry!.width, c.geometry!.height)
+        bounds.forEach(b => {
+          const newX = Math.round(centerX - b.rect.width / 2)
+          this.setCellAbsolutePosition(b.cell, newX, b.rect.y)
         })
       } else if (align === 'right') {
-        const maxX = Math.max(...cells.map(c => c.geometry!.x + c.geometry!.width))
-        cells.forEach(c => {
-          const newX = maxX - c.geometry!.width
-          this.setCellGeometry(c.id, newX, c.geometry!.y, c.geometry!.width, c.geometry!.height)
+        const maxX = Math.max(...bounds.map(b => b.rect.x + b.rect.width))
+        bounds.forEach(b => {
+          const newX = maxX - b.rect.width
+          this.setCellAbsolutePosition(b.cell, newX, b.rect.y)
         })
       } else if (align === 'top') {
-        const minY = Math.min(...cells.map(c => c.geometry!.y))
-        cells.forEach(c => {
-          this.setCellGeometry(c.id, c.geometry!.x, minY, c.geometry!.width, c.geometry!.height)
+        const minY = Math.min(...bounds.map(b => b.rect.y))
+        bounds.forEach(b => {
+          this.setCellAbsolutePosition(b.cell, b.rect.x, minY)
         })
       } else if (align === 'middle') {
-        const minY = Math.min(...cells.map(c => c.geometry!.y))
-        const maxY = Math.max(...cells.map(c => c.geometry!.y + c.geometry!.height))
+        const minY = Math.min(...bounds.map(b => b.rect.y))
+        const maxY = Math.max(...bounds.map(b => b.rect.y + b.rect.height))
         const centerY = (minY + maxY) / 2
-        cells.forEach(c => {
-          const newY = Math.round(centerY - c.geometry!.height / 2)
-          this.setCellGeometry(c.id, c.geometry!.x, newY, c.geometry!.width, c.geometry!.height)
+        bounds.forEach(b => {
+          const newY = Math.round(centerY - b.rect.height / 2)
+          this.setCellAbsolutePosition(b.cell, b.rect.x, newY)
         })
       } else if (align === 'bottom') {
-        const maxY = Math.max(...cells.map(c => c.geometry!.y + c.geometry!.height))
-        cells.forEach(c => {
-          const newY = maxY - c.geometry!.height
-          this.setCellGeometry(c.id, c.geometry!.x, newY, c.geometry!.width, c.geometry!.height)
+        const maxY = Math.max(...bounds.map(b => b.rect.y + b.rect.height))
+        bounds.forEach(b => {
+          const newY = maxY - b.rect.height
+          this.setCellAbsolutePosition(b.cell, b.rect.x, newY)
         })
       }
     } finally {
@@ -1250,55 +1386,53 @@ export class GraphController {
 
   /**
    * Distribuye uniformemente las celdas seleccionadas en el eje horizontal o vertical
+   * calculando distancias absolutas incluso si pertenecen a distintas agrupaciones.
    */
   distributeSelected(direction: 'horizontal' | 'vertical'): void {
     const cells = this.getSelectedCells().filter(c => !c.edge && c.geometry)
     if (cells.length < 3) return
 
+    const bounds = cells.map(c => ({ cell: c, rect: this.getCellAbsoluteBounds(c) }))
     const model = this.graph.getModel()
     model.beginUpdate()
     try {
       if (direction === 'horizontal') {
-        const sorted = [...cells].sort((a, b) => a.geometry!.x - b.geometry!.x)
+        const sorted = [...bounds].sort((a, b) => a.rect.x - b.rect.x)
         const first = sorted[0]
         const last = sorted[sorted.length - 1]
-        const minX = first.geometry!.x
-        const maxRight = last.geometry!.x + last.geometry!.width
+        const minX = first.rect.x
+        const maxRight = last.rect.x + last.rect.width
         const totalSpan = maxRight - minX
-        const totalWidth = sorted.reduce((sum, c) => sum + c.geometry!.width, 0)
+        const totalWidth = sorted.reduce((sum, item) => sum + item.rect.width, 0)
         const spacing = (totalSpan - totalWidth) / (sorted.length - 1)
 
-        let currentX = minX + first.geometry!.width + spacing
+        let currentX = minX + first.rect.width + spacing
         for (let i = 1; i < sorted.length - 1; i++) {
-          this.setCellGeometry(
-            sorted[i].id,
+          this.setCellAbsolutePosition(
+            sorted[i].cell,
             Math.round(currentX),
-            sorted[i].geometry!.y,
-            sorted[i].geometry!.width,
-            sorted[i].geometry!.height
+            sorted[i].rect.y
           )
-          currentX += sorted[i].geometry!.width + spacing
+          currentX += sorted[i].rect.width + spacing
         }
       } else {
-        const sorted = [...cells].sort((a, b) => a.geometry!.y - b.geometry!.y)
+        const sorted = [...bounds].sort((a, b) => a.rect.y - b.rect.y)
         const first = sorted[0]
         const last = sorted[sorted.length - 1]
-        const minY = first.geometry!.y
-        const maxBottom = last.geometry!.y + last.geometry!.height
+        const minY = first.rect.y
+        const maxBottom = last.rect.y + last.rect.height
         const totalSpan = maxBottom - minY
-        const totalHeight = sorted.reduce((sum, c) => sum + c.geometry!.height, 0)
+        const totalHeight = sorted.reduce((sum, item) => sum + item.rect.height, 0)
         const spacing = (totalSpan - totalHeight) / (sorted.length - 1)
 
-        let currentY = minY + first.geometry!.height + spacing
+        let currentY = minY + first.rect.height + spacing
         for (let i = 1; i < sorted.length - 1; i++) {
-          this.setCellGeometry(
-            sorted[i].id,
-            sorted[i].geometry!.x,
-            Math.round(currentY),
-            sorted[i].geometry!.width,
-            sorted[i].geometry!.height
+          this.setCellAbsolutePosition(
+            sorted[i].cell,
+            sorted[i].rect.x,
+            Math.round(currentY)
           )
-          currentY += sorted[i].geometry!.height + spacing
+          currentY += sorted[i].rect.height + spacing
         }
       }
     } finally {

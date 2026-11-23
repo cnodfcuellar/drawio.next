@@ -18,12 +18,14 @@ function createMockMxGraph() {
     edge: boolean
     geometry: any
     style: string
+    parent: any
     constructor(id: string, value: any, isVertex: boolean, isEdge: boolean) {
       this.id = id
       this.value = value
       this.vertex = isVertex
       this.edge = isEdge
       this.style = ''
+      this.parent = null
     }
   }
 
@@ -38,6 +40,13 @@ function createMockMxGraph() {
     getChildCount: (_parent: any) => Object.values(cellsMap).length,
     getChildAt: (_parent: any, idx: number) => Object.values(cellsMap)[idx] ?? null,
     isVertex: (cell: any) => Boolean(cell?.vertex),
+    isEdge: (cell: any) => Boolean(cell?.edge),
+    getParent: (cell: any) => cell?.parent ?? null,
+    getRoot: () => ({ id: 'root' }),
+    add: vi.fn((parent: any, child: any) => {
+      child.parent = parent
+      return child
+    }),
     addListener: (name: string, fn: any) => {
       if (!modelListeners[name]) modelListeners[name] = []
       modelListeners[name].push(fn)
@@ -91,10 +100,21 @@ function createMockMxGraph() {
       const cellId = id ?? `cell-${cellCounter++}`
       const cell = new MockCell(cellId, value, true, false)
       cell.geometry = { x, y, width, height }
+      cell.parent = _parent || { id: 'layer-0' }
       if (style) cell.style = style
       cellsMap[cellId] = cell
       return cell
     }
+
+    addCell = vi.fn((cell: any, parent: any) => {
+      cell.parent = parent
+      cellsMap[cell.id] = cell
+      return cell
+    })
+
+    isToggleEvent = vi.fn((evt: any) => Boolean(evt?.shiftKey || evt?.ctrlKey || evt?.metaKey))
+
+    getCells = vi.fn((_x: number, _y: number, _w: number, _h: number) => Object.values(cellsMap))
 
     insertEdge(
       _parent: any,
@@ -107,6 +127,7 @@ function createMockMxGraph() {
       const edgeId = id ?? `edge-${cellCounter++}`
       const cell = new MockCell(edgeId, value, false, true)
       cell.geometry = { source, target }
+      cell.parent = _parent || { id: 'layer-0' }
       if (style) cell.style = style
       cellsMap[edgeId] = cell
       return cell
@@ -148,6 +169,7 @@ function createMockMxGraph() {
         const clone = new MockCell(cloneId, c.value, c.vertex, c.edge)
         clone.geometry = c.geometry ? { ...c.geometry, x: (c.geometry.x || 0) + dx, y: (c.geometry.y || 0) + dy } : null
         clone.style = c.style
+        clone.parent = _target || c.parent || { id: 'layer-0' }
         cellsMap[cloneId] = clone
         return clone
       })
@@ -161,6 +183,7 @@ function createMockMxGraph() {
         const clone = new MockCell(`cloned-${cellCounter++}`, c.value, c.vertex, c.edge)
         clone.geometry = c.geometry ? { ...c.geometry } : null
         clone.style = c.style
+        clone.parent = c.parent
         return clone
       })
     })
@@ -169,7 +192,11 @@ function createMockMxGraph() {
       const groupId = `group-${cellCounter++}`
       const group = new MockCell(groupId, '', true, false)
       group.geometry = { x: 50, y: 50, width: 200, height: 200 }
+      group.parent = { id: 'layer-0' }
       ;(group as any).children = cells || []
+      if (cells) {
+        cells.forEach(c => { c.parent = group })
+      }
       cellsMap[groupId] = group
       currentSelection = [group]
       selectionListeners.forEach(fn => fn())
@@ -828,6 +855,110 @@ describe('GraphController', () => {
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'u', ctrlKey: true, shiftKey: true }))
     expect(spyUngroup).toHaveBeenCalled()
+  })
+
+  it('permite seleccionar múltiples formas pertenecientes a distintas agrupaciones simultáneamente', () => {
+    const rawGraph = controller.getRawGraph()
+    // Grupo 1 con su forma hija
+    const g1 = rawGraph.insertVertex(null, 'g1', 'Grupo 1', 100, 100, 200, 150)
+    const v1 = rawGraph.insertVertex(g1, 'v1', 'Forma 1', 20, 20, 80, 40)
+
+    // Grupo 2 con su forma hija
+    const g2 = rawGraph.insertVertex(null, 'g2', 'Grupo 2', 400, 100, 200, 150)
+    const v2 = rawGraph.insertVertex(g2, 'v2', 'Forma 2', 30, 30, 80, 40)
+
+    // Seleccionar ambas formas hijas que están en grupos diferentes
+    controller.selectCells([v1.id, v2.id])
+    const selected = controller.getSelectedCells()
+    expect(selected.length).toBe(2)
+    expect(selected.map(c => c.id)).toContain(v1.id)
+    expect(selected.map(c => c.id)).toContain(v2.id)
+  })
+
+  it('calcula las coordenadas absolutas de formas hijas anidadas en grupos', () => {
+    const rawGraph = controller.getRawGraph()
+    // Crear grupo padre en (100, 200)
+    const parentGroup = rawGraph.insertVertex(null, 'group-p', 'Grupo', 100, 200, 300, 200)
+    // Crear hijo en (15, 25) respecto al grupo
+    const child = rawGraph.insertVertex(parentGroup, 'child-1', 'Hijo', 15, 25, 80, 40)
+
+    const abs = controller.getCellAbsoluteBounds(child)
+    expect(abs.x).toBe(115) // 100 + 15
+    expect(abs.y).toBe(225) // 200 + 25
+    expect(abs.width).toBe(80)
+    expect(abs.height).toBe(40)
+
+    // Modificar posición absoluta del hijo a (250, 350)
+    controller.setCellAbsolutePosition(child, 250, 350)
+    expect(child.geometry.x).toBe(150) // 250 - 100
+    expect(child.geometry.y).toBe(150) // 350 - 200
+  })
+
+  it('alinea celdas pertenecientes a diferentes agrupaciones usando sus posiciones absolutas', () => {
+    const rawGraph = controller.getRawGraph()
+    // Grupo A en (100, 100) con hijo A en local (20, 10) -> abs x=120, y=110
+    const groupA = rawGraph.insertVertex(null, 'ga', 'GA', 100, 100, 200, 200)
+    const childA = rawGraph.insertVertex(groupA, 'ca', 'CA', 20, 10, 80, 40)
+
+    // Grupo B en (400, 100) con hijo B en local (30, 50) -> abs x=430, y=150
+    const groupB = rawGraph.insertVertex(null, 'gb', 'GB', 400, 100, 200, 200)
+    const childB = rawGraph.insertVertex(groupB, 'cb', 'CB', 30, 50, 80, 40)
+
+    controller.selectCells([childA.id, childB.id])
+    // Alinear a la izquierda: ambos deben coincidir en absX = 120 (minX)
+    controller.alignSelected('left')
+
+    const absA = controller.getCellAbsoluteBounds(childA)
+    const absB = controller.getCellAbsoluteBounds(childB)
+    expect(absA.x).toBe(120)
+    expect(absB.x).toBe(120) // 400 + localX(-280) = 120
+    expect(childB.geometry.x).toBe(-280) // 120 - 400
+  })
+
+  it('distribuye celdas pertenecientes a diferentes agrupaciones correctamente', () => {
+    const rawGraph = controller.getRawGraph()
+    // Grupo A en (0, 0) con hijo A en local (0, 0, w:100, h:50) -> abs x=0..100
+    const groupA = rawGraph.insertVertex(null, 'g1', 'G1', 0, 0, 300, 300)
+    const childA = rawGraph.insertVertex(groupA, 'c1', 'C1', 0, 0, 100, 50)
+
+    // Grupo B en (200, 0) con hijo B en local (0, 0, w:100, h:50) -> abs x=200..300
+    const groupB = rawGraph.insertVertex(null, 'g2', 'G2', 200, 0, 300, 300)
+    const childB = rawGraph.insertVertex(groupB, 'c2', 'C2', 0, 0, 100, 50)
+
+    // Hijo C en root en (600, 0, w:100, h:50) -> abs x=600..700
+    const childC = rawGraph.insertVertex(null, 'c3', 'C3', 600, 0, 100, 50)
+
+    // Total span: x=0 a x=700 (span=700). Total width = 300. Spacing = (700-300)/2 = 200
+    // c1 en 0, c2 en 0+100+200=300, c3 en 600
+    controller.selectCells([childA.id, childB.id, childC.id])
+    controller.distributeSelected('horizontal')
+
+    const absA = controller.getCellAbsoluteBounds(childA)
+    const absB = controller.getCellAbsoluteBounds(childB)
+    const absC = controller.getCellAbsoluteBounds(childC)
+
+    expect(absA.x).toBe(0)
+    expect(absB.x).toBe(300) // 200 + localX(100) = 300
+    expect(absC.x).toBe(600)
+  })
+
+  it('agrupa celdas provenientes de distintos grupos promoviéndolas a un contenedor común', () => {
+    const rawGraph = controller.getRawGraph()
+    const groupA = rawGraph.insertVertex(null, 'ga2', 'GA2', 100, 100, 200, 200)
+    const childA = rawGraph.insertVertex(groupA, 'ca2', 'CA2', 20, 20, 80, 40)
+
+    const groupB = rawGraph.insertVertex(null, 'gb2', 'GB2', 400, 200, 200, 200)
+    const childB = rawGraph.insertVertex(groupB, 'cb2', 'CB2', 10, 10, 80, 40)
+
+    controller.selectCells([childA.id, childB.id])
+    const newGroup = controller.groupSelected()
+
+    expect(newGroup).not.toBeNull()
+    // Los hijos deben haber sido promovidos de sus grupos antiguos
+    expect(childA.parent).not.toBe(groupA)
+    expect(childB.parent).not.toBe(groupB)
+    expect(childA.parent).toBe(newGroup)
+    expect(childB.parent).toBe(newGroup)
   })
 
   it('destruye la instancia limpiamente', () => {
