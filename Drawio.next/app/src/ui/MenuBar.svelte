@@ -277,6 +277,13 @@
 
 <nav class="menubar" data-testid="menubar">
   <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="32" cy="32" r="22" stroke="var(--text-muted, #64748B)" stroke-width="2.5" stroke-dasharray="3.5 3.5"/>
+      <rect x="22" y="22" width="20" height="20" rx="5.5" fill="var(--accent, #0284C7)" stroke="#38BDF8" stroke-width="1.5"/>
+      <circle cx="32" cy="32" r="3.5" fill="white"/>
+      <circle cx="47.5" cy="16.5" r="5" fill="#F08705" stroke="var(--bg-primary, #0F172A)" stroke-width="1.5"/>
+      <circle cx="16.5" cy="47.5" r="4.2" fill="#10B981" stroke="var(--bg-primary, #0F172A)" stroke-width="1.5"/>
+    </svg>
     <span class="logo-text">draw<span class="logo-dot">.</span>io</span>
     <span class="logo-next">next</span>
   </div>
@@ -559,11 +566,16 @@
 
   .logo {
     display: flex;
-    align-items: baseline;
-    gap: var(--space-1);
+    align-items: center;
+    gap: var(--space-2);
     margin-right: var(--space-6);
     font-weight: var(--font-bold);
     font-size: var(--text-md);
+  }
+  .logo-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
   }
   .logo-text { color: var(--text-primary); }
   .logo-dot  { color: var(--accent); }
