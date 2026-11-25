@@ -67,6 +67,7 @@
   let opacity = $derived(Number(getStyle("opacity", "100")) || 100);
   let fontSize = $derived(Number(getStyle("fontSize", "12")) || 12);
   let textAlign = $derived(getStyle("align", "center"));
+  let fontColor = $derived(getStyle("fontColor", "#000000"));
   let fontStyleVal = $derived(Number(getStyle("fontStyle", "0")) || 0);
   let isBold = $derived((fontStyleVal & 1) === 1);
   let isItalic = $derived((fontStyleVal & 2) === 2);
