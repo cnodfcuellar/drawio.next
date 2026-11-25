@@ -67,6 +67,9 @@
   let opacity = $derived(Number(getStyle("opacity", "100")) || 100);
   let fontSize = $derived(Number(getStyle("fontSize", "12")) || 12);
   let textAlign = $derived(getStyle("align", "center"));
+  let fontStyleVal = $derived(Number(getStyle("fontStyle", "0")) || 0);
+  let isBold = $derived((fontStyleVal & 1) === 1);
+  let isItalic = $derived((fontStyleVal & 2) === 2);
 
   // Estilos específicos de aristas
   let edgeStyleVal = $derived(getStyle("edgeStyle", "orthogonalEdgeStyle"));
@@ -187,6 +190,20 @@
     }
   }
 
+  function toggleBold() {
+    if (firstSelectedId && $activeGraph) {
+      const next = isBold ? (fontStyleVal & ~1) : (fontStyleVal | 1);
+      $activeGraph.setCellFontStyle(firstSelectedId, next);
+    }
+  }
+
+  function toggleItalic() {
+    if (firstSelectedId && $activeGraph) {
+      const next = isItalic ? (fontStyleVal & ~2) : (fontStyleVal | 2);
+      $activeGraph.setCellFontStyle(firstSelectedId, next);
+    }
+  }
+
   function updateRouting(routing: "straight" | "orthogonal" | "curved" | "entityRelation") {
     if (firstSelectedId && $activeGraph) {
       $activeGraph.setEdgeRouting(firstSelectedId, routing);
@@ -293,18 +310,6 @@
       </div>
     {:else}
       {#if activeTab === "Style"}
-        <!-- Texto de la Forma o Conector (Acceso Rápido) -->
-        <div class="prop-group">
-          <label class="prop-label" for="prop-text-quick">{isEdge ? "Etiqueta del Conector" : "Texto de la Forma"}</label>
-          <input
-            id="prop-text-quick"
-            class="prop-input"
-            type="text"
-            placeholder={isEdge ? "Ej: Paso 1, Sí, No..." : "Escribe una etiqueta..."}
-            value={cellText}
-            oninput={(e) => updateText(e.currentTarget.value)}
-          />
-        </div>
 
         {#if isEdge}
           <!-- PROPIEDADES DE CONECTOR / FLECHA -->
@@ -683,6 +688,31 @@
             value={cellText}
             oninput={(e) => updateText(e.currentTarget.value)}
           />
+        </div>
+
+        <!-- Estilos de Fuente (Negrita / Cursiva) -->
+        <div class="prop-group">
+          <div class="prop-label">Estilo Tipográfico</div>
+          <div class="btn-group">
+            <button
+              class="choice-btn"
+              class:active={isBold}
+              onclick={toggleBold}
+              title="Negrita (Ctrl+B)"
+              style="font-weight: bold;"
+            >
+              <b>B</b> Negrita
+            </button>
+            <button
+              class="choice-btn"
+              class:active={isItalic}
+              onclick={toggleItalic}
+              title="Cursiva (Ctrl+I)"
+              style="font-style: italic;"
+            >
+              <i>I</i> Cursiva
+            </button>
+          </div>
         </div>
 
         <!-- Tamaño de Fuente -->

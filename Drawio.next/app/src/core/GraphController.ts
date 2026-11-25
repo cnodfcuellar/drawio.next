@@ -1036,6 +1036,13 @@ export class GraphController {
   }
 
   /**
+   * Modifica el estilo tipográfico de la celda (bitmask: 1=Bold, 2=Italic, 4=Underline)
+   */
+  setCellFontStyle(cellId: string, style: number): void {
+    this.setCellStyleProperty(cellId, 'fontStyle', style)
+  }
+
+  /**
    * Mueve una celda (o las celdas seleccionadas) al frente (z-order)
    */
   bringToFront(cellId?: string): void {
