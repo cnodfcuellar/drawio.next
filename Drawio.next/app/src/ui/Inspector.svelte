@@ -1,6 +1,7 @@
 <script lang="ts">
   import { hasSelection, selectedIds } from "../stores/selection";
   import { activeGraph, graphRevision, pendingConnectSource } from "../stores/graph";
+  import ColorPicker from "./ColorPicker.svelte";
 
   const tabs = ["Style", "Arrange", "Text"] as const;
   let activeTab: (typeof tabs)[number] = $state("Style");
@@ -422,43 +423,21 @@
           </div>
 
           <!-- PROPIEDADES DE NODO / FORMA: Color de Relleno -->
-          <div class="prop-group">
-            <div class="prop-label">Color de Relleno</div>
-            <div class="color-palette">
-              {#each ["#dae8fc", "#d5e8d4", "#ffe6cc", "#f8cecc", "#e1d5e7", "#ffffff", "none"] as color}
-                <button
-                  class="color-btn"
-                  class:active-color={fillColor === color}
-                  class:none-color={color === "none"}
-                  style="background-color: {color === 'none' ? 'transparent' : color};"
-                  title={color === "none" ? "Sin relleno" : `Relleno ${color}`}
-                  onclick={() => updateFillColor(color)}
-                >
-                  {#if color === "none"}⊘{/if}
-                </button>
-              {/each}
-            </div>
-          </div>
+          <ColorPicker
+            label="Color de Relleno"
+            color={fillColor}
+            onChange={updateFillColor}
+            allowNone={true}
+          />
         {/if}
 
         <!-- Color de Trazo / Borde (Compartido para Nodos y Aristas) -->
-        <div class="prop-group">
-          <div class="prop-label">{isEdge ? "Color del Conector" : "Color de Borde"}</div>
-          <div class="color-palette">
-            {#each ["#6c8ebf", "#82b366", "#d79b00", "#b85450", "#9673a6", "#0078d4", "#000000", "#ffffff", "none"] as color}
-              <button
-                class="color-btn"
-                class:active-color={strokeColor === color}
-                class:none-color={color === "none"}
-                style="background-color: {color === 'none' ? 'transparent' : color};"
-                title={color === "none" ? "Sin borde" : `Color ${color}`}
-                onclick={() => updateStrokeColor(color)}
-              >
-                {#if color === "none"}⊘{/if}
-              </button>
-            {/each}
-          </div>
-        </div>
+        <ColorPicker
+          label={isEdge ? "Color del Conector" : "Color de Borde"}
+          color={strokeColor}
+          onChange={updateStrokeColor}
+          allowNone={true}
+        />
 
         <!-- Grosor de Trazo -->
         <div class="prop-group">
@@ -751,19 +730,12 @@
         </div>
 
         <!-- Color de Fuente -->
-        <div class="prop-group">
-          <div class="prop-label">Color de Texto</div>
-          <div class="color-palette">
-            {#each ["#000000", "#ffffff", "#333333", "#0078d4", "#d83b01", "#107c41"] as color}
-              <button
-                class="color-btn"
-                style="background-color: {color};"
-                title={`Color ${color}`}
-                onclick={() => updateFontColor(color)}
-              ></button>
-            {/each}
-          </div>
-        </div>
+        <ColorPicker
+          label="Color de Texto"
+          color={fontColor}
+          onChange={updateFontColor}
+          allowNone={false}
+        />
       {/if}
     {/if}
   </div>
@@ -877,33 +849,6 @@
     margin-bottom: 2px;
   }
 
-  /* Paleta de Colores */
-  .color-palette {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-  .color-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: transform 0.1s ease, border-color 0.1s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-  .color-btn:hover {
-    transform: scale(1.15);
-    border-color: var(--accent);
-  }
-  .color-btn.active-color {
-    border: 2px solid var(--accent);
-    box-shadow: 0 0 4px var(--accent);
-  }
 
   /* Botones de opción / Choice */
   .btn-group {
